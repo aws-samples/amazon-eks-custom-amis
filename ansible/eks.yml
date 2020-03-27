@@ -1,0 +1,11 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
+- name: eks ami
+  hosts: all
+  roles:
+    - common
+    - aws-ssm-agent
+    - docker
+    - eks

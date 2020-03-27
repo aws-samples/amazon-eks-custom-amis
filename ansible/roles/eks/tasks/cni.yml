@@ -1,0 +1,35 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# file: ansible/roles/eks/tasks/cni.yml
+
+- name: be sure the /opt/cni/bin folder exists
+  file:
+    path: /opt/cni/bin
+    state: directory
+
+- name: be sure we have the proper version of the cni
+  get_url:
+    url: https://github.com/containernetworking/cni/releases/download/{{ cni_version }}/cni-{{ kube_arch }}-{{ cni_version }}.tgz
+    dest: /tmp/cni-{{ kube_arch }}-{{ cni_version }}.tgz
+
+- name: be sure we have the proper version of the cni plugins
+  get_url:
+    url: https://github.com/containernetworking/plugins/releases/download/{{ cni_plugin_version }}/cni-plugins-{{ kube_arch }}-{{ cni_plugin_version }}.tgz
+    dest: /tmp/cni-plugins-{{ kube_arch }}-{{ cni_plugin_version }}.tgz
+
+- name: be sure the cni is unpacked into the proper directory
+  shell: tar -xvf /tmp/cni-{{ kube_arch }}-{{ cni_version }}.tgz -C /opt/cni/bin
+
+- name: be sure the cni plugins is unpacked into the proper directory
+  shell: tar -xvf /tmp/cni-plugins-{{ kube_arch }}-{{ cni_plugin_version }}.tgz -C /opt/cni/bin
+
+- name: be sure the cni download is cleaned up
+  file:
+    path: /tmp/cni-{{ kube_arch }}-{{ cni_version }}.tgz
+    state: absent
+
+- name: be sure the cni plugins download is cleaned up
+  file:
+    path: /tmp/cni-plugins-{{ kube_arch }}-{{ cni_plugin_version }}.tgz
+    state: absent

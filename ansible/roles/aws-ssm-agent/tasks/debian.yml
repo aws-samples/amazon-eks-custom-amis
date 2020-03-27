@@ -1,0 +1,20 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# file: ansible/roles/aws-ssm-agent/tasks/debian.yml
+
+- name: be sure we download the latest ssm agent
+  get_url:
+    url: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb
+    dest: /tmp/amazon-ssm-agent.deb
+
+- name: be sure the latest ssm agent is installed
+  apt:
+    deb: /tmp/amazon-ssm-agent.deb
+
+- name: be sure the ssm agent is started and enabled
+  systemd:
+    name: amazon-ssm-agent
+    state: started
+    enabled: yes
+    daemon_reload: yes

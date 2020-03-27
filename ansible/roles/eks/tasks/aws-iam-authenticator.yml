@@ -1,0 +1,10 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# file: ansible/roles/eks/tasks/aws-iam-authenticator.yml
+
+- name: be sure we have the latest version of the aws-iam-authenticator
+  get_url:
+    url: "{{ eks_s3_bucket_url }}/{{ k8s_version }}/{{ k8s_build_date }}/bin/linux/{{ kube_arch }}/aws-iam-authenticator"
+    dest: /usr/bin/aws-iam-authenticator
+    mode: a+x

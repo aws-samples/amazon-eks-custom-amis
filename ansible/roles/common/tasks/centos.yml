@@ -1,0 +1,30 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# file: ansible/roles/common/tasks/centos.yml
+
+- name: be sure we have the latest version of all packages
+  yum:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+- name: be sure the epel-release
+  yum:
+    name: epel-release
+    state: latest
+
+- name: be sure dependencies are installed
+  yum:
+    name:
+      - ca-certificates
+      - curl
+      - python-pip
+      - jq
+      - python3
+    state: latest
+
+- name: be sure the latest awscli is installed
+  pip:
+    name: awscli
+    state: latest

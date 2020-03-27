@@ -1,0 +1,26 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# file: ansible/roles/docker/tasks/main.yml
+
+- name: run operating system specific commands
+  include: "{{ ansible_facts['distribution'] | lower }}.yml"
+
+- name: be sure the /etc/docker folder exists
+  file:
+    path: /etc/docker
+    state: directory
+
+- name: be sure we have the latest version of the docker configuration
+  template:
+    src: docker-daemon.json.j2
+    dest: /etc/docker/daemon.json
+
+- include: sysctl.yml
+
+- name: be sure docker is started and configured to start on boot
+  systemd:
+    name: docker
+    state: restarted
+    enabled: yes
+    daemon_reload: yes

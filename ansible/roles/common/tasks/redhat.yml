@@ -1,0 +1,49 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# file: ansible/roles/common/tasks/redhat.yml
+
+- name: be sure all of the redhat repos are enabled
+  shell: "yum-config-manager --enable {{ item }}"
+  with_items:
+    - rhui-client-config-server-7
+    - rhel-7-server-rhui-rpms
+    - rhel-7-server-rhui-rh-common-rpms
+    - rhel-7-server-rhui-extras-rpms
+
+- name: be sure repo_gpgcheck is not enabled as it is not supported
+  ini_file:
+    dest: /etc/yum.conf
+    section: main
+    option: repo_gpgcheck
+    value: 0
+    create: false
+
+- name: be sure we have the latest version of all packages
+  yum:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+- name: be sure the dependencies are installed
+  yum:
+    name:
+      - ca-certificates
+      - curl
+      - yum-utils
+      - python3
+    state: latest
+
+- name: be sure the latest version of jq is installed
+  get_url:
+    url: https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+    dest: /usr/bin/jq
+    mode: a+x
+
+- name: be sure the latest version of the awscli is installed
+  pip:
+    executable: pip3
+    name: awscli
+    state: latest
+  environment:
+    PIP_TARGET: /usr/bin

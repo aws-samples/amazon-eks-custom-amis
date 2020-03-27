@@ -1,0 +1,80 @@
+{
+
+  "variables": {
+    "aws_region": "",
+
+    "k8s_version": "1.15.10",
+    "k8s_build_date": "2020-02-22",
+    "cni_version": "v0.6.0",
+    "cni_plugin_version": "v0.7.5",
+
+    "ami_name": "centos7",
+    "ami_description": "An EKS base image based on CentOS 7 Build Date: {{ isotime }}",
+
+    "source_ami_product_code": "aw0evgkw8e5c1q413zgy5pjce",
+    "source_ami_owner": "aws-marketplace",
+    "source_ami_ssh_user": "centos",
+
+    "vpc_id": "",
+    "subnet_id": ""
+  },
+
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "{{user `aws_region`}}",
+      "source_ami_filter": {
+        "filters": {
+          "product-code": "{{user `source_ami_product_code`}}",
+          "root-device-type": "ebs",
+          "state": "available",
+          "virtualization-type": "hvm",
+          "architecture": "x86_64"
+        },
+        "owners": [ "{{user `source_ami_owner`}}" ],
+        "most_recent": true
+      },
+      "instance_type": "m5.large",
+      "ssh_username": "{{user `source_ami_ssh_user`}}",
+      "ssh_pty": true,
+      "subnet_id": "{{user `subnet_id`}}",
+      "tags": {
+          "Name": "eks-{{user `ami_name`}}-{{ timestamp }}",
+          "BuildDate": "{{ isotime }}",
+          "Kubernetes-Version": "{{user `k8s_version`}}",
+          "Kubernetes-BuildDate": "{{user `k8s_build_date`}}",
+          "CNI-Version": "{{user `cni_version`}}",
+          "CNI-Plugin-Version": "{{user `cni_plugin_version`}}"
+      },
+      "ami_name": "eks-{{user `ami_name`}}-{{ timestamp }}",
+      "ami_description": "{{ user `ami_description` }}",
+      "ami_virtualization_type": "hvm",
+      "run_tags": {
+        "Name": "packer-builder-eks-{{user `ami_name`}}-ami"
+      }
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 5; done"
+    },
+    {
+      "type": "shell",
+      "inline": "sudo yum update -y && sudo yum install -y python3"
+    },
+    {
+      "type": "ansible",
+      "playbook_file": "../ansible/eks.yml",
+      "user": "{{user `source_ami_ssh_user`}}",
+      "extra_arguments": [
+        "--become",
+        "--become-method=sudo",
+        "--become-user=root",
+        "--extra-vars",
+        "ansible_python_interpreter=/usr/bin/python aws_region={{user `aws_region`}} k8s_version={{user `k8s_version`}} k8s_build_date={{user `k8s_build_date`}} cni_version={{user `cni_version`}} cni_plugin_version={{user `cni_plugin_version`}}"
+      ]
+    }
+  ]
+}
