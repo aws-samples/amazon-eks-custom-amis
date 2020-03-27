@@ -2,12 +2,16 @@
 
 This repository contains Ansible playbooks along with Packer definitions to create custom AMIs for use with Amazon EKS via "bring your own" Auto Scaling Groups.  Many organizations require running custom AMIs for security, compliance, or internal policy requirements. **The Amazon EKS Optimized AMI remains the preferred way to deploy containers on Amazon EKS**, these AMIs aim to provide a starting place for customers looking to implement custom AMIs. The AMIs built in this repository are based on the [Amazon EKS optimized AMI published by AWS](https://github.com/awslabs/amazon-eks-ami).
 
-| Distribution | Versions(s) | Supported | Packer Config | Make | STIG |
-|--------------|:-----------:|:---------:|---------------|------|------|
-| CentOS | 7 | Yes | `centos-7.json` | `build-centos-7` | |
-| Ubuntu | 18.04 | Yes | `ubuntu-1804.json` | `build-ubuntu-1804` | |
-| Debian | Stretch | Yes | `debian-stretch.json` | `build-debian-stretch` | |
-| Red Hat | 7 | Yes | `rhel-7.json` | `build-rhel-7`, `build-rhel-7-stig` | :white_check_mark: |
+| Distribution | Versions(s) | Supported | Make | STIG Available |
+|--------------|:-----------:|:---------:|------|:------:|
+| Debian | Stretch | :white_check_mark: | `build-debian-stretch` | :x: |
+| Debian | Buster | :x: | | :x: |
+| Ubuntu | 16.04 | :x:  |  | :x: |
+| Ubuntu | 18.04 | :white_check_mark: | `build-ubuntu-1804` | :x: |
+| CentOS | 7 | :white_check_mark: | `build-centos-7` | :x: |
+| CentOS | 8 | :x:  |  | :x: |
+| Red Hat Enterprise Linux | 7 | :white_check_mark: | `build-rhel-7`, `build-rhel-7-stig` | :white_check_mark: |
+| Red Hat Enterprise Linux | 8 | :x: |  |  |
 
 ## Installing Dependencies
 
