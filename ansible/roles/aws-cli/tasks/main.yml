@@ -1,26 +1,3 @@
 ---
 
-- name: be sure we have the awscli dependencies installed
-  yum:
-    state: latest
-    name:
-      - unzip
-  when: ansible_facts['os_family'] == "RedHat"
-
-- name: be sure we have the awscli dependencies installed
-  apt:
-    state: latest
-    name:
-      - unzip
-  when: ansible_facts['os_family'] == "Debian"
-
-- name: be sure awscli is installed
-  block:
-    - get_url:
-        url: https://s3.amazonaws.com/aws-cli/awscli-bundle.zip
-        dest: /tmp/awscli-bundle.zip
-    - unarchive:
-        src: /tmp/awscli-bundle.zip
-        dest: /tmp
-        remote_src: yes
-    - command: /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/bin/aws
+- include: "{{ ansible_facts['os_family'] | lower }}.yml"

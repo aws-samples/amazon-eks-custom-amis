@@ -1,0 +1,6 @@
+---
+
+- name: be sure aws cli is installed
+  pip:
+    state: latest
+    name: awscli

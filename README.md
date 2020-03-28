@@ -4,14 +4,14 @@ This repository contains Ansible playbooks along with Packer definitions to crea
 
 | Distribution | Versions(s) | Supported | Make | STIG Available |
 |--------------|:-----------:|:---------:|------|:------:|
-| Debian | Stretch | :white_check_mark: | `build-debian-stretch` |  |
-| Debian | Buster | :x: | | :x: |
-| Ubuntu | 16.04 | :white_check_mark: | `build-ubuntu-1604` | |
-| Ubuntu | 18.04 | :white_check_mark: | `build-ubuntu-1804` | |
-| CentOS | 7 | :white_check_mark: | `build-centos-7` | |
-| CentOS | 8 | :x: |  | :x: |
-| Red Hat Enterprise Linux | 7 | :white_check_mark: | `build-rhel-7`, `build-rhel-7-stig` | :white_check_mark: |
-| Red Hat Enterprise Linux | 8 | :x: |  |  |
+| Debian                   | Stretch | :white_check_mark: | `build-debian-stretch`              | |
+| Debian                   | Buster  | :x:                |                                     | |
+| Ubuntu                   | 16.04   | :white_check_mark: | `build-ubuntu-1604`                 | |
+| Ubuntu                   | 18.04   | :white_check_mark: | `build-ubuntu-1804`                 | |
+| CentOS                   | 7       | :white_check_mark: | `build-centos-7`                    | |
+| CentOS                   | 8       | :x:                |                                     | |
+| Red Hat Enterprise Linux | 7       | :white_check_mark: | `build-rhel-7`, `build-rhel-7-stig` | :white_check_mark: |
+| Red Hat Enterprise Linux | 8       | :x:                |                                     |  |
 
 ## Installing Dependencies
 

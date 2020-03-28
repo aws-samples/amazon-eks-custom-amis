@@ -10,7 +10,7 @@
     option: repo_gpgcheck
     value: '0'
     create: false
-
+  
 - name: be sure we have the latest version of all packages
   yum:
     name: "*"

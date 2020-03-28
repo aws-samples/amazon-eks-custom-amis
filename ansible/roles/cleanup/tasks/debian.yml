@@ -5,6 +5,6 @@
 
 - name: be sure the apt cache is clean
   apt:
+    state: absent
     autoremove: yes
     autoclean: yes
-

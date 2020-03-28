@@ -4,7 +4,7 @@
 # file: ansible/roles/docker/tasks/main.yml
 
 - name: run operating system specific commands
-  include: "{{ ansible_facts['distribution'] | lower }}.yml"
+  include: "{{ ansible_facts['os_family'] | lower }}.yml"
 
 - name: be sure the /etc/docker folder exists
   file:

@@ -6,8 +6,9 @@
 - name: be sure the yum cache is clean
   shell: yum clean all
 
-- name: be sure to cleanup redhate directories
-  shell: "rm -rf {{ item }}"
-  with_items:
-    - /var/cache/yum
-    - /var/log/rhsm/*
+- name: be sure to cleanup yum directories
+  shell: "rm -rf /var/cache/yum"
+
+- name: be sure to cleanup redhat directories
+  shell: "rm -rf /var/log/rhsm/*"
+  when: ansible_facts[‘distribution’] == 'RedHat'

@@ -11,10 +11,10 @@
 
 - name: be sure the dependencies are installed
   apt:
+    state: latest
     name:
       - ca-certificates
       - curl
       - gnupg2
       - python3
       - python3-pip
-    state: latest

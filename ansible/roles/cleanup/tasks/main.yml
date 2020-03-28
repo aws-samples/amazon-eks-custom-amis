@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT-0
 # file: ansible/roles/common/tasks/main.yml
 
-- include: "{{ ansible_facts['distribution'] | lower }}.yml"
+- include: "{{ ansible_facts['os_family'] | lower }}.yml"
 
 - name: reboot to apply updates
   reboot: {}
