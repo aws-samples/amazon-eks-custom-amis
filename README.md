@@ -4,12 +4,12 @@ This repository contains Ansible playbooks along with Packer definitions to crea
 
 | Distribution | Versions(s) | Supported | Make | STIG Available |
 |--------------|:-----------:|:---------:|------|:------:|
-| Debian | Stretch | :white_check_mark: | `build-debian-stretch` | :x: |
+| Debian | Stretch | :white_check_mark: | `build-debian-stretch` |  |
 | Debian | Buster | :x: | | :x: |
-| Ubuntu | 16.04 | :x:  |  | :x: |
-| Ubuntu | 18.04 | :white_check_mark: | `build-ubuntu-1804` | :x: |
-| CentOS | 7 | :white_check_mark: | `build-centos-7` | :x: |
-| CentOS | 8 | :x:  |  | :x: |
+| Ubuntu | 16.04 | :white_check_mark: | `build-ubuntu-1604` | |
+| Ubuntu | 18.04 | :white_check_mark: | `build-ubuntu-1804` | |
+| CentOS | 7 | :white_check_mark: | `build-centos-7` | |
+| CentOS | 8 | :x: |  | :x: |
 | Red Hat Enterprise Linux | 7 | :white_check_mark: | `build-rhel-7`, `build-rhel-7-stig` | :white_check_mark: |
 | Red Hat Enterprise Linux | 8 | :x: |  |  |
 
@@ -31,11 +31,52 @@ The Packer commands are encapsulated in Make commands. Packer handles provisioni
 make AWS_REGION=us-east-2 AWS_VPC_ID=vpc-123456789abcdefgh AWS_SUBNET_ID=subnet-123456789abcdefgh build-centos-7
 ```
 
-| Parameter | Description |
-|-----------|-------------|
-| `AWS_REGION` | The AWS region to build and save the AMI |
-| `AWS_VPC_ID` | The AWS VPC to build the AMI |
-| `AWS_SUBNET_ID` | The AWS Subnet to build the AMI |
+| Parameter | Default | Description |
+|-----------|:-------:|-------------|
+| `AWS_REGION` | `` | The AWS region to build and save the AMI |
+| `AWS_VPC_ID` | `` | The AWS VPC to build the AMI |
+| `AWS_SUBNET_ID`| `` | The AWS Subnet to build the AMI |
+| `K8S_VERSION`| `1.15.10` | The version of Kubernetes to install. See blow for information on how to get this value. |
+| `K8S_BUILD_DATE`| `2020-02-22` | The build date of the Kubernetes build |
+| `CNI_VERSION`| `v0.6.0` | The version of the Kubernetes Container Networking Interface (CNI) to install |
+| `CNI_PLUGIN_VERSION`| `v0.7.5` | The version of the Kubernetes Container Networking Interface (CNI) plugin to install |
+
+#### Getting the Kubernetes Build Information
+
+Amazon EKS builds and tests specific versions of Kubernetes together for compatability. It is important that you use versions that have been tested together. To get the list of support Kubernetes versions run the following command:
+
+```bash
+aws s3 ls amazon-eks --region=us-west-2
+# PRE 1.10.11/
+# PRE 1.10.13/
+# PRE 1.10.3/
+# PRE 1.11.10/
+# PRE 1.11.5/
+# PRE 1.11.8/
+# PRE 1.11.9/
+# PRE 1.12.10/
+# PRE 1.12.7/
+# PRE 1.12.9/
+# PRE 1.13.11/
+# PRE 1.13.12/
+# PRE 1.13.7/
+# PRE 1.13.8/
+# PRE 1.14.6/
+# PRE 1.14.7/
+# PRE 1.14.8/
+# PRE 1.14.9/
+# PRE 1.15.10/
+# PRE cloudformation/
+# PRE manifests/
+```
+
+Once you select a version you will need to get the build date:
+
+```bash
+aws s3 ls s3://amazon-eks/1.15.10/ --region=us-west-2
+# PRE 2020-02-22/
+```
+
 
 ### Considerations
 

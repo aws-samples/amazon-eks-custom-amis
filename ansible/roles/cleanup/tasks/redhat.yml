@@ -1,0 +1,13 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# file: ansible/roles/cleanup/tasks/redhat.yml
+
+- name: be sure the yum cache is clean
+  shell: yum clean all
+
+- name: be sure to cleanup redhate directories
+  shell: "rm -rf {{ item }}"
+  with_items:
+    - /var/cache/yum
+    - /var/log/rhsm/*

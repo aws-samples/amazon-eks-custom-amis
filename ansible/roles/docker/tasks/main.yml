@@ -16,8 +16,6 @@
     src: docker-daemon.json.j2
     dest: /etc/docker/daemon.json
 
-- include: sysctl.yml
-
 - name: be sure docker is started and configured to start on boot
   systemd:
     name: docker

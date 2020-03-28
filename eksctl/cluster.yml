@@ -1,0 +1,27 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: custom-ami
+  region: us-east-2
+
+nodeGroups:
+  - name: ng-1
+    ami: ami-092bf4a3ab2c2dd61
+    instanceType: t3.large
+    desiredCapacity: 1
+    minSize: 1
+    maxSize: 3
+    privateNetworking: false
+    ssh:
+      publicKeyPath: ~/.ssh/id_rsa.pub
+
+  - name: ng-2
+    ami: ami-051f852a783ef440f
+    instanceType: t3.xlarge
+    desiredCapacity: 1
+    minSize: 1
+    maxSize: 3
+    privateNetworking: false
+    ssh:
+      publicKeyPath: ~/.ssh/id_rsa.pub

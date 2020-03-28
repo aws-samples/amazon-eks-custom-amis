@@ -19,12 +19,8 @@
     name:
       - ca-certificates
       - curl
-      - python-pip
-      - jq
+      - yum-utils
       - python3
-    state: latest
-
-- name: be sure the latest awscli is installed
-  pip:
-    name: awscli
+      - nfs-utils
+      - logrotate
     state: latest

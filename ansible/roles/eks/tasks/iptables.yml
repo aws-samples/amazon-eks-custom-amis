@@ -4,11 +4,24 @@
 # file: ansible/roles/eks/tasks/iptables.yml
 
 - name: be sure forwarding is enabled via iptables
-  shell: /sbin/iptables-save > /etc/sysconfig/iptables
+  block:
+    - file:
+        path: /etc/sysconfig
+        state: directory
+    - shell: /sbin/iptables-save > /etc/sysconfig/iptables
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: be sure forwarding is enabled via iptables
+  block:
+    - file:
+        path: /etc/iptables
+        state: directory
+    - shell: /sbin/iptables-save > /etc/iptables/rules.v4
+  when: ansible_facts['os_family'] == "Debian"
 
 - name: be sure we have the latest version of the iptables restore from aws
-  get_url:
-    url: https://raw.githubusercontent.com/awslabs/amazon-eks-ami/master/files/iptables-restore.service
+  copy:
+    src: iptables-restore.{{ ansible_facts['os_family'] | lower }}.service
     dest: /etc/systemd/system/iptables-restore.service
 
 - name: be sure the iptables-restore is started and enabled

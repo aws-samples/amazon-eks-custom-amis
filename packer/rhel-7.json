@@ -3,10 +3,10 @@
   "variables": {
     "aws_region": "",
 
-    "k8s_version": "1.15.10",
-    "k8s_build_date": "2020-02-22",
-    "cni_version": "v0.6.0",
-    "cni_plugin_version": "v0.7.5",
+    "k8s_version": "",
+    "k8s_build_date": "",
+    "cni_version": "",
+    "cni_plugin_version": "",
 
     "ami_name": "rhel7",
     "ami_description": "An EKS base image based on RHEL 7 Build Date: {{ isotime }}",
@@ -61,10 +61,6 @@
       "inline": "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 5; done"
     },
     {
-      "type": "shell",
-      "inline": "sudo yum update -y && sudo yum install -y python3"
-    },
-    {
       "type": "ansible",
       "playbook_file": "../ansible/eks.yml",
       "user": "{{user `source_ami_ssh_user`}}",
@@ -73,7 +69,7 @@
         "--become-method=sudo",
         "--become-user=root",
         "--extra-vars",
-        "ansible_python_interpreter=/usr/bin/python aws_region={{user `aws_region`}} k8s_version={{user `k8s_version`}} k8s_build_date={{user `k8s_build_date`}} cni_version={{user `cni_version`}} cni_plugin_version={{user `cni_plugin_version`}}"
+        "ansible_python_interpreter=/bin/python aws_region={{user `aws_region`}} k8s_version={{user `k8s_version`}} k8s_build_date={{user `k8s_build_date`}} cni_version={{user `cni_version`}} cni_plugin_version={{user `cni_plugin_version`}}"
       ]
     }
   ]

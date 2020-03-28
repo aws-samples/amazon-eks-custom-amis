@@ -4,3 +4,13 @@
 # file: ansible/roles/common/tasks/main.yml
 
 - include: "{{ ansible_facts['distribution'] | lower }}.yml"
+
+- name: be sure swap is disabled
+  block:
+    - shell: swapoff -a
+    - mount:
+        name: swap
+        fstype: swap
+        state: absent
+
+

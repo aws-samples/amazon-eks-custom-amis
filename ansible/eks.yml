@@ -2,10 +2,25 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-- name: eks ami
+- name: install base components
   hosts: all
   roles:
     - common
-    - aws-ssm-agent
+    - aws-cli
+
+- name: apply the redhat official stig to the ami
+  hosts: all
+  tasks:
+    - include_role:
+        name: RedHatOfficial.rhel7_stig
+      when: 
+        - is_stig_enabled | bool
+        - ansible_facts['os_family'] == "RedHat"
+        - ansible_facts['distribution_major_version'] == "7"
+
+- name: apply the eks configuration to the ami
+  hosts: all
+  roles:
     - docker
     - eks
+    - cleanup

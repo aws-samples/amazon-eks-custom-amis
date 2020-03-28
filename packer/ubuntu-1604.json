@@ -8,12 +8,12 @@
     "cni_version": "",
     "cni_plugin_version": "",
 
-    "ami_name": "debian-stretch",
-    "ami_description": "An EKS base image based on Debian Stretch Build Date: {{ isotime }}",
+    "ami_name": "ubuntu1604",
+    "ami_description": "An EKS base image based on Ubuntu 16.04 LTS Build Date: {{ isotime }}",
 
-    "source_ami_name": "debian-stretch-hvm-x86_64-gp2-*",
-    "source_ami_owner": "379101102735",
-    "source_ami_ssh_user": "admin",
+    "source_ami_name": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*",
+    "source_ami_owner": "099720109477",
+    "source_ami_ssh_user": "ubuntu",
 
     "vpc_id": "",
     "subnet_id": ""

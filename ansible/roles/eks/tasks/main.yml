@@ -7,16 +7,21 @@
   set_fact:
     kube_arch: "{% if ansible_architecture=='x86_64' %}amd64{% else %}arm64{% endif %}"
 
-- include: iptables.yml
+- name: be sure the latest version of jq is installed
+  get_url:
+    url: https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+    dest: /usr/bin/jq
+    mode: a+x
 
 - name: be sure logrotate is configured for kube-proxy
   get_url:
     url: https://raw.githubusercontent.com/awslabs/amazon-eks-ami/master/files/logrotate-kube-proxy
     dest: /etc/logrotate.d/kube-proxy
 
-- include: cni.yml
-- include: kubelet.yml
+- include: iptables.yml
 - include: aws-iam-authenticator.yml
+- include: kubelet.yml
+- include: cni.yml
 
 - name: be sure the /etc/eks directory exists
   file:

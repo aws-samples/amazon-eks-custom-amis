@@ -25,30 +25,25 @@
     enabled: no
   ignore_errors: yes
 
-- name: be sure container-selinux is installed
-  yum:
-    name: container-selinux
-    state: latest
-    update_cache: yes
-
 - name: be sure the docker dependencies are installed
   yum:
     state: latest
-    update_cache: yes
     name:
       - device-mapper-persistent-data
       - lvm2
+      - yum-utils
 
 - name: be sure the docker repository is configured
-  get_url:
-    url: https://download.docker.com/linux/centos/docker-ce.repo
-    dest: /etc/yum.repos.d/docker-ce.repo
+  shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
 - name: be sure the latest version of docker is installed
   yum:
     state: latest
+    name: docker-ce
     update_cache: yes
-    name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
+
+- name: be sure to set sebool container_manage_cgroup
+  seboolean:
+    name: container_manage_cgroup
+    state: yes
+    persistent: yes
