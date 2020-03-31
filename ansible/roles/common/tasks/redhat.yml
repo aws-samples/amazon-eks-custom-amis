@@ -31,6 +31,5 @@
       - ca-certificates
       - curl
       - yum-utils
-      - nfs-utils
-      - logrotate
+      - wget
 

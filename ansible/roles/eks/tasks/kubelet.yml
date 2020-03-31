@@ -21,6 +21,7 @@
       - conntrack-tools
       - ebtables
       - socat
+      - nfs-utils
   when: ansible_facts['os_family'] == "RedHat"
 
 - name: be sure we have the kubernetes dependencies installed
@@ -29,7 +30,21 @@
     name:
       - apt-transport-https
       - curl
+      - socat
+      - jq
   when: ansible_facts['os_family'] == "Debian"
+
+- name: be sure we have nfs-common installed to mount efs mounts
+  apt:
+    state: latest
+    name: nfs-common
+  when: ansible_facts['distribution'] == "Ubuntu"
+
+- name: be sure we have nfs-utils installed to mount efs mounts
+  apt:
+    state: latest
+    name: nfs-utils
+  when: ansible_facts['distribution'] == "Debian"
 
 - name: be sure we have the latest version of the kubelet from aws
   get_url:

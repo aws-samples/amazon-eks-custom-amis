@@ -7,14 +7,11 @@
   yum:
     name: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
     state: latest
-  tags:
-    - ssm
-
+    disable_gpg_check: yes
+  
 - name: be sure the ssm agent is started and enabled
   systemd:
     name: amazon-ssm-agent
     state: started
     enabled: yes
     daemon_reload: yes
-  tags:
-    - ssm

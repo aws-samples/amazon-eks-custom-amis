@@ -11,4 +11,4 @@
 
 - name: be sure to cleanup redhat directories
   shell: "rm -rf /var/log/rhsm/*"
-  when: ansible_facts[‘distribution’] == 'RedHat'
+  when: ansible_facts['distribution'] == 'RedHat'

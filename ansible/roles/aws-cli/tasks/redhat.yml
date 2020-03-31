@@ -1,4 +1,7 @@
 ---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# file: ansible/roles/aws-cli/tasks/redhat.yml
 
 - name: be sure we have the awscli dependencies installed
   yum:

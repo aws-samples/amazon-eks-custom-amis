@@ -3,7 +3,4 @@
 # SPDX-License-Identifier: MIT-0
 # file: ansible/roles/aws-ssm-agent/tasks/main.yml
 
-
-- include: "{{ ansible_facts['distribution'] | lower }}.yml"
-  tags:
-    - ssm
+- include: "{{ ansible_facts['os_family'] | lower }}.yml"

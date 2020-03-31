@@ -5,22 +5,18 @@
 
 - name: be sure we have the latest version of all packages
   yum:
-    name: "*"
     state: latest
+    name: "*"
     update_cache: yes
 
 - name: be sure the epel-release
   yum:
-    name: epel-release
     state: latest
+    name: epel-release
 
 - name: be sure dependencies are installed
   yum:
+    state: latest
     name:
       - ca-certificates
-      - curl
-      - yum-utils
       - python3
-      - nfs-utils
-      - logrotate
-    state: latest

@@ -3,14 +3,28 @@
 # SPDX-License-Identifier: MIT-0
 # file: ansible/roles/aws-ssm-agent/tasks/debian.yml
 
+- name: be sure the latest ssm agent is install via snap
+  snap:
+    name: amazon-ssm-agent
+    classic: yes
+  when:
+    - ansible_facts['distribution'] == 'Ubuntu'
+    - ansible_facts['distribution_major_version'] == '18.04'
+
 - name: be sure we download the latest ssm agent
   get_url:
     url: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb
     dest: /tmp/amazon-ssm-agent.deb
+  when:
+    - ansible_facts['distribution'] != 'Ubuntu'
+    - ansible_facts['distribution_major_version'] != '18.04'
 
 - name: be sure the latest ssm agent is installed
   apt:
     deb: /tmp/amazon-ssm-agent.deb
+  when:
+    - ansible_facts['distribution'] != 'Ubuntu'
+    - ansible_facts['distribution_major_version'] != '18.04'
 
 - name: be sure the ssm agent is started and enabled
   systemd:
@@ -18,3 +32,6 @@
     state: started
     enabled: yes
     daemon_reload: yes
+  when:
+    - ansible_facts['distribution'] != 'Ubuntu'
+    - ansible_facts['distribution_major_version'] != '18.04'
