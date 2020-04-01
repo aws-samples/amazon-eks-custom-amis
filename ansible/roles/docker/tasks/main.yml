@@ -3,22 +3,31 @@
 # SPDX-License-Identifier: MIT-0
 # file: ansible/roles/docker/tasks/main.yml
 
+- name: be sure the docker folder is created and ready to be mounted
+  shell: rm -rf /var/lib/docker && mkdir -p /var/lib/docker
+
+- set_fact:
+    docker_disk_name: /dev/nvme0n1
+  when: ansible_facts['os_family'] == 'Debian'
+
+- set_fact:
+    docker_disk_name: /dev/nvme1n1
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: be sure the docker partition is formated
+  filesystem:
+    fstype: ext4
+    dev: "{{ docker_disk_name }}"
+
+- name: be sure the docker partition is mounted
+  mount:
+    src: "{{ docker_disk_name }}"
+    path: /var/lib/docker
+    fstype: ext4
+    state: mounted
+
 - name: run operating system specific commands
   include: "{{ ansible_facts['os_family'] | lower }}.yml"
 
-- name: be sure the /etc/docker folder exists
-  file:
-    path: /etc/docker
-    state: directory
-
-- name: be sure we have the latest version of the docker configuration
-  template:
-    src: docker-daemon.json.j2
-    dest: /etc/docker/daemon.json
-
-- name: be sure docker is started and configured to start on boot
-  systemd:
-    name: docker
-    state: restarted
-    enabled: yes
-    daemon_reload: yes
+- name: run the docker cis benchmark
+  include: cis-benchmark.yml

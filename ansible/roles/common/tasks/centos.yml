@@ -20,3 +20,12 @@
     name:
       - ca-certificates
       - python3
+      - audit
+      - audit-libs
+
+- name: be sure auditd is started and enabled
+  systemd:
+    name: auditd
+    state: started
+    enabled: yes
+    daemon_reload: yes
