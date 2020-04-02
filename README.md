@@ -82,6 +82,12 @@ aws s3 ls s3://amazon-eks/1.15.10/ --region=us-west-2
 - This repository leverages the latest version of [Docker CE](https://docs.docker.com/install/) available from Docker. The version of Docker that comes with RHEL 7 is out of date and overidden with the Docker CE repository.
 - Custom AMIs are only supported in the bring your own Auto Scaling Group configuration of Amazon EKS worker nodes.
 
+### CIS Benchmark for Docker
+
+Sections 1, 2, and 3 of the [CIS Benchmark for Docker](https://www.cisecurity.org/benchmark/docker/) are applied during image build. Sections 4, 5, 6, 7, and 8 do not apply to Amazon EKS deployments or apply directly to container images. In order to support Amazon EKS we have made a few modifications:
+
+- `2.8 - Enable user namespace support` is not supported by the AWS VPC CNI Driver because it needs to access the host. This can be mitigated via Kubernetes Pod configuration.
+
 ### DoD Security Technical Implementation Guides (STIGs)
 
 This repository also supports that have approved [STIGs from DISA](https://public.cyber.mil/stigs/). Currently, the only supported OS is Red Hat Enterprise Linux 7. To apply the STIG to the Red Hat Enterprise Linux base image, install the [Red Hat official STIG playbook](https://github.com/RedHatOfficial/ansible-role-rhel7-stig) from [Ansible Galaxy](https://galaxy.ansible.com/). There is a preconfigured Packer configuration for the STIG image. **These images are reference implementations and still needs to be validated by your security organization. These images are designed to be starting place for regulated environments.**

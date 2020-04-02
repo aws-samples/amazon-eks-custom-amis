@@ -38,6 +38,31 @@
       "ssh_username": "{{user `source_ami_ssh_user`}}",
       "ssh_pty": true,
       "subnet_id": "{{user `subnet_id`}}",
+      "encrypt_boot": true,
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/sda1",
+          "volume_size": 25,
+          "volume_type": "gp2",
+          "delete_on_termination": true
+        },
+        {
+          "device_name": "/dev/sdb",
+          "volume_size": 25,
+          "volume_type": "gp2",
+          "encrypted": true,
+          "delete_on_termination": true
+        }
+      ],
+      "ami_block_device_mappings": [
+        {
+          "device_name": "/dev/sdb",
+          "volume_size": 25,
+          "volume_type": "gp2",
+          "encrypted": true,
+          "delete_on_termination": true
+        }
+      ],
       "tags": {
           "Name": "eks-{{user `ami_name`}}-{{ timestamp }}",
           "BuildDate": "{{ isotime }}",
@@ -60,6 +85,10 @@
     {
       "type": "shell",
       "inline": "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 5; done"
+    },
+    {
+      "type": "shell",
+      "inline": "sudo lsblk"
     },
     {
       "type": "ansible",

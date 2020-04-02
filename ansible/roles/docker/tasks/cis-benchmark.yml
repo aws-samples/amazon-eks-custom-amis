@@ -1,0 +1,152 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# file: ansible/roles/docker/tasks/cis-benchmark.yml
+
+
+- name: find the location of docker.service unit file
+  shell: systemctl show -p FragmentPath docker.service
+  register: docker_service
+
+- name: find the location of docker.socket unit file
+  shell: systemctl show -p FragmentPath docker.socket
+  register: docker_socket
+
+- set_fact:
+    docker_audit_rules_path: "/etc/audit/rules.d/docker.rules"
+    docker_service_path: "{{ docker_service.stdout | regex_search('[^=]+$') }}"
+    docker_socket_path: "{{ docker_socket.stdout | regex_search('[^=]+$') }}"
+
+- name: be sure docker folders folders exists
+  file:
+    state: directory
+    path: "{{ item }}"
+  with_items:
+    - /etc/docker
+    - /etc/sysconfig
+    - /etc/default
+    - /var/lib/docker
+
+- name: 1.1.1 ensure the container host has been hardened
+  debug:
+    msg: "[not scored] - 1.1.1 ensure the container host has been hardened"
+
+- name: 1.1.2 ensure that the version of Docker is up to date
+  shell: docker version
+  changed_when: no
+  ignore_errors: yes
+
+- name: 1.2.1 ensure a separate partition for containers has been created
+  command: grep '/var/lib/docker\s' /proc/mounts
+  changed_when: no
+  ignore_errors: yes
+
+- name: 1.2.2 ensure only trusted users are allowed to control Docker daemon
+  shell: getent group docker
+  changed_when: no
+  ignore_errors: yes
+
+- name: 1.2.3 ensure auditing is configured for the Docker daemon
+  lineinfile:
+    line: "-w {{ item }} -k docker"
+    state: present
+    dest: "{{ docker_audit_rules_path }}"
+    create: true
+  with_items:
+    - /usr/bin/dockerd
+    - /usr/bin/docker
+
+- name: 1.2.4 - 1.2.12 ensure auditing is configured for Docker files and directories
+  lineinfile:
+    line: "-w {{ item }} -k docker"
+    state: present
+    dest: "{{ docker_audit_rules_path }}"
+    create: true
+  with_items:
+    - /var/lib/docker
+    - /etc/docker
+    - "{{ docker_service_path }}"
+    - "{{ docker_socket_path }}"
+    - /etc/default/docker
+    - /etc/sysconfig/docker
+    - /etc/docker/daemon.json
+    - /usr/bin/containerd
+    - /usr/bin/docker-containerd
+    - /usr/bin/runc
+    - /usr/bin/docker-runc
+
+- name: 2.1 - 2.17 - ensure the docker configuration is secure
+  template:
+    src: docker-daemon.json.j2
+    dest: /etc/docker/daemon.json
+
+- name: 2 - restart the docker daemon
+  systemd:
+    name: docker
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+
+- name: 3.1 - 3.2 - Ensure that the docker.service file ownership is set to root:root
+  file:
+    state: file
+    path: "{{ docker_service_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: 3.3 - 3.4 - Ensure that the docker.socket file ownership is set to root:root
+  file:
+    state: file
+    path: "{{ docker_socket_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: 3.5 - 3.6 - Ensure that the /etc/docker file ownership is set to root:root
+  file:
+    state: directory
+    path: /etc/docker
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: 3.7 - 3.8 - Ensure that the /etc/docker file ownership is set to root:root
+  file:
+    state: directory
+    path: /etc/docker/certs.d/
+    recurse: yes
+    owner: root
+    group: root
+    mode: '0444'
+
+- name: 3.9 - 3.14 - ensure proper file persions on docker tls certificates
+  debug:
+    msg: "does not apply because the docker daemon is not exposed outside of the host"
+
+- name: 3.15 - Ensure that the /var/run/docker.sock file ownership is set to root:docker
+  file:
+    state: touch
+    path: /var/run/docker.sock
+    owner: root
+    group: docker
+    mode: '0660'
+
+- name: 3.17 - 3.18 - Ensure that the daemon.json file ownership is set to root:root
+  file:
+    state: touch
+    path: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: 3.19 - 3.21 - Ensure that the file ownership is set to root:root
+  file:
+    state: touch
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - /etc/default/docker
+    - /etc/sysconfig/docker

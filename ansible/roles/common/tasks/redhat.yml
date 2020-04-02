@@ -31,5 +31,12 @@
       - ca-certificates
       - curl
       - yum-utils
-      - wget
+      - audit
+      - audit-libs
 
+- name: be sure auditd is started and enabled
+  systemd:
+    name: auditd
+    state: started
+    enabled: yes
+    daemon_reload: yes

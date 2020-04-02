@@ -16,3 +16,12 @@
       - ca-certificates
       - python3
       - python3-pip
+      - auditd
+      - audispd-plugins
+
+- name: be sure auditd is started and enabled
+  systemd:
+    name: auditd
+    state: started
+    enabled: yes
+    daemon_reload: yes
