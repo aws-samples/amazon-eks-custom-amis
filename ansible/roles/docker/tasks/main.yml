@@ -7,12 +7,13 @@
   shell: rm -rf /var/lib/docker && mkdir -p /var/lib/docker
 
 - set_fact:
-    docker_disk_name: /dev/nvme0n1
-  when: ansible_facts['os_family'] == 'Debian'
+    docker_disk_name: /dev/nvme1n1
 
 - set_fact:
-    docker_disk_name: /dev/nvme1n1
-  when: ansible_facts['os_family'] == 'RedHat'
+    docker_disk_name: /dev/nvme0n1
+  when: 
+    - ansible_facts['distribution'] == 'Ubuntu'
+    - ansible_facts['distribution_major_version'] == '18'
 
 - name: be sure the docker partition is formated
   filesystem:

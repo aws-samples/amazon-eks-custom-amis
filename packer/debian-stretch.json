@@ -15,6 +15,10 @@
     "source_ami_owner": "379101102735",
     "source_ami_ssh_user": "admin",
 
+    "http_proxy": "",
+    "https_proxy": "",
+    "no_proxy": "",
+
     "vpc_id": "",
     "subnet_id": ""
   },
@@ -83,20 +87,52 @@
   "provisioners": [
     {
       "type": "shell",
-      "inline": "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 5; done"
+      "inline": "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 5; done",
+      "environment_vars": [
+        "http_proxy={{ user `http_proxy` }}",
+        "https_proxy={{ user `https_proxy` }}",
+        "no_proxy={{ user `no_proxy` }}",
+        "HTTP_PROXY={{ user `http_proxy` }}",
+        "HTTPS_PROXY={{ user `https_proxy` }}",
+        "NO_PROXY={{ user `no_proxy` }}"
+      ]
     },
     {
       "type": "shell",
-      "inline": "sudo lsblk"
+      "inline": "sudo lsblk",
+      "environment_vars": [
+        "http_proxy={{ user `http_proxy` }}",
+        "https_proxy={{ user `https_proxy` }}",
+        "no_proxy={{ user `no_proxy` }}",
+        "HTTP_PROXY={{ user `http_proxy` }}",
+        "HTTPS_PROXY={{ user `https_proxy` }}",
+        "NO_PROXY={{ user `no_proxy` }}"
+      ]
     },
     {
       "type": "shell",
-      "inline": "sudo apt install -y python3"
+      "inline": "sudo apt install -y python3",
+      "environment_vars": [
+        "http_proxy={{ user `http_proxy` }}",
+        "https_proxy={{ user `https_proxy` }}",
+        "no_proxy={{ user `no_proxy` }}",
+        "HTTP_PROXY={{ user `http_proxy` }}",
+        "HTTPS_PROXY={{ user `https_proxy` }}",
+        "NO_PROXY={{ user `no_proxy` }}"
+      ]
     },
     {
       "type": "ansible",
       "playbook_file": "../ansible/eks.yml",
       "user": "{{user `source_ami_ssh_user`}}",
+      "ansible_env_vars": [
+        "http_proxy={{ user `http_proxy` }}",
+        "https_proxy={{ user `https_proxy` }}",
+        "no_proxy={{ user `no_proxy` }}",
+        "HTTP_PROXY={{ user `http_proxy` }}",
+        "HTTPS_PROXY={{ user `https_proxy` }}",
+        "NO_PROXY={{ user `no_proxy` }}"
+      ],
       "extra_arguments": [
         "--become",
         "--become-method=sudo",

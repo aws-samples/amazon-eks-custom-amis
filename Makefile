@@ -7,12 +7,19 @@ K8S_BUILD_DATE := 2020-02-22
 CNI_VERSION := v0.6.0
 CNI_PLUGIN_VERSION := v0.7.5
 
+HTTP_PROXY := ""
+HTTPS_PROXY := ""
+NO_PROXY := ""
+
 define packer_build
 	@echo "Starting Packer Build"
 	@echo "VPC ID: $(AWS_VPC_ID)"
 	@echo "SUBNET ID: $(AWS_SUBNET_ID)"
 	@echo "REGION: $(AWS_REGION)"
 	@echo "CONFIG: $1"
+	@echo "HTTP Proxy: $(HTTP_PROXY)"
+	@echo "HTTPS Proxy: $(HTTPS_PROXY)"
+	@echo "No Proxy: $(NO_PROXY)"
 
 	cd ./packer; \
 		packer build -var "vpc_id=$(AWS_VPC_ID)" \
@@ -22,6 +29,9 @@ define packer_build
 			-var "k8s_build_date=$(K8S_BUILD_DATE)" \
 			-var "cni_version=$(CNI_VERSION)" \
 			-var "cni_plugin_version=$(CNI_PLUGIN_VERSION)" \
+			-var "http_proxy=$(HTTP_PROXY)" \
+			-var "https_proxy=$(HTTPS_PROXY)" \
+			-var "no_proxy=$(NO_PROXY)" \
 			$1
 endef
 

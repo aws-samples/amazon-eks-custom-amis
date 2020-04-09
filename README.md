@@ -40,6 +40,9 @@ make AWS_REGION=us-east-2 AWS_VPC_ID=vpc-123456789abcdefgh AWS_SUBNET_ID=subnet-
 | `K8S_BUILD_DATE`| `2020-02-22` | The build date of the Kubernetes build |
 | `CNI_VERSION`| `v0.6.0` | The version of the Kubernetes Container Networking Interface (CNI) to install |
 | `CNI_PLUGIN_VERSION`| `v0.7.5` | The version of the Kubernetes Container Networking Interface (CNI) plugin to install |
+| `HTTP_PROXY` |  | Specify an HTTP Proxy to use when running commands on the server. This will set the `http_proxy` and `HTTP_PROXY` environment variables on the server while commands are running. |
+| `HTTPS_PROXY` |  | Specify an HTTPS Proxy to use when running commands on the server. This will set the `https_proxy` and `HTTPS_PROXY` environment variables on the server while commands are running. |
+| `NO_PROXY` |  | Specify the no proxy configuration to use when running commands on the server. This will set the `no_proxy` and `NO_PROXY` environment variables on the server while commands are running. |
 
 #### Getting the Kubernetes Build Information
 
@@ -47,27 +50,10 @@ Amazon EKS builds and tests specific versions of Kubernetes together for compata
 
 ```bash
 aws s3 ls amazon-eks --region=us-west-2
-# PRE 1.10.11/
-# PRE 1.10.13/
-# PRE 1.10.3/
-# PRE 1.11.10/
-# PRE 1.11.5/
-# PRE 1.11.8/
-# PRE 1.11.9/
-# PRE 1.12.10/
-# PRE 1.12.7/
-# PRE 1.12.9/
-# PRE 1.13.11/
-# PRE 1.13.12/
-# PRE 1.13.7/
-# PRE 1.13.8/
-# PRE 1.14.6/
-# PRE 1.14.7/
-# PRE 1.14.8/
+# ...
 # PRE 1.14.9/
 # PRE 1.15.10/
-# PRE cloudformation/
-# PRE manifests/
+# ...
 ```
 
 Once you select a version you will need to get the build date:
