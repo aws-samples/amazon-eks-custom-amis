@@ -84,8 +84,6 @@ Sections 1, 2, and 3 of the [CIS Benchmark for Docker](https://www.cisecurity.or
 
 This repository also supports applying the [STIG from DISA](https://public.cyber.mil/stigs/). Currently, the only supported OS is Red Hat Enterprise Linux 7. The Red Hat Enterprise Linux 7 STIG playbooks have been generated using [OpenSCAP](https://www.open-scap.org/) based on the [NIST Checklist](https://nvd.nist.gov/ncp/checklist/811). **These images are reference implementations and still needs to be validated by your security organization. These images are designed to be starting place for regulated environments.**
 
-Next, in the repositories root directory:
-
 ```bash
 make AWS_REGION=us-east-2 \
     AWS_VPC_ID=vpc-123456789abcdefgh \
@@ -98,8 +96,6 @@ make AWS_REGION=us-east-2 \
 
 This repository also supports applying the [CJIS hardening guidelines from the FBI](https://www.fbi.gov/services/cjis). Currently, the only supported OS is Red Hat Enterprise Linux 7. The Red Hat Enterprise Linux 7 CJIS playbooks have been generated using [OpenSCAP](https://www.open-scap.org/) based on the [NIST Checklist](https://nvd.nist.gov/ncp/checklist/811). **These images are reference implementations and still needs to be validated by your security organization. These images are designed to be starting place for regulated environments.**
 
-Next, in the repositories root directory:
-
 ```bash
 make AWS_REGION=us-east-2 \
     AWS_VPC_ID=vpc-123456789abcdefgh \
@@ -111,8 +107,6 @@ make AWS_REGION=us-east-2 \
 #### CIA Commercial Cloud Services (CIA C2S)
 
 Currently, the only supported OS is Red Hat Enterprise Linux 7. The Red Hat Enterprise Linux 7 C2S playbooks have been generated using [OpenSCAP](https://www.open-scap.org/) based on the [NIST Checklist](https://nvd.nist.gov/ncp/checklist/811). **These images are reference implementations and still needs to be validated by your security organization. These images are designed to be starting place for regulated environments.**
-
-Next, in the repositories root directory:
 
 ```bash
 make AWS_REGION=us-east-2 \
