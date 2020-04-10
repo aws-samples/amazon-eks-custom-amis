@@ -10,6 +10,7 @@ CNI_PLUGIN_VERSION := v0.7.5
 HTTP_PROXY := ""
 HTTPS_PROXY := ""
 NO_PROXY := ""
+HARDENING := "none"
 
 define packer_build
 	@echo "Starting Packer Build"
@@ -20,6 +21,7 @@ define packer_build
 	@echo "HTTP Proxy: $(HTTP_PROXY)"
 	@echo "HTTPS Proxy: $(HTTPS_PROXY)"
 	@echo "No Proxy: $(NO_PROXY)"
+	@echo "Hardening: $(HARDENING)"
 
 	cd ./packer; \
 		packer build -var "vpc_id=$(AWS_VPC_ID)" \
@@ -32,6 +34,7 @@ define packer_build
 			-var "http_proxy=$(HTTP_PROXY)" \
 			-var "https_proxy=$(HTTPS_PROXY)" \
 			-var "no_proxy=$(NO_PROXY)" \
+			-var "hardening=$(HARDENING)" \
 			$1
 endef
 

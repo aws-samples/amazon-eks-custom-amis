@@ -19,6 +19,8 @@
     "https_proxy": "",
     "no_proxy": "",
 
+    "hardening": "none",
+
     "vpc_id": "",
     "subnet_id": ""
   },
@@ -68,18 +70,19 @@
         }
       ],
       "tags": {
-          "Name": "eks-{{user `ami_name`}}-{{ timestamp }}",
-          "BuildDate": "{{ isotime }}",
-          "Kubernetes-Version": "{{user `k8s_version`}}",
-          "Kubernetes-BuildDate": "{{user `k8s_build_date`}}",
-          "CNI-Version": "{{user `cni_version`}}",
-          "CNI-Plugin-Version": "{{user `cni_plugin_version`}}"
+        "Name": "eks-{{user `ami_name`}}-{{user `hardening`}}-{{ timestamp }}",
+        "BuildDate": "{{ isotime }}",
+        "Kubernetes-Version": "{{user `k8s_version`}}",
+        "Kubernetes-BuildDate": "{{user `k8s_build_date`}}",
+        "CNI-Version": "{{user `cni_version`}}",
+        "CNI-Plugin-Version": "{{user `cni_plugin_version`}}",
+        "Hardening": "{{user `hardening`}}"
       },
-      "ami_name": "eks-{{user `ami_name`}}-{{ timestamp }}",
-      "ami_description": "{{ user `ami_description` }}",
+      "ami_name": "eks-{{user `ami_name`}}-{{user `hardening`}}-{{ timestamp }}",
+      "ami_description": "{{user `ami_description` }}",
       "ami_virtualization_type": "hvm",
       "run_tags": {
-        "Name": "packer-builder-eks-{{user `ami_name`}}-ami"
+        "Name": "packer-builder-eks-{{user `ami_name`}}-{{user `hardening`}}-ami"
       }
     }
   ],
@@ -89,36 +92,36 @@
       "type": "shell",
       "inline": "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 5; done",
       "environment_vars": [
-        "http_proxy={{ user `http_proxy` }}",
-        "https_proxy={{ user `https_proxy` }}",
-        "no_proxy={{ user `no_proxy` }}",
-        "HTTP_PROXY={{ user `http_proxy` }}",
-        "HTTPS_PROXY={{ user `https_proxy` }}",
-        "NO_PROXY={{ user `no_proxy` }}"
+        "http_proxy={{user `http_proxy` }}",
+        "https_proxy={{user `https_proxy` }}",
+        "no_proxy={{user `no_proxy` }}",
+        "HTTP_PROXY={{user `http_proxy` }}",
+        "HTTPS_PROXY={{user `https_proxy` }}",
+        "NO_PROXY={{user `no_proxy` }}"
       ]
     },
     {
       "type": "shell",
       "inline": "sudo lsblk",
       "environment_vars": [
-        "http_proxy={{ user `http_proxy` }}",
-        "https_proxy={{ user `https_proxy` }}",
-        "no_proxy={{ user `no_proxy` }}",
-        "HTTP_PROXY={{ user `http_proxy` }}",
-        "HTTPS_PROXY={{ user `https_proxy` }}",
-        "NO_PROXY={{ user `no_proxy` }}"
+        "http_proxy={{user `http_proxy` }}",
+        "https_proxy={{user `https_proxy` }}",
+        "no_proxy={{user `no_proxy` }}",
+        "HTTP_PROXY={{user `http_proxy` }}",
+        "HTTPS_PROXY={{user `https_proxy` }}",
+        "NO_PROXY={{user `no_proxy` }}"
       ]
     },
     {
       "type": "shell",
       "inline": "sudo yum install -y python3",
       "environment_vars": [
-        "http_proxy={{ user `http_proxy` }}",
-        "https_proxy={{ user `https_proxy` }}",
-        "no_proxy={{ user `no_proxy` }}",
-        "HTTP_PROXY={{ user `http_proxy` }}",
-        "HTTPS_PROXY={{ user `https_proxy` }}",
-        "NO_PROXY={{ user `no_proxy` }}"
+        "http_proxy={{user `http_proxy` }}",
+        "https_proxy={{user `https_proxy` }}",
+        "no_proxy={{user `no_proxy` }}",
+        "HTTP_PROXY={{user `http_proxy` }}",
+        "HTTPS_PROXY={{user `https_proxy` }}",
+        "NO_PROXY={{user `no_proxy` }}"
       ]
     },
     {
@@ -126,19 +129,19 @@
       "playbook_file": "../ansible/eks.yml",
       "user": "{{user `source_ami_ssh_user`}}",
       "ansible_env_vars": [
-        "http_proxy={{ user `http_proxy` }}",
-        "https_proxy={{ user `https_proxy` }}",
-        "no_proxy={{ user `no_proxy` }}",
-        "HTTP_PROXY={{ user `http_proxy` }}",
-        "HTTPS_PROXY={{ user `https_proxy` }}",
-        "NO_PROXY={{ user `no_proxy` }}"
+        "http_proxy={{user `http_proxy` }}",
+        "https_proxy={{user `https_proxy` }}",
+        "no_proxy={{user `no_proxy` }}",
+        "HTTP_PROXY={{user `http_proxy` }}",
+        "HTTPS_PROXY={{user `https_proxy` }}",
+        "NO_PROXY={{user `no_proxy` }}"
       ],
       "extra_arguments": [
         "--become",
         "--become-method=sudo",
         "--become-user=root",
         "--extra-vars",
-        "ansible_python_interpreter=/usr/bin/python aws_region={{user `aws_region`}} k8s_version={{user `k8s_version`}} k8s_build_date={{user `k8s_build_date`}} cni_version={{user `cni_version`}} cni_plugin_version={{user `cni_plugin_version`}}"
+        "ansible_python_interpreter=/usr/bin/python aws_region={{user `aws_region`}} k8s_version={{user `k8s_version`}} k8s_build_date={{user `k8s_build_date`}} cni_version={{user `cni_version`}} cni_plugin_version={{user `cni_plugin_version`}} hardening={{user `hardening`}}"
       ]
     }
   ]

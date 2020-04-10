@@ -13,4 +13,9 @@
         fstype: swap
         state: absent
 
+- name: reboot to apply updates
+  reboot: {}
+
+- name: wait for machine to come back
+  wait_for_connection: {}
 

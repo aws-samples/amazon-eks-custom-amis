@@ -1,0 +1,28 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# file: ansible/roles/hardening/tasks/main.yml
+
+- name: be sure to include the proper {{ hardening | lower }} variables based on os family
+  include_vars: "{{ hardening | lower }}-{{ ansible_facts['os_family'] | lower }}.yml"
+  when: 
+    - hardening | lower != "none"
+    - hardening | lower != ""
+
+- name: be sure to include the proper {{ hardening | lower }} tasks based on os family
+  include: "{{ hardening | lower }}-{{ ansible_facts['os_family'] | lower }}.yml"
+  when: 
+    - hardening | lower != "none"
+    - hardening | lower != ""
+
+- name: be sure to reboot system after hardening
+  reboot: {}
+  when: 
+    - hardening | lower != "none"
+    - hardening | lower != ""
+
+- name: be sure to reboot system after hardening
+  wait_for_connection: {}
+  when: 
+    - hardening | lower != "none"
+    - hardening | lower != ""
