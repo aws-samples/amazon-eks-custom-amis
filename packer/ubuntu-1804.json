@@ -40,7 +40,7 @@
         "owners": [ "{{user `source_ami_owner`}}" ],
         "most_recent": true
       },
-      "instance_type": "m5.large",
+      "instance_type": "m5n.large",
       "ssh_username": "{{user `source_ami_ssh_user`}}",
       "ssh_pty": true,
       "subnet_id": "{{user `subnet_id`}}",
@@ -128,20 +128,12 @@
       "type": "ansible",
       "playbook_file": "../ansible/eks.yml",
       "user": "{{user `source_ami_ssh_user`}}",
-      "ansible_env_vars": [
-        "http_proxy={{user `http_proxy` }}",
-        "https_proxy={{user `https_proxy` }}",
-        "no_proxy={{user `no_proxy` }}",
-        "HTTP_PROXY={{user `http_proxy` }}",
-        "HTTPS_PROXY={{user `https_proxy` }}",
-        "NO_PROXY={{user `no_proxy` }}"
-      ],
       "extra_arguments": [
         "--become",
         "--become-method=sudo",
         "--become-user=root",
         "--extra-vars",
-        "ansible_python_interpreter=/usr/bin/python3 aws_region={{user `aws_region`}} k8s_version={{user `k8s_version`}} k8s_build_date={{user `k8s_build_date`}} cni_version={{user `cni_version`}} cni_plugin_version={{user `cni_plugin_version`}} hardening={{user `hardening`}}"
+        "ansible_python_interpreter=/usr/bin/python3 aws_region={{user `aws_region`}} k8s_version={{user `k8s_version`}} k8s_build_date={{user `k8s_build_date`}} cni_version={{user `cni_version`}} cni_plugin_version={{user `cni_plugin_version`}} hardening={{user `hardening`}} http_proxy={{user `http_proxy` }} https_proxy={{user `https_proxy` }} no_proxy={{user `no_proxy` }}"
       ]
     }
   ]
