@@ -27,6 +27,11 @@
     fstype: ext4
     state: mounted
 
+- name: check if selinux is enabled
+  command: sestatus
+  register: sestatus
+  changed_when: false
+
 - name: run operating system specific commands
   include: "{{ ansible_facts['os_family'] | lower }}.yml"
 

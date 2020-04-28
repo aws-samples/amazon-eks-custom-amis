@@ -13,6 +13,30 @@
         fstype: swap
         state: absent
 
+- name: be sure the /etc/issue is set as the ssh login banner
+  block:
+
+    - name: Deduplicate values from /etc/ssh/sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        create: false
+        regexp: (?i)^\s*Banner\s+
+        state: absent
+
+    - name: Insert correct line to /etc/ssh/sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        create: true
+        line: Banner /etc/issue
+        state: present
+        insertbefore: ^Match
+        validate: /usr/sbin/sshd -t -f %s
+
+    - name: be sure to set the login banner
+      template:
+        src: issue.j2
+        dest: /etc/issue
+
 - name: reboot to apply updates
   reboot: {}
 

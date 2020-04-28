@@ -21,6 +21,9 @@
           "Soft": 1024
         }
     },
+{% if 'enabled' in sestatus.stdout %}
+    "selinux-enabled": true,
+{% endif %}
     "live-restore": true,
     "userland-proxy": false,
     "max-concurrent-downloads": 10,
