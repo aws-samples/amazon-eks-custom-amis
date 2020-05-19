@@ -61,7 +61,15 @@ make AWS_REGION=us-east-2 \
 
 ### Fetching the Kubernetes Build Information
 
-Amazon EKS builds and tests specific versions of Kubernetes together for compatability. It is important that you use versions that have been tested together. To get the list of support Kubernetes versions run the following command:
+Amazon EKS builds and tests specific versions of Kubernetes together for compatability. It is important that you use versions that have been tested together. 
+
+| Kubernetes Version | Build Date | CNI Version | CNI Plugins Version |
+|--------------------|------------|-------------|---------------------|
+| 1.16.8 | 2020-04-16 | 0.6.0 | 0.7.5 |
+| 1.15.11 | 2020-04-16 | 0.6.0 | 0.7.5 |
+| 1.14.9 | 2020-04-16 | 0.6.0 | 0.7.5 |
+
+To get the list of support Kubernetes versions run the following command:
 
 ```bash
 aws s3 ls amazon-eks --region=us-west-2
