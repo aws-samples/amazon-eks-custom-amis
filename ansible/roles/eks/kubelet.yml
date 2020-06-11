@@ -1,0 +1,111 @@
+---
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# file: ansible/roles/eks/tasks/kubelet.yml
+
+- name: be sure the kubelet folders exists
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /etc/kubernetes/manifests
+    - /var/lib/kubernetes
+    - /var/lib/kubelet
+    - /etc/kubernetes/kubelet
+    - /etc/systemd/system/kubelet.service.d
+
+- name: be sure we have the kubernetes dependencies installed
+  yum:
+    state: latest
+    name:
+      - conntrack-tools
+      - ebtables
+      - socat
+      - nfs-utils
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: be sure we have the kubernetes dependencies installed
+  apt:
+    state: latest
+    name:
+      - apt-transport-https
+      - curl
+      - socat
+      - jq
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: be sure we have nfs-common installed to mount efs mounts
+  apt:
+    state: latest
+    name: nfs-common
+  when: ansible_facts['distribution'] == "Ubuntu"
+
+- name: be sure we have nfs-utils installed to mount efs mounts
+  apt:
+    state: latest
+    name: nfs-utils
+  when: ansible_facts['distribution'] == "Debian"
+
+- name: be sure we have the latest version of the kubelet from aws
+  get_url:
+    url: "{{ eks_s3_bucket_url }}/{{ k8s_version }}/{{ k8s_build_date }}/bin/linux/{{ kube_arch }}/kubelet"
+    dest: /usr/bin/kubelet
+    mode: a+x
+
+- name: be sure the latest version of kubeconfig is present
+  get_url:
+    url: https://raw.githubusercontent.com/awslabs/amazon-eks-ami/master/files/kubelet-kubeconfig
+    dest: /var/lib/kubelet/kubeconfig
+
+- name: be sure the latest version of kubelet configuration is present
+  get_url:
+    url: https://raw.githubusercontent.com/awslabs/amazon-eks-ami/master/files/kubelet-config.json
+    dest: /etc/kubernetes/kubelet/kubelet-config.json
+
+- name: be sure the latest version of kubelet service is present
+  get_url:
+    url: https://raw.githubusercontent.com/awslabs/amazon-eks-ami/master/files/kubelet.service
+    dest: /etc/systemd/system/kubelet.service
+
+- name: be sure the kernel is configured for kubernetes
+  block:
+    - command: modprobe br_netfilter
+    - lineinfile:
+        path: /etc/sysctl.d/99-k8s.conf
+        line: 'net.ipv4.ip_forward = 1'
+        state: present
+        create: yes
+    - lineinfile:
+        path: /etc/sysctl.d/99-k8s.conf
+        line: 'net.bridge.bridge-nf-call-ip6tables = 1'
+        state: present
+        create: yes
+    - lineinfile:
+        path: /etc/sysctl.d/99-k8s.conf
+        line: 'net.bridge.bridge-nf-call-iptables = 1'
+        state: present
+        create: yes
+#Adding these 3 lines to make the kubelet not fail on the startup and create a kernel panic
+    - lineinfile:
+        path: /etc/sysctl.d/90-kubelet.conf
+        line: 'vm.overcommit_memory=1'
+        state: present
+        create: yes
+    - lineinfile:
+        path: /etc/sysctl.d/90-kubelet.conf
+        line: 'kernel.panic=10'
+        state: present
+        create: yes
+    - lineinfile:
+        path: /etc/sysctl.d/90-kubelet.conf
+        line: 'kernel.panic_on_oops=1'
+        state: present
+        create: yes
+    - command: sysctl --system
+
+- name: be sure the kubelet is started and enabled
+  systemd:
+    name: kubelet
+    state: stopped
+    enabled: no
+    daemon_reload: yes
