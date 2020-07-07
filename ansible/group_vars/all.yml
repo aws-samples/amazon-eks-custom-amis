@@ -1,8 +1,8 @@
 ---
 # file: ansible/group_vars/all.yml
 
-k8s_version: "1.15.10"
-k8s_build_date: "2020-02-22"
+k8s_version: "1.16.8"
+k8s_build_date: "2020-04-16"
 eks_s3_bucket_url: "https://amazon-eks.s3.us-west-2.amazonaws.com"
 cni_version: "v0.6.0"
 cni_plugin_version: "v0.7.5"

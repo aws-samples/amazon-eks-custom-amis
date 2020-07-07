@@ -37,6 +37,11 @@
         src: issue.j2
         dest: /etc/issue
 
+- name: be sure /etc/environment file exists
+  file:
+    path: /etc/environment
+    state: touch
+
 - name: reboot to apply updates
   reboot: {}
 

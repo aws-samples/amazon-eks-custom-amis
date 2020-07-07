@@ -13,6 +13,7 @@
 
     "source_ami_name": "RHEL-7.?*GA*",
     "source_ami_owner": "309956199498",
+    "source_ami_owner_govcloud": "219670896067",
     "source_ami_ssh_user": "ec2-user",
 
     "http_proxy": "",
@@ -38,10 +39,10 @@
           "virtualization-type": "hvm",
           "architecture": "x86_64"
         },
-        "owners": [ "{{user `source_ami_owner`}}" ],
+        "owners": [ "{{user `source_ami_owner`}}", "{{user `source_ami_owner_govcloud`}}" ],
         "most_recent": true
       },
-      "instance_type": "m5n.large",
+      "instance_type": "m5.large",
       "ssh_username": "{{user `source_ami_ssh_user`}}",
       "ssh_pty": true,
       "subnet_id": "{{user `subnet_id`}}",

@@ -12,7 +12,8 @@
     "ami_description": "An EKS base image based on Debian Stretch Build Date: {{ isotime }}",
 
     "source_ami_name": "debian-stretch-hvm-x86_64-gp2-*",
-    "source_ami_owner": "379101102735",
+    "source_ami_owner": "379101102735", 
+    "source_ami_owner_govcloud": "345084742485", 
     "source_ami_ssh_user": "admin",
 
     "http_proxy": "",
@@ -38,10 +39,10 @@
           "virtualization-type": "hvm",
           "architecture": "x86_64"
         },
-        "owners": [ "{{user `source_ami_owner`}}" ],
+        "owners": [ "{{user `source_ami_owner`}}", "{{user `source_ami_owner_govcloud`}}" ],
         "most_recent": true
       },
-      "instance_type": "m5n.large",
+      "instance_type": "m5.large",
       "ssh_username": "{{user `source_ami_ssh_user`}}",
       "ssh_pty": true,
       "subnet_id": "{{user `subnet_id`}}",

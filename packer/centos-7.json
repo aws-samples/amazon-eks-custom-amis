@@ -41,7 +41,7 @@
         "owners": [ "{{user `source_ami_owner`}}" ],
         "most_recent": true
       },
-      "instance_type": "m5n.large",
+      "instance_type": "m5.large",
       "ssh_username": "{{user `source_ami_ssh_user`}}",
       "ssh_pty": true,
       "subnet_id": "{{user `subnet_id`}}",

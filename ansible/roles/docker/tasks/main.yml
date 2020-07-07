@@ -35,5 +35,15 @@
 - name: run operating system specific commands
   include: "{{ ansible_facts['os_family'] | lower }}.yml"
 
+- name: be sure the  /etc/systemd/system/docker.service.d folder exists
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+
+- name: be sure the docker loads environment variables from /etc/environment
+  copy:
+    src: environment.conf
+    dest: /etc/systemd/system/docker.service.d/environment.conf
+
 - name: run the docker cis benchmark
   include: cis-benchmark.yml

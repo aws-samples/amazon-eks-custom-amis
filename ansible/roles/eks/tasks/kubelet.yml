@@ -67,6 +67,12 @@
     url: https://raw.githubusercontent.com/awslabs/amazon-eks-ami/master/files/kubelet.service
     dest: /etc/systemd/system/kubelet.service
 
+- name: be sure the kubelet loads environment variables from /etc/environment
+  copy:
+    src: environment.conf
+    dest: /etc/systemd/system/kubelet.service.d/environment.conf
+
+
 - name: be sure the kernel is configured for kubernetes
   block:
     - command: modprobe br_netfilter
@@ -83,6 +89,21 @@
     - lineinfile:
         path: /etc/sysctl.d/99-k8s.conf
         line: 'net.bridge.bridge-nf-call-iptables = 1'
+        state: present
+        create: yes
+    - lineinfile:
+        path: /etc/sysctl.d/99-k8s.conf
+        line: 'vm.overcommit_memory=1'
+        state: present
+        create: yes
+    - lineinfile:
+        path: /etc/sysctl.d/99-k8s.conf
+        line: 'kernel.panic=10'
+        state: present
+        create: yes
+    - lineinfile:
+        path: /etc/sysctl.d/99-k8s.conf
+        line: 'kernel.panic_on_oops=1'
         state: present
         create: yes
     - command: sysctl --system
