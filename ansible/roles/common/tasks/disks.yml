@@ -1,0 +1,87 @@
+- name: be sure the disk is partitioned according to our configuration
+  parted:
+    label: gpt
+    state: present
+    name: "{{ item['name'] }}"
+    device: "{{ secondary_disk_name }}"
+    number: "{{ item_index + 1 }}"
+    part_start: "{{ item['part_start'] }}"
+    part_end: "{{ item['part_end'] }}"
+  loop: "{{ secondary_disk_partitions }}"
+  loop_control:
+    index_var: item_index
+
+- name: be sure the partitions are formatted
+  filesystem:
+    fstype: "{{ secondary_disk_format }}"
+    dev: "{{ secondary_disk_name }}p{{ item_index + 1 }}"
+  loop: "{{ secondary_disk_partitions }}"
+  loop_control:
+    index_var: item_index
+
+- name: be sure source directories exist
+  shell: mkdir -p {{ item['path'] }}
+  args:
+    executable: /bin/bash
+    warn: no
+  loop: "{{ secondary_disk_partitions }}"
+  loop_control:
+    index_var: item_index
+
+- name: be sure temporary mount exist
+  shell: mkdir -p {{ item['tmp'] }}
+  args:
+    executable: /bin/bash
+    warn: no
+  loop: "{{ secondary_disk_partitions }}"
+  loop_control:
+    index_var: item_index
+
+- name: be sure the disks are temporarily mounted
+  shell: mount -t {{ secondary_disk_format }} "{{ secondary_disk_name }}p{{ item_index + 1 }}" {{ item['tmp'] }}
+  args:
+    executable: /bin/bash
+    warn: no
+  loop: "{{ secondary_disk_partitions }}"
+  loop_control:
+    index_var: item_index
+
+- name: be sure the source directories are synced with the new partitions
+  shell: cp -aR {{ item['path'] }}/* {{ item['tmp'] }}/
+  args:
+    executable: /bin/bash
+    warn: no
+  ignore_errors: yes
+  loop: "{{ secondary_disk_partitions }}"
+  loop_control:
+    index_var: item_index
+
+- name: be sure the temporary mount points are unmounted
+  shell: umount "{{ secondary_disk_name }}p{{ item_index + 1 }}"
+  args:
+    executable: /bin/bash
+    warn: no
+  loop: "{{ secondary_disk_partitions }}"
+  loop_control:
+    index_var: item_index
+
+- name: be sure we have the disk UUIDs for mounting
+  shell: blkid "{{ secondary_disk_name }}p{{ item_index + 1 }}" -sUUID -ovalue
+  args:
+    executable: /bin/bash
+    warn: no
+  register: disk_uuids
+  loop: "{{ secondary_disk_partitions }}"
+  loop_control:
+    index_var: item_index
+  
+- name: be sure the new partitions are mounted via /etc/fstab
+  mount:
+    src: UUID={{ item.stdout }}
+    path: "{{ item.item.path }}"
+    fstype: "{{ secondary_disk_format }}"
+    state: mounted
+    opts: defaults,nofail
+  loop: "{{ disk_uuids.results }}"
+  loop_control:
+    index_var: item_index

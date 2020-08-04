@@ -3,30 +3,6 @@
 # SPDX-License-Identifier: MIT-0
 # file: ansible/roles/docker/tasks/main.yml
 
-- name: be sure the docker folder is created and ready to be mounted
-  shell: rm -rf /var/lib/docker && mkdir -p /var/lib/docker
-
-- set_fact:
-    docker_disk_name: /dev/nvme1n1
-
-- set_fact:
-    docker_disk_name: /dev/nvme0n1
-  when: 
-    - ansible_facts['distribution'] == 'Ubuntu'
-    - ansible_facts['distribution_major_version'] == '18'
-
-- name: be sure the docker partition is formated
-  filesystem:
-    fstype: ext4
-    dev: "{{ docker_disk_name }}"
-
-- name: be sure the docker partition is mounted
-  mount:
-    src: "{{ docker_disk_name }}"
-    path: /var/lib/docker
-    fstype: ext4
-    state: mounted
-
 - name: check if selinux is enabled
   command: sestatus
   register: sestatus
@@ -35,7 +11,7 @@
 - name: run operating system specific commands
   include: "{{ ansible_facts['os_family'] | lower }}.yml"
 
-- name: be sure the  /etc/systemd/system/docker.service.d folder exists
+- name: be sure the /etc/systemd/system/docker.service.d folder exists
   file:
     path: /etc/systemd/system/docker.service.d
     state: directory

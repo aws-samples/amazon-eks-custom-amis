@@ -63,11 +63,12 @@ make AWS_REGION=us-east-2 \
 
 Amazon EKS builds and tests specific versions of Kubernetes together for compatability. It is important that you use versions that have been tested together. 
 
-| Kubernetes Version | Build Date | CNI Version | CNI Plugins Version |
-|--------------------|------------|-------------|---------------------|
-| 1.16.8 | 2020-04-16 | 0.6.0 | 0.7.5 |
-| 1.15.11 | 2020-04-16 | 0.6.0 | 0.7.5 |
-| 1.14.9 | 2020-04-16 | 0.6.0 | 0.7.5 |
+| Kubernetes Version | Build Date | CNI Plugins Version |
+|--------------------|------------|---------------------|
+| 1.17.7 | 2020-07-08 | v0.8.6 |
+| 1.16.12 | 2020-07-08 | v0.8.6 |
+| 1.15.11 | 2020-07-08 | v0.8.6 |
+| 1.14.9 | 2020-07-08 | v0.8.6 |
 
 To get the list of support Kubernetes versions run the following command:
 

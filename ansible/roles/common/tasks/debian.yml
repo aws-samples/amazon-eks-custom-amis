@@ -3,6 +3,37 @@
 # SPDX-License-Identifier: MIT-0
 # file: ansible/roles/common/tasks/debian.yml
 
+- name: be sure the disks are configured
+  set_fact:
+    secondary_disk_format: xfs
+    secondary_disk_name: /dev/nvme1n1
+    secondary_disk_partitions:
+      - name: debian-var
+        path: /var
+        tmp: /srv/var
+        part_start: 0%
+        part_end: 20%
+      - name: debian-var-log-audit
+        path: /var/log/audit
+        tmp: /srv/varlogaudit
+        part_start: 20%
+        part_end: 30%
+      - name: debian-home
+        path: /home
+        tmp: /srv/home
+        part_start: 30%
+        part_end: 40%
+      - name: debian-tmp
+        path: /tmp
+        tmp: /srv/tmp
+        part_start: 40%
+        part_end: 50%
+      - name: docker-var-lib
+        path: /var/lib/docker
+        tmp: /srv/varlibdocker
+        part_start: 50%
+        part_end: 90%
+
 - name: be sure we have the latest version of all packages
   apt:
     name: "*"
@@ -18,6 +49,9 @@
       - python3-pip
       - auditd
       - audispd-plugins
+      - parted
+
+- include_tasks: disks.yml
 
 - name: be sure auditd is started and enabled
   systemd:

@@ -77,32 +77,32 @@
   block:
     - command: modprobe br_netfilter
     - lineinfile:
-        path: /etc/sysctl.d/99-k8s.conf
+        path: /etc/sysctl.d/99-amazon.conf
         line: 'net.ipv4.ip_forward = 1'
         state: present
         create: yes
     - lineinfile:
-        path: /etc/sysctl.d/99-k8s.conf
+        path: /etc/sysctl.d/99-amazon.conf
         line: 'net.bridge.bridge-nf-call-ip6tables = 1'
         state: present
         create: yes
     - lineinfile:
-        path: /etc/sysctl.d/99-k8s.conf
+        path: /etc/sysctl.d/99-amazon.conf
         line: 'net.bridge.bridge-nf-call-iptables = 1'
         state: present
         create: yes
     - lineinfile:
-        path: /etc/sysctl.d/99-k8s.conf
+        path: /etc/sysctl.d/99-amazon.conf
         line: 'vm.overcommit_memory=1'
         state: present
         create: yes
     - lineinfile:
-        path: /etc/sysctl.d/99-k8s.conf
+        path: /etc/sysctl.d/99-amazon.conf
         line: 'kernel.panic=10'
         state: present
         create: yes
     - lineinfile:
-        path: /etc/sysctl.d/99-k8s.conf
+        path: /etc/sysctl.d/99-amazon.conf
         line: 'kernel.panic_on_oops=1'
         state: present
         create: yes
