@@ -65,10 +65,11 @@ Amazon EKS builds and tests specific versions of Kubernetes together for compata
 
 | Kubernetes Version | Build Date | CNI Plugins Version |
 |--------------------|------------|---------------------|
-| 1.17.7 | 2020-07-08 | v0.8.6 |
-| 1.16.12 | 2020-07-08 | v0.8.6 |
-| 1.15.11 | 2020-07-08 | v0.8.6 |
-| 1.14.9 | 2020-07-08 | v0.8.6 |
+| 1.18.8 | 2020-09-18 | v0.8.6 |
+| 1.17.11 | 2020-09-18 | v0.8.6 |
+| 1.16.13 | 2020-09-18 | v0.8.6 |
+| 1.15.11 | 2020-09-18 | v0.8.6 |
+| 1.14.9 | 2020-09-18 | v0.8.6 |
 
 To get the list of support Kubernetes versions run the following command:
 
