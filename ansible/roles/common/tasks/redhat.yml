@@ -13,26 +13,31 @@
         tmp: /srv/var
         part_start: 0%
         part_end: 20%
+        security_context: var_t
       - name: rhel-var-log-audit
         path: /var/log/audit
         tmp: /srv/varlogaudit
         part_start: 20%
         part_end: 30%
+        security_context: audit_log_t
       - name: rhel-home
         path: /home
         tmp: /srv/home
         part_start: 30%
         part_end: 40%
+        security_context: home_root
       - name: rhel-tmp
         path: /tmp
         tmp: /srv/tmp
         part_start: 40%
         part_end: 50%
+        security_context: tmp_t
       - name: docker-var-lib
         path: /var/lib/docker
         tmp: /srv/varlibdocker
         part_start: 50%
         part_end: 90%
+        security_context: container_var_lib_t
 
 - name: be sure repo_gpgcheck is not enabled as it is not supported
   ini_file:
@@ -74,3 +79,14 @@
     state: started
     enabled: yes
     daemon_reload: yes
+
+- name: be sure to set correct selinux labels on directories
+  shell: |
+    semanage fcontext -a -t {{ item['security_context'] }} {{ item['path'] }}
+    restorecon -Rv {{ item['path'] }}
+  args:
+    executable: /bin/bash
+    warn: no
+  loop: "{{ secondary_disk_partitions }}"
+  loop_control:
+    index_var: item_index

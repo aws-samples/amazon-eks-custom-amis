@@ -34,12 +34,17 @@
       - yum-utils
 
 - name: be sure the docker repository is configured
-  shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  template:
+    src: docker.repo.j2
+    dest: /etc/yum.repos.d/docker.repo
 
 - name: be sure the latest version of docker is installed
   yum:
     state: latest
-    name: docker-ce
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
     update_cache: yes
 
 - name: be sure to set sebool container_manage_cgroup
