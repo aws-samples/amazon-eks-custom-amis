@@ -11,7 +11,7 @@ The following hardening guidelines are currently supported by this repository. L
 | Red Hat Enterprise Linux | 7 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | Red Hat Enterprise Linux | 8 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 
-*Scripts and artifacts created by this repository do not gaurentee compliance and these AMIs are not officially supported by AWS. Ensure your security and compliance teams thoroughly review these scripts before moving AMIs into production.
+*Scripts and artifacts created by this repository do not gaurentee compliance and these AMIs are not officially supported by AWS. Ensure your security and compliance teams thoroughly review these scripts before moving AMIs into production.*
 
 ## Installing Dependencies
 
