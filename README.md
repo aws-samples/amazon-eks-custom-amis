@@ -2,12 +2,16 @@
 
 This repository contains [Packer](https://packer.io/) scripts and definitions to create custom AMIs for use with [Amazon EKS via self-managed Auto Scaling Groups](https://docs.aws.amazon.com/eks/latest/userguide/worker.html) and [Managed Node Groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html).  Many organizations require running custom AMIs for security, compliance, or internal policy requirements. **The Amazon EKS Optimized AMI remains the preferred way to deploy containers on Amazon EKS, these AMIs aim to provide a starting place for customers looking to implement custom AMIs with operating systems other than Amazon Linux.** The AMIs built in this repository are based on the [Amazon EKS optimized AMI published by AWS](https://github.com/awslabs/amazon-eks-ami).
 
+The following hardening guidelines are currently supported by this repository. Lack of support in this repository does not indicate that you can't meet compliance with Amazon EKS, it simply means it is not supported by this repository. We welcome pull requests!
+
 | Distribution | Version | CIS Benchmark (cis) | NIST 800-171 (nist) | ACSC (acsc) | HIPAA (hipaa) | OSPP (ospp) | PCI-DSS (pci-dss) | DISA STIG (stig) |
 |--------------|:-------:|:----------------:|:--------------------:|:-----------------:|:---------:|:---------:|:---------:|:---------:|
 | Amazon Linux             | 2 | :white_check_mark: | :x: | :x: | :x: | :x: | :x: | :x: |
 | Ubuntu                   | 18.04 | :x: | :x: | :x: | :x: | :x: | :x: | :x: |
 | Red Hat Enterprise Linux | 7 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | Red Hat Enterprise Linux | 8 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+
+*Scripts and artifacts created by this repository do not gaurentee compliance and these AMIs are not officially supported by AWS. Ensure your security and compliance teams thoroughly review these scripts before moving AMIs into production.
 
 ## Installing Dependencies
 
@@ -108,6 +112,8 @@ The following changes are made during the build process to the hardened image in
 - The `boot=UUID=<disk uuid>` from the grub boot configuration has been revmoed. This prevents instances from being stuck booting when FIPS mode is enabled
 - `firewalld` service is disabled.
 - The SELinux boolean `container_manage_cgroup` is enabled to support containers.
+- Hardening frameworks such as the DISA STIG that enable SELinux require the VPC CNI `aws-node` container be run in privileged mode.
+- Packer does not support RHEL 8 in FIPS mode. SSH authentication breaks once FIPS is enabled. This repository enables FIPS as the last step as a workaround.
 
 ### Fetching the Kubernetes Build Information
 
