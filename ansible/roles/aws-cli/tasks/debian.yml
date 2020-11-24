@@ -1,9 +1,0 @@
----
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
-# file: ansible/roles/aws-cli/tasks/debian.yml
-
-- name: be sure aws cli is installed
-  pip:
-    state: latest
-    name: awscli

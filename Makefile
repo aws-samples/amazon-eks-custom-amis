@@ -1,58 +1,72 @@
-AWS_VPC_ID := none
-AWS_SUBNET_ID := none
-AWS_REGION := us-east-2
-K8S_VERSION := 1.18.8
-K8S_BUILD_DATE := 2020-09-18
-CNI_PLUGIN_VERSION := v0.8.6
-HTTP_PROXY := ""
-HTTPS_PROXY := "" 
-NO_PROXY := ""
-HARDENING := none
-KMS_KEY_ID := ""
 
-define packer_build
-	@echo "Starting Packer Build"
-	@echo "VPC ID: $(AWS_VPC_ID)"
-	@echo "SUBNET ID: $(AWS_SUBNET_ID)"
-	@echo "REGION: $(AWS_REGION)"
-	@echo "CONFIG: $1"
-	@echo "HTTP Proxy: $(HTTP_PROXY)"
-	@echo "HTTPS Proxy: $(HTTPS_PROXY)"
-	@echo "No Proxy: $(NO_PROXY)"
-	@echo "Hardening: $(HARDENING)"
-	@echo "KMS Key Id: $(KMS_KEY_ID)"
+PACKER_VARIABLES := binary_bucket_name binary_bucket_region eks_version eks_build_date cni_plugin_version hardening_flag http_proxy https_proxy no_proxy
+VPC_ID := vpc-0e8cf1ce122b1b059
+SUBNET_ID := subnet-0eddf1d7d0f9f9772
+AWS_REGOIN := us-east-2
+PACKER_FILE := 
 
-	cd ./packer; \
+build:
 	packer build \
-		-var "vpc_id=$(AWS_VPC_ID)" \
-		-var "subnet_id=$(AWS_SUBNET_ID)" \
-		-var "aws_region=$(AWS_REGION)" \
-		-var "k8s_version=$(K8S_VERSION)" \
-		-var "k8s_build_date=$(K8S_BUILD_DATE)" \
-		-var "cni_plugin_version=$(CNI_PLUGIN_VERSION)" \
-		-var "http_proxy=$(HTTP_PROXY)" \
-		-var "https_proxy=$(HTTPS_PROXY)" \
-		-var "no_proxy=$(NO_PROXY)" \
-		-var "hardening=$(HARDENING)" \
-		-var "kms_key_id=$(KMS_KEY_ID)" \
-		$1
-endef
+		--var 'aws_region=$(AWS_REGOIN)' \
+		--var 'vpc_id=$(VPC_ID)' \
+		--var 'subnet_id=$(SUBNET_ID)' \
+		$(foreach packerVar,$(PACKER_VARIABLES), $(if $($(packerVar)),--var $(packerVar)='$($(packerVar))',)) \
+		$(PACKER_FILE)
 
-install:
-	brew install ansible packer
-	cd ./ansible; ansible-galaxy install RedHatOfficial.rhel7_stig
+# Amazon Linux 2
+#-----------------------------------------------------
+build-al2-1.15:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.15.11 eks_build_date=2020-09-18
 
-build-ubuntu-1604:
-	$(call packer_build,"ubuntu-1604.json")
+build-al2-1.16:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.16.13 eks_build_date=2020-09-18
 
-build-ubuntu-1804:
-	$(call packer_build,"ubuntu-1804.json")
+build-al2-1.17:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.17.11 eks_build_date=2020-09-18
 
-build-debian-stretch:
-	$(call packer_build,"debian-stretch.json")
+build-al2-1.18:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.18.8 eks_build_date=2020-09-18
 
-build-centos-7:
-	$(call packer_build,"centos-7.json")
+# Ubuntu 18.04
+#-----------------------------------------------------
+build-ubuntu1804-1.15:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=1.15.11 eks_build_date=2020-09-18
 
-build-rhel-7:
-	$(call packer_build,"rhel-7.json")
+build-ubuntu1804-1.16:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=1.16.13 eks_build_date=2020-09-18
+
+build-ubuntu1804-1.17:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=1.17.11 eks_build_date=2020-09-18
+
+build-ubuntu1804-1.18:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=1.18.8 eks_build_date=2020-09-18
+
+# RHEL 7
+#-----------------------------------------------------
+build-rhel7-1.15:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=1.15.11 eks_build_date=2020-09-18
+
+build-rhel7-1.16:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=1.16.13 eks_build_date=2020-09-18
+
+build-rhel7-1.17:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=1.17.11 eks_build_date=2020-09-18
+
+build-rhel7-1.18:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=1.18.8 eks_build_date=2020-09-18
+
+# RHEL 8
+#-----------------------------------------------------
+build-rhel8-1.15:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=1.15.11 eks_build_date=2020-09-18
+
+build-rhel8-1.16:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=1.16.13 eks_build_date=2020-09-18
+
+build-rhel8-1.17:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=1.17.11 eks_build_date=2020-09-18
+
+build-rhel8-1.18:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=1.18.8 eks_build_date=2020-09-18
+
+

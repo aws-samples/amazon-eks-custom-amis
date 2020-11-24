@@ -1,6 +1,0 @@
----
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
-# file: ansible/roles/aws-ssm-agent/tasks/main.yml
-
-- include: "{{ ansible_facts['os_family'] | lower }}.yml"
