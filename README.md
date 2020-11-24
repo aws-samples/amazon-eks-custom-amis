@@ -82,9 +82,9 @@ The following operating systems are supported by this repository. This repositor
 
 #### Amazon Linux
 
-| Distribution | Version | Supported | CIS Benchmark |
+| Distribution | Version | Build Command | CIS Benchmark |
 |:---|:---:|:---:|:---:|
-| Amazon Linux | 2 | :white_check_mark: | `hardening_flag=cis` |
+| Amazon Linux | 2 | `build-al2-<eks major version>` | `hardening_flag=cis` |
 
 The Amazon Linux 2 EKS Optmized AMI is used as the base for this image. This image extends the EKS Optimized AMI to apply the Amazon Linux 2 CIS Benchmark, Docker CIS Benchmark, and Amazon EKS CIS Benchmark. These benchmarks are typically used to meet NIST 800-53 controls. Hardening is provided as a "best effort" and does not gaurentee compliance with the above frameworks.
 
@@ -104,10 +104,10 @@ make build-al2-1.18
 
 #### Red Hat Enterprise Linux
 
-| Distribution | Version | Supported | CIS Benchmark | NIST 800-171 | E8 | HIPAA | OSPP | PCI | DISA STIG |
+| Distribution | Version | Build Command  | CIS Benchmark | NIST 800-171 | E8 | HIPAA | OSPP | PCI | DISA STIG |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| Red Hat Enterprise Linux | 7 | :white_check_mark: | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` | `hardening_flag=stig` |
-| Red Hat Enterprise Linux | 8 | :white_check_mark: | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` | `hardening_flag=stig` |
+| Red Hat Enterprise Linux | 7 | `build-rhel7-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` | `hardening_flag=stig` |
+| Red Hat Enterprise Linux | 8 | `build-rhel8-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` | `hardening_flag=stig` |
 
 Red Hat Enterprise Linux 7/8 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components. OpenSCAP is used to apply the above hardening frameworks. Hardening is provided as a "best effort" and does not gaurentee compliance with the above frameworks. Certain adjustments are made in order to work with Amazon EKS:
 
@@ -154,7 +154,7 @@ make build-rhel8-1.18
 
 | Distribution | Version | Supported |
 |:---|:---:|:---:|
-| Ubuntu | 18.04 | :white_check_mark: |
+| Ubuntu | 18.04 | `build-ubuntu1804-<eks major version>` |
 
 Ubuntu 18.04 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components.
 
