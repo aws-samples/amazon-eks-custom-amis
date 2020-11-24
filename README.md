@@ -2,16 +2,19 @@
 
 This repository contains [Packer](https://packer.io/) scripts and definitions to create custom AMIs for use with [Amazon EKS via self-managed Auto Scaling Groups](https://docs.aws.amazon.com/eks/latest/userguide/worker.html) and [Managed Node Groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html).  Many organizations require running custom AMIs for security, compliance, or internal policy requirements. **The Amazon EKS Optimized AMI remains the preferred way to deploy containers on Amazon EKS, these AMIs aim to provide a starting place for customers looking to implement custom AMIs with operating systems other than Amazon Linux.** The AMIs built in this repository are based on the [Amazon EKS optimized AMI published by AWS](https://github.com/awslabs/amazon-eks-ami).
 
-The following hardening guidelines are currently supported by this repository. Lack of support in this repository does not indicate that you can't meet compliance with Amazon EKS, it simply means it is not supported by this repository. We welcome pull requests!
-
-| Distribution | Version | CIS Benchmark (cis) | NIST 800-171 (nist) | ACSC (acsc) | HIPAA (hipaa) | OSPP (ospp) | PCI-DSS (pci-dss) | DISA STIG (stig) |
-|--------------|:-------:|:----------------:|:--------------------:|:-----------------:|:---------:|:---------:|:---------:|:---------:|
-| Amazon Linux             | 2 | :white_check_mark: | :x: | :x: | :x: | :x: | :x: | :x: |
-| Ubuntu                   | 18.04 | :x: | :x: | :x: | :x: | :x: | :x: | :x: |
-| Red Hat Enterprise Linux | 7 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Red Hat Enterprise Linux | 8 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+This repository also applies the Docker CIS Benchmark and Amazon EKS CIS Benchmark to all AMIs. We also support a number of optional hardening benchmarks such as DISA STIG, PCI-DSS, and HIPAA. These are based on [OpenSCAP](https://www.open-scap.org/) and other open source hardening guidelines.
 
 *Scripts and artifacts created by this repository do not gaurentee compliance and these AMIs are not officially supported by AWS. Ensure your security and compliance teams thoroughly review these scripts before moving AMIs into production.*
+
+Lack of support in this repository does not indicate that you can't meet compliance with Amazon EKS, it simply means it is not supported by this repository. We welcome pull requests!
+
+| Distribution | Version | Supported | Supported Hardening |
+|:---|:---:|:---:|:---:|
+| Amazon Linux | 2 | :white_check_mark: | CIS Benchmark |
+| Ubuntu | 18.04 | :white_check_mark: | |
+| Ubuntu | 20.04 | :x: | |
+| Red Hat Enterprise Linux | 7 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
+| Red Hat Enterprise Linux | 8 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
 
 ## Installing Dependencies
 
@@ -25,7 +28,11 @@ You will also need to provision a VPC with a single public Subnet. You can lever
 
 ## Usage
 
-The Packer commands are encapsulated in Make commands. Packer handles provisioning the instance, the temporary ssh key, temporary security group, and creating the AMI. Below are the variables accepted by the `build` command. This repository also offers convenience commands listed below.
+The Packer commands are encapsulated in Make commands. Packer handles provisioning the instance, the temporary ssh key, temporary security group, and creating the AMI. Below are the variables accepted by the `build` command. The Make commands folllow the following naming convention:
+
+```bash
+make build-<operating system>-<eks major version>
+```
 
 | Parameter | Default | Description |
 |-----------|:-------:|-------------|
@@ -38,82 +45,132 @@ The Packer commands are encapsulated in Make commands. Packer handles provisioni
 | `http_proxy` |  | Specify an HTTP Proxy to use when running commands on the server. This will set the `http_proxy` and `HTTP_PROXY` environment variables on the server while commands are running. |
 | `https_proxy` |  | Specify an HTTPS Proxy to use when running commands on the server. This will set the `https_proxy` and `HTTPS_PROXY` environment variables on the server while commands are running. |
 | `no_proxy` |  | Specify the no proxy configuration to use when running commands on the server. This will set the `no_proxy` and `NO_PROXY` environment variables on the server while commands are running. |
+| `hardening_flag` | `false` | This flag specifies the hardening to apply to the instance. The default is only the Docker and EKS benchmark. |
+
+### Using the AMI
+
+The AMI can be used with [self-managed node groups](https://docs.aws.amazon.com/eks/latest/userguide/worker.html) and [managed node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) within EKS. The AMIs built in this repository use the same [bootstrap script](https://github.com/awslabs/amazon-eks-ami/blob/master/files/bootstrap.sh) used in the EKS Optimized AMI. To join the cluster, run the following command on boot:
 
 ```bash
+/etc/eks/bootstrap.sh <cluster name> --kubelet-extra-args '--node-labels=eks.amazonaws.com/nodegroup=<node group name>,eks.amazonaws.com/nodegroup-image=<ami id>'
+```
 
-# build amazon linux 2 images
-make build-al2-1.15
-make build-al2-1.16
-make build-al2-1.17
-make build-al2-1.18
+This can also be used with [eksctl](https://eksctl.io/) to create a managed node group with a custom AMI. The excerpt from a `cluster.yml` shows how to supply a AMI ID:
 
-# build ubuntu 18.04 images
-make build-ubuntu1804-1.15
-make build-ubuntu1804-1.16
-make build-ubuntu1804-1.17
-make build-ubuntu1804-1.18
-
-# build rhel 7 images
-make build-rhel7-1.15
-make build-rhel7-1.16
-make build-rhel7-1.17
-make build-rhel7-1.18
-
-# build rhel 8 images
-make build-rhel8-1.15
-make build-rhel8-1.16
-make build-rhel8-1.17
-make build-rhel8-1.18
+```yaml
+managedNodeGroups:
+  - name: ng-1
+    ami: <AMI ID>
+    instanceType: t3.xlarge
+    minSize: 3
+    desiredCapacity: 3
+    maxSize: 6
+    privateNetworking: true
+    labels:
+      role: worker
+    overrideBootstrapCommand: |
+     /etc/eks/bootstrap.sh <cluster name> --kubelet-extra-args '--node-labels=eks.amazonaws.com/nodegroup=<node group name>,eks.amazonaws.com/nodegroup-image=<ami id>'
+    tags:
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/<cluster name>: "true"
 
 ```
 
-### Considerations
+### Supported Operating Systems
+
+The following operating systems are supported by this repository. This repository is not officially supported by AWS or Amazon EKS.
+
+#### Amazon Linux
+
+| Distribution | Version | Supported | CIS Benchmark |
+|:---|:---:|:---:|:---:|
+| Amazon Linux | 2 | :white_check_mark: | `hardening_flag=cis` |
+
+The Amazon Linux 2 EKS Optmized AMI is used as the base for this image. This image extends the EKS Optimized AMI to apply the Amazon Linux 2 CIS Benchmark, Docker CIS Benchmark, and Amazon EKS CIS Benchmark. These benchmarks are typically used to meet NIST 800-53 controls. Hardening is provided as a "best effort" and does not gaurentee compliance with the above frameworks.
+
+```bash
+# build amazon linux 2 for amazon eks 1.15
+make build-al2-1.15
+
+# build amazon linux 2 for amazon eks 1.16
+make build-al2-1.16
+
+# build amazon linux 2 for amazon eks 1.17
+make build-al2-1.17
+
+# build amazon linux 2 for amazon eks 1.18
+make build-al2-1.18
+```
+
+#### Red Hat Enterprise Linux
+
+| Distribution | Version | Supported | CIS Benchmark | NIST 800-171 | E8 | HIPAA | OSPP | PCI | DISA STIG |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| Red Hat Enterprise Linux | 7 | :white_check_mark: | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` | `hardening_flag=stig` |
+| Red Hat Enterprise Linux | 8 | :white_check_mark: | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` | `hardening_flag=stig` |
+
+Red Hat Enterprise Linux 7/8 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components. OpenSCAP is used to apply the above hardening frameworks. Hardening is provided as a "best effort" and does not gaurentee compliance with the above frameworks. Certain adjustments are made in order to work with Amazon EKS:
 
 - This repository leverages the latest version of [Docker CE](https://docs.docker.com/install/) available from Docker. The version of Docker that comes with RHEL 7 is out of date and overidden with the Docker CE repository.
-- Custom AMIs are only supported in the bring your own Auto Scaling Group configuration of Amazon EKS worker nodes.
-- Hardening is provided as a "best effort" baseline and should still be independently validated by your organization's security team.
-
-### Hardening
-
-This repository supports standard Container and Operating System (OS) hardening guides. The frameworks can be applied by appending the `hardening_flag` parameter to your build script, for example:
+- The `firewalld` serivce is disable to support Docker and Kubernetes.
+- When FIPS 140-2 mode is enabled, `boot=<UUID>` is not added as the `/boot` folder is not on a separate partition.
+- The SELinux boolean `container_manage_cgroup` is enabled to support containers.
+- **Hardening frameworks such as the DISA STIG that enable SELinux require the VPC CNI `aws-node` container be run in privileged mode.**
+- Packer does not support RHEL 8 in FIPS mode. SSH authentication breaks once FIPS is enabled. This repository enables FIPS as the last step as a workaround.
 
 ```bash
-make build-rhel8-1.18 hardening_flag=stig
+# Red Hat Enterprise Linux 7
+################################
+
+# build red hat enterprise linux 7 for amazon eks 1.15
+make build-rhel7-1.15
+
+# build red hat enterprise linux 7 for amazon eks 1.16
+make build-rhel7-1.16
+
+# build red hat enterprise linux 7 for amazon eks 1.17
+make build-rhel7-1.17
+
+# build red hat enterprise linux 7 for amazon eks 1.18
+make build-rhel7-1.18
+
+# Red Hat Enterprise Linux 8
+################################
+
+# build red hat enterprise linux 8 for amazon eks 1.15
+make build-rhel8-1.15
+
+# build red hat enterprise linux 8 for amazon eks 1.16
+make build-rhel8-1.16
+
+# build red hat enterprise linux 8 for amazon eks 1.17
+make build-rhel8-1.17
+
+# build red hat enterprise linux 8 for amazon eks 1.18
+make build-rhel8-1.18
 ```
 
-You can find the full list of supported hardening scripts in the table above. The value of the hardening flag is found in parentheses in the header.
+#### Ubuntu 18.04
 
-#### CIS Benchmark for Docker
+| Distribution | Version | Supported |
+|:---|:---:|:---:|:---:|
+| Ubuntu | 18.04 | :white_check_mark: |
 
-Sections 1, 2, and 3 of the [CIS Benchmark for Docker](https://www.cisecurity.org/benchmark/docker/) are applied during image build. Sections 4, 5, 6, 7, and 8 do not apply to Amazon EKS deployments or apply directly to container images. In order to support Amazon EKS we have made a few modifications:
+Ubuntu 18.04 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components.
 
-- `2.8 - Enable user namespace support` is not supported by the AWS VPC CNI Driver because it needs to access the host. This can be mitigated via Kubernetes Pod configuration.
+```bash
+# build ubuntu 18.04 for amazon eks 1.15
+make build-ubuntu1804-1.15
 
-To see the implementation visit the `cis-docker.sh` [script](./scripts/shared/cis-docker.sh).
+# build ubuntu 18.04 for amazon eks 1.16
+make build-ubuntu1804-1.16
 
-#### CIS Benchmark for EKS
+# build ubuntu 18.04 for amazon eks 1.17
+make build-ubuntu1804-1.17
 
-The worker node sections of the [Amazon EKS CIS Benchmark](https://aws.amazon.com/about-aws/whats-new/2020/07/announcing-cis-benchmark-for-amazon-eks/) are applied during image build.
-
-To see the implementation visit the `cis-eks.sh` [script](./scripts/shared/cis-eks.sh).
-
-#### DoD Security Technical Implementation Guides (STIG)
-
-*Only applies to Red Hat Enterprise Linux AMIs.*
-
-This repository also supports applying the [STIG from DISA](https://public.cyber.mil/stigs/). The Red Hat Enterprise Linux STIG scripts are generated using [OpenSCAP](https://www.open-scap.org/) based on the [NIST Checklist](https://nvd.nist.gov/ncp/checklist/811). **These images are reference implementations and still needs to be validated by your security organization. These images are designed to be starting place for regulated environments.**
-
-To see the implementation visit the `hardening.sh` [RHEL 7](./scripts/rhel7/hardening.sh) and [RHEL 8](./scripts/rhel8/hardening.sh) scripts.
-
-#### Hardening Notes
-
-The following changes are made during the build process to the hardened image in order to support Amazon EC2 and Kubernetes:
-
-- The `boot=UUID=<disk uuid>` from the grub boot configuration has been revmoed. This prevents instances from being stuck booting when FIPS mode is enabled
-- `firewalld` service is disabled.
-- The SELinux boolean `container_manage_cgroup` is enabled to support containers.
-- Hardening frameworks such as the DISA STIG that enable SELinux require the VPC CNI `aws-node` container be run in privileged mode.
-- Packer does not support RHEL 8 in FIPS mode. SSH authentication breaks once FIPS is enabled. This repository enables FIPS as the last step as a workaround.
+# build ubuntu 18.04 for amazon eks 1.18
+make build-ubuntu1804-1.18
+```
 
 ### Fetching the Kubernetes Build Information
 
