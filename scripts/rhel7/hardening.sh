@@ -12,6 +12,7 @@ case $HARDENING_FLAG in
     ;;
   
   cui)
+    enable_fips
     oscap_generate_fix "/usr/share/xml/scap/ssg/content/ssg-rhel7-ds.xml" "xccdf_org.ssgproject.content_profile_cui"
     ;;
 
@@ -42,5 +43,4 @@ esac
 
 if [ -f /etc/packer/hardening.sh ]; then
   bash /etc/packer/hardening.sh
-  reboot
 fi

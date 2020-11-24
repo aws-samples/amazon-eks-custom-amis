@@ -130,5 +130,5 @@ EnvironmentFile=/etc/environment
 EOF
 
 systemctl daemon-reload
-systemctl enable docker
+systemctl enable docker && systemctl start docker
 

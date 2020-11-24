@@ -15,14 +15,13 @@ dnf update -y && dnf autoremove -y
 # install dependencies
 dnf install -y ca-certificates curl yum-utils audit audit-libs parted unzip redhat-lsb-core
 
-curl -sL -o /usr/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
-chmod +x /usr/bin/jq
+install_jq
 
 # enable audit log
 systemctl enable auditd && systemctl start auditd
 
 # enable the /etc/environment
-touch /etc/environment
+configure_http_proxy
 
 # install aws cli
 install_awscliv2

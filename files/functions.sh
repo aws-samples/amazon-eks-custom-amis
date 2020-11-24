@@ -71,6 +71,10 @@ install_openscap() {
     fi
 }
 
+install_jq() {
+    curl -sL -o /usr/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+    chmod +x /usr/bin/jq
+}
 
 oscap_generate_fix() {
     local oscap_source=$1
@@ -163,21 +167,48 @@ partition_disks() {
     migrate_and_mount_disk "${disk_name}p5" /var/lib/docker
 }
 
+configure_http_proxy() {
+    touch /etc/environment
+
+    if [ -z "${HTTP_PROXY}" ]; then
+        echo "http_proxy=${HTTP_PROXY}" >> /etc/environment
+        echo "HTTP_PROXY=${HTTP_PROXY}" >> /etc/environment
+    fi
+
+    if [ -z "${HTTPS_PROXY}" ]; then
+        echo "https_proxy=${HTTPS_PROXY}" >> /etc/environment
+        echo "HTTPS_PROXY=${HTTPS_PROXY}" >> /etc/environment
+    fi
+
+    if [ -z "${NO_PROXY}" ]; then
+        echo "no_proxy=${NO_PROXY}" >> /etc/environment
+        echo "NO_PROXY=${NO_PROXY}" >> /etc/environment
+    fi
+}
+
 enable_fips() {
-  # install dependencies
-  yum install -y dracut-fips-aesni dracut-fips
 
-  # we will configure FIPS ourselves as the generated STIG locks the OS
-  # configure dracut-fips
-  dracut -f
+    if is_rhel_7; then
 
-  # udpate the kernel settings
-  grubby --update-kernel=ALL --args="fips=1"
+        # install dependencies
+        yum install -y dracut-fips-aesni dracut-fips
 
-  # configure this to meet the stig checker
-  sed -i "/^GRUB_CMDLINE_LINUX/ s/\"$/ fips=1\"/" /etc/default/grub
+        # we will configure FIPS ourselves as the generated STIG locks the OS
+        # configure dracut-fips
+        dracut -f
 
-  # set the ssh ciphers
-  sed -i 's/^Cipher.*/Ciphers aes128-ctr,aes192-ctr,aes256-ctr/' /etc/ssh/sshd_config
-  sed -i 's/^MACs.*/MACs hmac-sha2-256,hmac-sha2-512/' /etc/ssh/sshd_config
+        # udpate the kernel settings
+        grubby --update-kernel=ALL --args="fips=1"
+
+        # configure this to meet the stig checker
+        sed -i "/^GRUB_CMDLINE_LINUX/ s/\"$/ fips=1\"/" /etc/default/grub
+
+        # set the ssh ciphers
+        sed -i 's/^Cipher.*/Ciphers aes128-ctr,aes192-ctr,aes256-ctr/' /etc/ssh/sshd_config
+        sed -i 's/^MACs.*/MACs hmac-sha2-256,hmac-sha2-512/' /etc/ssh/sshd_config
+
+    elif is_rhel_8; then
+        fips-mode-setup --enable
+    fi
+
 }

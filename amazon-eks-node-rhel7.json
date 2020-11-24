@@ -11,6 +11,9 @@
     "volume_size":"100",
     "vpc_id":"",
     "subnet_id":"",
+    "http_proxy": "",
+    "https_proxy": "",
+    "no_proxy": "",
 
     "source_ami_owner":"309956199498",
     "source_ami_owner_govcloud":"219670896067",
@@ -94,21 +97,14 @@
       "scripts": [
         "./scripts/rhel7/boilerplate.sh"
       ],
-      "execute_command":"echo 'packer' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'",
-      "expect_disconnect":true,
-      "pause_after":"30s"
-    },
-    {
-      "type":"shell",
-      "scripts": [
-        "./scripts/rhel7/hardening.sh"
+      "environment_vars": [
+        "HTTP_PROXY={{user `http_proxy`}}",
+        "HTTPS_PROXY={{user `https_proxy`}}",
+        "NO_PROXY={{user `no_proxy`}}"
       ],
       "execute_command":"echo 'packer' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'",
       "expect_disconnect":true,
-      "pause_after":"30s",
-      "environment_vars": [
-        "HARDENING_FLAG={{user `hardening_flag`}}"
-      ]
+      "pause_after":"30s"
     },
     {
       "type":"shell",
@@ -122,6 +118,9 @@
       "expect_disconnect":true,
       "pause_after":"30s",
       "environment_vars": [
+        "HTTP_PROXY={{user `http_proxy`}}",
+        "HTTPS_PROXY={{user `https_proxy`}}",
+        "NO_PROXY={{user `no_proxy`}}",
         "KUBERNETES_VERSION={{user `eks_version`}}",
         "KUBERNETES_BUILD_DATE={{user `eks_build_date`}}",
         "BINARY_BUCKET_NAME={{user `binary_bucket_name`}}",
@@ -133,7 +132,19 @@
     {
       "type":"shell",
       "scripts": [
+        "./scripts/rhel7/hardening.sh",
         "./scripts/rhel7/cleanup.sh"
+      ],
+      "environment_vars": [
+        "HTTP_PROXY={{user `http_proxy`}}",
+        "HTTPS_PROXY={{user `https_proxy`}}",
+        "NO_PROXY={{user `no_proxy`}}",
+        "KUBERNETES_VERSION={{user `eks_version`}}",
+        "KUBERNETES_BUILD_DATE={{user `eks_build_date`}}",
+        "BINARY_BUCKET_NAME={{user `binary_bucket_name`}}",
+        "BINARY_BUCKET_REGION={{user `binary_bucket_region`}}",
+        "CNI_PLUGIN_VERSION={{user `cni_plugin_version`}}",
+        "HARDENING_FLAG={{user `hardening_flag`}}"
       ],
       "execute_command":"echo 'packer' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'"
     }

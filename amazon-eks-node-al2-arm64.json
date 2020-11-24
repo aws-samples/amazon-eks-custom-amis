@@ -6,6 +6,9 @@
     "volume_size":"100",
     "vpc_id":"",
     "subnet_id":"",
+    "http_proxy": "",
+    "https_proxy": "",
+    "no_proxy": "",
 
     "source_ami_owner":"602401143452",
     "source_ami_owner_govcloud":"219670896067",
@@ -33,6 +36,7 @@
         "most_recent":true
       },
       "instance_type":"m6g.xlarge",
+
       "ssh_username":"{{user `source_ami_ssh_user`}}",
       "ssh_pty":true,
       "subnet_id":"{{user `subnet_id`}}",
@@ -74,6 +78,11 @@
     {
       "type":"shell",
       "script":"./scripts/al2/boilerplate.sh",
+      "environment_vars": [
+        "HTTP_PROXY={{user `http_proxy`}}",
+        "HTTPS_PROXY={{user `https_proxy`}}",
+        "NO_PROXY={{user `no_proxy`}}"
+      ],
       "execute_command":"echo 'packer' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'",
       "expect_disconnect":true,
       "pause_after":"15s"
@@ -85,6 +94,11 @@
         "./scripts/shared/cis-docker.sh",
         "./scripts/shared/cis-eks.sh",
         "./scripts/al2/cleanup.sh"
+      ],
+      "environment_vars": [
+        "HTTP_PROXY={{user `http_proxy`}}",
+        "HTTPS_PROXY={{user `https_proxy`}}",
+        "NO_PROXY={{user `no_proxy`}}"
       ],
       "execute_command":"echo 'packer' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'"
     }

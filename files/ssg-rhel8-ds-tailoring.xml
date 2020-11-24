@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xccdf:Tailoring xmlns:xccdf="http://checklists.nist.gov/xccdf/1.2" id="xccdf_scap-workbench_tailoring_default">
-  <xccdf:benchmark href="/usr/share/xml/scap/ssg/content/ssg-rhel7-ds.xml"/>
+  <xccdf:benchmark href="/usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml"/>
   <xccdf:version time="2020-11-19T09:59:39">1</xccdf:version>
   <xccdf:Profile id="xccdf_org.ssgproject.content_profile_stig_aws" extends="xccdf_org.ssgproject.content_profile_stig">
-    <xccdf:title xmlns:xhtml="http://www.w3.org/1999/xhtml" xml:lang="en-US" override="true">DISA STIG for Red Hat Enterprise Linux 7 for AWS</xccdf:title>
+    <xccdf:title xmlns:xhtml="http://www.w3.org/1999/xhtml" xml:lang="en-US" override="true">DISA STIG for Red Hat Enterprise Linux 8 for AWS</xccdf:title>
     <xccdf:description xmlns:xhtml="http://www.w3.org/1999/xhtml" xml:lang="en-US" override="true">This profile contains configuration checks that align to the
 DISA STIG for Red Hat Enterprise Linux V1R4.
 
-In addition to being applicable to Red Hat Enterprise Linux 7, DISA recognizes this
+In addition to being applicable to Red Hat Enterprise Linux 8, DISA recognizes this
 configuration baseline as applicable to the operating system tier of
-Red Hat technologies that are based on Red Hat Enterprise Linux 7, such as:
+Red Hat technologies that are based on Red Hat Enterprise Linux 8, such as:
 
 - Red Hat Enterprise Linux Server
 - Red Hat Enterprise Linux Workstation and Desktop
 - Red Hat Enterprise Linux for HPC
 - Red Hat Storage
-- Red Hat Containers with a Red Hat Enterprise Linux 7 image</xccdf:description>
+- Red Hat Containers with a Red Hat Enterprise Linux 8 image</xccdf:description>
     <xccdf:select idref="xccdf_org.ssgproject.content_group_fips" selected="false"/>
     <xccdf:select idref="xccdf_org.ssgproject.content_group_network-firewalld" selected="false"/>
   </xccdf:Profile>
