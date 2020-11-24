@@ -3,7 +3,7 @@
 This repository contains [Packer](https://packer.io/) scripts and definitions to create custom AMIs for use with [Amazon EKS via self-managed Auto Scaling Groups](https://docs.aws.amazon.com/eks/latest/userguide/worker.html) and [Managed Node Groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html).  Many organizations require running custom AMIs for security, compliance, or internal policy requirements. **The Amazon EKS Optimized AMI remains the preferred way to deploy containers on Amazon EKS, these AMIs aim to provide a starting place for customers looking to implement custom AMIs with operating systems other than Amazon Linux.** The AMIs built in this repository are based on the [Amazon EKS optimized AMI published by AWS](https://github.com/awslabs/amazon-eks-ami).
 
 | Distribution | Version | CIS Benchmark (cis) | NIST 800-171 (nist) | ACSC (acsc) | HIPAA (hipaa) | OSPP (ospp) | PCI-DSS (pci-dss) | DISA STIG (stig) |
-|--------------|:-------:|:----------------:|:--------------------:|:-----------------:|:---------:|---------:|---------:|---------:|
+|--------------|:-------:|:----------------:|:--------------------:|:-----------------:|:---------:|:---------:|:---------:|:---------:|
 | Amazon Linux             | 2 | :white_check_mark: | :x: | :x: | :x: | :x: | :x: | :x: |
 | Ubuntu                   | 18.04 | :x: | :x: | :x: | :x: | :x: | :x: | :x: |
 | Red Hat Enterprise Linux | 7 | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
