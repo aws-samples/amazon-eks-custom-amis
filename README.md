@@ -153,7 +153,7 @@ make build-rhel8-1.18
 #### Ubuntu 18.04
 
 | Distribution | Version | Supported |
-|:---|:---:|:---:|:---:|
+|:---|:---:|:---:|
 | Ubuntu | 18.04 | :white_check_mark: |
 
 Ubuntu 18.04 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components.
@@ -177,7 +177,7 @@ make build-ubuntu1804-1.18
 Amazon EKS builds and tests specific versions of Kubernetes together for compatability. It is important that you use versions that have been tested together. 
 
 | Kubernetes Version | Build Date | CNI Plugins Version |
-|--------------------|------------|---------------------|
+|---|:---:|:---:|
 | 1.18.8 | 2020-09-18 | v0.8.6 |
 | 1.17.11 | 2020-09-18 | v0.8.6 |
 | 1.16.13 | 2020-09-18 | v0.8.6 |
