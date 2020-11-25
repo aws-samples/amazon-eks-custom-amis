@@ -1,0 +1,78 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: custom-amis
+  region: us-east-2
+
+managedNodeGroups:
+  - name: ng-centos8-1
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 1
+    privateNetworking: true
+    iam:
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+    launchTemplate:
+      id: "lt-07e8ddb2174f65ef8"
+
+  - name: ng-centos7-1
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 1
+    privateNetworking: true
+    iam:
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+    launchTemplate:
+      id: "lt-0f478f78025f3264e"
+
+  - name: ng-rhel7-1
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 1
+    privateNetworking: true
+    iam:
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+    launchTemplate:
+      id: "lt-0bc794954226ca638"
+
+  - name: ng-rhel8-1
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 1
+    privateNetworking: true
+    iam:
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+    launchTemplate:
+      id: "lt-0ab9c2a9b32be2268"
+
+  - name: ng-ubuntu1804-1
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 1
+    privateNetworking: true
+    iam:
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+    launchTemplate:
+      id: "lt-00e3b031af66b3766"
+  

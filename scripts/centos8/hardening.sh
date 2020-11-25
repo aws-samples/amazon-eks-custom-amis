@@ -34,7 +34,7 @@ case $HARDENING_FLAG in
 
   stig)
     enable_fips
-    oscap_generate_fix "/usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml" "xccdf_org.ssgproject.content_profile_stig" "/etc/packer/files/ssg-rhel8-stig-tailoring.xml"
+    oscap_generate_fix "/usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml" "xccdf_org.ssgproject.content_profile_stig" "/etc/packer/files/ssg-rhel8-ds-tailoring.xml"
     ;;
   
   *)

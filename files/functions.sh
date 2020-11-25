@@ -7,7 +7,7 @@ wait_for_cloudinit() {
 install_awscliv2() {
     curl -o awscliv2.zip "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip"
     unzip awscliv2.zip
-    ./aws/install
+    ./aws/install -i /usr/local/aws-cli -b /usr/bin
     rm -f awscliv2.zip
 }
 
@@ -39,15 +39,25 @@ is_rhel_8() {
     [[ $(lsb_release -sr) == "8"* ]]
 }
 
+is_centos() {
+    [[ $(lsb_release -sd) == "\"CentOS"* ]]
+}
+
+is_centos_7() {
+    [[ $(lsb_release -sr) == "7"* ]]
+}
+
+is_centos_8() {
+    [[ $(lsb_release -sr) == "8"* ]]
+}
+
 install_ssmagent() {
 
     if is_ubuntu; then
-        echo "installing Amazon SSM Agent on Ubuntu using Snap..."
         snap install amazon-ssm-agent --classic
         systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
         systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
     else
-        echo "Install Amazon SSM Agent on RHEL..."
         yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
         systemctl enable amazon-ssm-agent && systemctl start amazon-ssm-agent
     fi
@@ -56,7 +66,7 @@ install_ssmagent() {
 
 install_openscap() {
 
-    if is_rhel; then
+    if is_rhel || is_centos; then
         echo "installing OpenSCAP on Red Hat Enterprise Linux..."
         yum install -y openscap openscap-scanner scap-security-guide
     elif is_amazonlinux2; then
@@ -209,6 +219,8 @@ enable_fips() {
 
     elif is_rhel_8; then
         fips-mode-setup --enable
+    else
+        echo "FIPS 140-2 is not supported on this operating system."
     fi
 
 }

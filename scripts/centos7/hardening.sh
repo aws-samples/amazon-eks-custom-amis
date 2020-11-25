@@ -34,7 +34,7 @@ case $HARDENING_FLAG in
 
   stig)
     enable_fips
-    oscap_generate_fix "/usr/share/xml/scap/ssg/content/ssg-rhel7-ds.xml" "xccdf_org.ssgproject.content_profile_stig_aws" "/etc/packer/files/ssg-rhel7-stig-tailoring.xml"
+    oscap_generate_fix "/usr/share/xml/scap/ssg/content/ssg-rhel7-ds.xml" "xccdf_org.ssgproject.content_profile_stig" "/etc/packer/files/ssg-rhel7-ds-tailoring.xml"
     ;;
   
   *)
@@ -44,3 +44,4 @@ esac
 if [ -f /etc/packer/hardening.sh ]; then
   bash /etc/packer/hardening.sh
 fi
+

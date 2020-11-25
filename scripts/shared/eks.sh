@@ -22,9 +22,8 @@ fi
 
 # install dependencies
 
-if is_rhel && is_rhel_8; then
+if (is_rhel && is_rhel_8) || (is_centos && is_centos_8); then
 
-    echo "installing RHEL 8 eks dependencies..."
     dnf install -y \
         conntrack \
         curl \
@@ -32,9 +31,8 @@ if is_rhel && is_rhel_8; then
         socat \
         unzip
 
-elif is_rhel && is_rhel_7; then
+elif (is_rhel && is_rhel_7) || (is_centos && is_centos_7); then
 
-    echo "installing RHEL 7 eks dependencies..."
     yum install -y \
         conntrack \
         curl \
@@ -44,7 +42,6 @@ elif is_rhel && is_rhel_7; then
 
 elif is_ubuntu; then
 
-    echo "installing Ubuntu eks dependencies..."
     apt-get install -y \
         conntrack \
         curl \

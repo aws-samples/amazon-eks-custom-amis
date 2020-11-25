@@ -16,7 +16,7 @@ else
     exit 1
 fi
 
-if is_rhel && is_rhel_7; then
+if (is_rhel && is_rhel_7) || (is_centos && is_centos_7); then
 
   yum remove -y \
     docker \
@@ -35,7 +35,7 @@ if is_rhel && is_rhel_7; then
   sed -i 's/\$releasever/7/g' /etc/yum.repos.d/docker-ce.repo
   yum install -y docker-ce docker-ce-cli containerd.io
 
-elif is_rhel && is_rhel_8; then
+elif (is_rhel && is_rhel_8) || (is_centos && is_centos_8); then
 
   dnf remove -y \
     docker \

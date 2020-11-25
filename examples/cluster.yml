@@ -1,0 +1,37 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: custom-amis
+  region: us-east-2
+
+managedNodeGroups:
+  - name: ng-centos8-1
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 1
+    privateNetworking: true
+    iam:
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+    launchTemplate:
+      id: lt-009639031a5ef3302
+
+  - name: ng-centos7-1
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 1
+    privateNetworking: true
+    iam:
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+    launchTemplate:
+      id: lt-0a883caf833b9c4db
+
+  

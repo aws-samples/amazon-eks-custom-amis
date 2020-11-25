@@ -15,6 +15,8 @@ Lack of support in this repository does not indicate that you can't meet complia
 | Ubuntu | 20.04 | :x: | |
 | Red Hat Enterprise Linux | 7 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
 | Red Hat Enterprise Linux | 8 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
+| CentOS | 7 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS |
+| CentOS | 8 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS|
 
 ## Installing Dependencies
 
@@ -55,12 +57,18 @@ The AMI can be used with [self-managed node groups](https://docs.aws.amazon.com/
 /etc/eks/bootstrap.sh <cluster name> --kubelet-extra-args '--node-labels=eks.amazonaws.com/nodegroup=<node group name>,eks.amazonaws.com/nodegroup-image=<ami id>'
 ```
 
-This can also be used with [eksctl](https://eksctl.io/) to create a managed node group with a custom AMI. The excerpt from a `cluster.yml` shows how to supply a AMI ID:
+This can also be used with [eksctl](https://eksctl.io/) to create a managed node group with a custom AMI. To use with managed node groups, you will first need to create a Launch Template. You need to create a Launch Template because eksctl uses a type of UserData that only support Amazon Linux 2 so we must provide our own.
+
+```bash
+./helpers/eksctl-lt.sh --cluster custom-ami --name ng-1 --ami ami-123456789abcdefgh --instance-type t3.xlarge
+# lt-123456789abcdefgh
+```
+
+The excerpt from a `cluster.yml` shows how to supply a Launch Template ID:
 
 ```yaml
 managedNodeGroups:
   - name: ng-1
-    ami: <AMI ID>
     instanceType: t3.xlarge
     minSize: 3
     desiredCapacity: 3
@@ -68,12 +76,11 @@ managedNodeGroups:
     privateNetworking: true
     labels:
       role: worker
-    overrideBootstrapCommand: |
-     /etc/eks/bootstrap.sh <cluster name> --kubelet-extra-args '--node-labels=eks.amazonaws.com/nodegroup=<node group name>,eks.amazonaws.com/nodegroup-image=<ami id>'
     tags:
       k8s.io/cluster-autoscaler/enabled: "true"
       k8s.io/cluster-autoscaler/<cluster name>: "true"
-
+    launchTemplate:
+      id: lt-123456789abcdefgh
 ```
 
 ### Supported Operating Systems
@@ -100,6 +107,28 @@ make build-al2-1.17
 
 # build amazon linux 2 for amazon eks 1.18
 make build-al2-1.18
+```
+
+#### Ubuntu
+
+| Distribution | Version | Supported |
+|:---|:---:|:---:|
+| Ubuntu | 18.04 | `build-ubuntu1804-<eks major version>` |
+
+Ubuntu 18.04 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components.
+
+```bash
+# build ubuntu 18.04 for amazon eks 1.15
+make build-ubuntu1804-1.15
+
+# build ubuntu 18.04 for amazon eks 1.16
+make build-ubuntu1804-1.16
+
+# build ubuntu 18.04 for amazon eks 1.17
+make build-ubuntu1804-1.17
+
+# build ubuntu 18.04 for amazon eks 1.18
+make build-ubuntu1804-1.18
 ```
 
 #### Red Hat Enterprise Linux
@@ -150,31 +179,55 @@ make build-rhel8-1.17
 make build-rhel8-1.18
 ```
 
-#### Ubuntu 18.04
+#### CentOS
 
-| Distribution | Version | Supported |
-|:---|:---:|:---:|
-| Ubuntu | 18.04 | `build-ubuntu1804-<eks major version>` |
+| Distribution | Version | Build Command  | CIS Benchmark | NIST 800-171 | E8 | HIPAA | OSPP | PCI |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| CentOS | 7 | `build-rhel7-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` |
+| CentOS | 8 | `build-rhel8-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` |
 
-Ubuntu 18.04 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components.
+CentOS 7/8 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components. OpenSCAP is used to apply the above hardening frameworks. Hardening is provided as a "best effort" and does not gaurentee compliance with the above frameworks. Certain adjustments are made in order to work with Amazon EKS:
+
+- The `firewalld` serivce is disable to support Docker and Kubernetes.
+- While FIPS 140-2 modules can be applied to CentOS, CentOS has not been formally validated.
+- The SELinux boolean `container_manage_cgroup` is enabled to support containers.
+- Hardening is applied using RHEL hardening guides.
 
 ```bash
-# build ubuntu 18.04 for amazon eks 1.15
-make build-ubuntu1804-1.15
+# CentOS 7
+################################
 
-# build ubuntu 18.04 for amazon eks 1.16
-make build-ubuntu1804-1.16
+# build centos 7 for amazon eks 1.15
+make build-centos7-1.15
 
-# build ubuntu 18.04 for amazon eks 1.17
-make build-ubuntu1804-1.17
+# build centos 7 for amazon eks 1.16
+make build-centos7-1.16
 
-# build ubuntu 18.04 for amazon eks 1.18
-make build-ubuntu1804-1.18
+# build centos 7 for amazon eks 1.17
+make build-centos7-1.17
+
+# build centos 7 for amazon eks 1.18
+make build-centos7-1.18
+
+# CentOS 8
+################################
+
+# build centos 8 for amazon eks 1.15
+make build-centos8-1.15
+
+# build centos 8 for amazon eks 1.16
+make build-centos8-1.16
+
+# build centos 8 for amazon eks 1.17
+make build-centos8-1.17
+
+# build centos 8 for amazon eks 1.18
+make build-centos8-1.18
 ```
 
 ### Fetching the Kubernetes Build Information
 
-Amazon EKS builds and tests specific versions of Kubernetes together for compatability. It is important that you use versions that have been tested together. 
+Amazon EKS builds and tests specific versions of Kubernetes together for compatability. It is important that you use versions that have been tested together.
 
 | Kubernetes Version | Build Date | CNI Plugins Version |
 |---|:---:|:---:|
