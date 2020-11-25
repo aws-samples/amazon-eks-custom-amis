@@ -182,7 +182,7 @@ make build-rhel8-1.18
 #### CentOS
 
 | Distribution | Version | Build Command  | CIS Benchmark | NIST 800-171 | E8 | HIPAA | OSPP | PCI |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | CentOS | 7 | `build-rhel7-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` |
 | CentOS | 8 | `build-rhel8-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` |
 
