@@ -14,8 +14,10 @@ dnf update -y && dnf autoremove -y
 
 # install dependencies
 dnf install -y ca-certificates curl yum-utils audit audit-libs parted unzip redhat-lsb-core
-
 install_jq
+
+# disable firewalld
+systemctl disable firewalld && systemctl stop firewalld
 
 # enable audit log
 systemctl enable auditd && systemctl start auditd
@@ -29,9 +31,8 @@ install_awscliv2
 # install ssm agent
 install_ssmagent
 
-echo "ensure secondary disk is mounted to proper locations"
+# partition disks
 systemctl stop tuned rsyslog crond irqbalance polkit chronyd NetworkManager
-
 partition_disks /dev/nvme1n1
 
 reboot

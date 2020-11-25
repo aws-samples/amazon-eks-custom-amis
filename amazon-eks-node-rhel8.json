@@ -85,7 +85,7 @@
       "type": "shell",
       "inline": [
         "mkdir -p /etc/packer/files",
-        "chown -R ec2-user:ec2-user /etc/packer/files"
+        "chown -R {{user `source_ami_ssh_user`}}:{{user `source_ami_ssh_user`}} /etc/packer/files"
       ],
       "execute_command":"echo 'packer' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'"
     },

@@ -17,6 +17,16 @@ Red Hat technologies that are based on Red Hat Enterprise Linux 7, such as:
 - Red Hat Storage
 - Red Hat Containers with a Red Hat Enterprise Linux 7 image</xccdf:description>
     <xccdf:select idref="xccdf_org.ssgproject.content_group_fips" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_grub2_enable_fips_mode" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_package_dracut-fips_installed" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_package_dracut-fips-aesni_installed" selected="false"/>
     <xccdf:select idref="xccdf_org.ssgproject.content_group_network-firewalld" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_group_ruleset_modifications" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_configure_firewalld_rate_limiting" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_configure_firewalld_ports" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_set_firewalld_default_zone" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_group_firewalld_activation" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_service_firewalld_enabled" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_package_firewalld_installed" selected="false"/>
   </xccdf:Profile>
 </xccdf:Tailoring>

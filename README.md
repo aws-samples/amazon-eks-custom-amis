@@ -55,12 +55,18 @@ The AMI can be used with [self-managed node groups](https://docs.aws.amazon.com/
 /etc/eks/bootstrap.sh <cluster name> --kubelet-extra-args '--node-labels=eks.amazonaws.com/nodegroup=<node group name>,eks.amazonaws.com/nodegroup-image=<ami id>'
 ```
 
-This can also be used with [eksctl](https://eksctl.io/) to create a managed node group with a custom AMI. The excerpt from a `cluster.yml` shows how to supply a AMI ID:
+This can also be used with [eksctl](https://eksctl.io/) to create a managed node group with a custom AMI. To use with managed node groups, you will first need to create a Launch Template. You need to create a Launch Template because eksctl uses a type of UserData that only support Amazon Linux 2 so we must provide our own.
+
+```bash
+./helpers/eksctl-lt.sh --cluster custom-ami --name ng-1 --ami ami-123456789abcdefgh --instance-type t3.xlarge
+# lt-123456789abcdefgh
+```
+
+The excerpt from a `cluster.yml` shows how to supply a Launch Template ID:
 
 ```yaml
 managedNodeGroups:
   - name: ng-1
-    ami: <AMI ID>
     instanceType: t3.xlarge
     minSize: 3
     desiredCapacity: 3
@@ -68,12 +74,11 @@ managedNodeGroups:
     privateNetworking: true
     labels:
       role: worker
-    overrideBootstrapCommand: |
-     /etc/eks/bootstrap.sh <cluster name> --kubelet-extra-args '--node-labels=eks.amazonaws.com/nodegroup=<node group name>,eks.amazonaws.com/nodegroup-image=<ami id>'
     tags:
       k8s.io/cluster-autoscaler/enabled: "true"
       k8s.io/cluster-autoscaler/<cluster name>: "true"
-
+    launchTemplate:
+      id: lt-123456789abcdefgh
 ```
 
 ### Supported Operating Systems

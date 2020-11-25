@@ -12,11 +12,6 @@ wait_for_cloudinit
 # upgrade the operating system
 yum update -y && yum autoremove -y
 
-# enable repositories
-yum-config-manager --enable rhel-7-server-rhui-rpms
-yum-config-manager --enable rhel-7-server-rhui-rh-common-rpms
-yum-config-manager --enable rhel-7-server-rhui-extras-rpms
-
 # install dependencies
 yum install -y ca-certificates curl yum-utils audit audit-libs parted unzip redhat-lsb-core
 install_jq
@@ -37,7 +32,7 @@ install_awscliv2
 install_ssmagent
 
 # partition disks
-systemctl stop postfix tuned rsyslog crond irqbalance polkit chronyd NetworkManager
+systemctl stop postfix tuned rsyslog crond irqbalance polkit chronyd
 partition_disks /dev/nvme1n1
 
 reboot

@@ -69,4 +69,32 @@ build-rhel8-1.17:
 build-rhel8-1.18:
 	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=1.18.8 eks_build_date=2020-09-18
 
+# CentOS 7
+#-----------------------------------------------------
+build-centos7-1.15:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=1.15.11 eks_build_date=2020-09-18
+
+build-centos7-1.16:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=1.16.13 eks_build_date=2020-09-18
+
+build-centos7-1.17:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=1.17.11 eks_build_date=2020-09-18
+
+build-centos7-1.18:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=1.18.8 eks_build_date=2020-09-18
+
+# CentOS 8
+#-----------------------------------------------------
+build-centos8-1.15:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=1.15.11 eks_build_date=2020-09-18
+
+build-centos8-1.16:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=1.16.13 eks_build_date=2020-09-18
+
+build-centos8-1.17:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=1.17.11 eks_build_date=2020-09-18
+
+build-centos8-1.18:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=1.18.8 eks_build_date=2020-09-18
+
 

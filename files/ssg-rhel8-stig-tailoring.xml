@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xccdf:Tailoring xmlns:xccdf="http://checklists.nist.gov/xccdf/1.2" id="xccdf_scap-workbench_tailoring_default">
+  <xccdf:benchmark href="/usr/share/xml/scap/ssg/content/ssg-rhel8-ds.xml"/>
+  <xccdf:version time="2020-11-24T16:37:36">1</xccdf:version>
+  <xccdf:Profile id="xccdf_org.ssgproject.content_profile_stig_aws" extends="xccdf_org.ssgproject.content_profile_stig">
+    <xccdf:title xmlns:xhtml="http://www.w3.org/1999/xhtml" xml:lang="en-US" override="true">[DRAFT] DISA STIG for Red Hat Enterprise Linux 8 for Amazon EKS</xccdf:title>
+    <xccdf:description xmlns:xhtml="http://www.w3.org/1999/xhtml" xml:lang="en-US" override="true">This profile contains configuration checks that align to the
+[DRAFT] DISA STIG for Red Hat Enterprise Linux 8.
+
+In addition to being applicable to Red Hat Enterprise Linux 8, DISA recognizes this
+configuration baseline as applicable to the operating system tier of
+Red Hat technologies that are based on Red Hat Enterprise Linux 8, such as:
+
+- Red Hat Enterprise Linux Server
+- Red Hat Enterprise Linux Workstation and Desktop
+- Red Hat Enterprise Linux for HPC
+- Red Hat Storage
+- Red Hat Containers with a Red Hat Enterprise Linux 8 image</xccdf:description>
+    <xccdf:select idref="xccdf_org.ssgproject.content_group_fips" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_enable_dracut_fips_module" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_sysctl_crypto_fips_enabled" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_etc_system_fips_exists" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_enable_fips_mode" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_group_network-firewalld" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_group_firewalld_activation" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_service_firewalld_enabled" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_package_firewalld_installed" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_group_ruleset_modifications" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_set_firewalld_default_zone" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_configure_firewalld_rate_limiting" selected="false"/>
+    <xccdf:select idref="xccdf_org.ssgproject.content_rule_configure_firewalld_ports" selected="false"/>
+  </xccdf:Profile>
+</xccdf:Tailoring>
