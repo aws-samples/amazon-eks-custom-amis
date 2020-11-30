@@ -41,6 +41,20 @@ build-ubuntu1804-1.17:
 build-ubuntu1804-1.18:
 	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=1.18.8 eks_build_date=2020-09-18
 
+# Ubuntu 20.04
+#-----------------------------------------------------
+build-ubuntu2004-1.15:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=1.15.11 eks_build_date=2020-09-18
+
+build-ubuntu2004-1.16:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=1.16.13 eks_build_date=2020-09-18
+
+build-ubuntu2004-1.17:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=1.17.11 eks_build_date=2020-09-18
+
+build-ubuntu2004-1.18:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=1.18.8 eks_build_date=2020-09-18
+
 # RHEL 7
 #-----------------------------------------------------
 build-rhel7-1.15:
