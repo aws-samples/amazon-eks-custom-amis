@@ -20,11 +20,11 @@ is_ubuntu() {
 }
 
 is_ubuntu_18() {
-    [[ $(lsb_release -sr) == "18"* ]]
+    [[ $(lsb_release -sd) == "Ubuntu 18.04"* ]]
 }
 
 is_ubuntu_20() {
-    [[ $(lsb_release -sr) = "20"* ]]
+    [[ $(lsb_release -sd) = "Ubuntu 20.04"* ]]
 }
 
 is_rhel() {
@@ -44,11 +44,11 @@ is_centos() {
 }
 
 is_centos_7() {
-    [[ $(lsb_release -sr) == "7"* ]]
+    [[ $(lsb_release -sd) == "\"CentOS Linux release 7"* ]]
 }
 
 is_centos_8() {
-    [[ $(lsb_release -sr) == "8"* ]]
+    [[ $(lsb_release -sd) == "\"CentOS Linux release 8"* ]]
 }
 
 install_ssmagent() {
@@ -67,13 +67,10 @@ install_ssmagent() {
 install_openscap() {
 
     if is_rhel || is_centos; then
-        echo "installing OpenSCAP on Red Hat Enterprise Linux..."
         yum install -y openscap openscap-scanner scap-security-guide
     elif is_amazonlinux2; then
-        echo "installing OpenSCAP on Amazon Linux 2..."
         yum install -y openscap openscap-scanner scap-security-guide
     elif is_ubuntu; then
-        echo "installing OpenSCAP on Ubuntu..."
         apt-get install -y libopenscap8 ssg-debian ssg-debderived
     else
         echo "operating system not supported with OpenSCAP..."
@@ -114,41 +111,45 @@ oscap_generate_fix() {
 }
 
 migrate_and_mount_disk() {
-  local DISK_NAME=$1
-  local FOLDER_PATH=$2
-  local TEMP_PATH="/mnt${FOLDER_PATH}"
-  local OLD_PATH="${FOLDER_PATH}-old"
+    local DISK_NAME=$1
+    local FOLDER_PATH=$2
+    local TEMP_PATH="/mnt${FOLDER_PATH}"
+    local OLD_PATH="${FOLDER_PATH}-old"
 
-  echo "applying ext4 filesystem to ${DISK_NAME}"
-  mkfs -t ext4 ${DISK_NAME}
+    echo "applying ext4 filesystem to ${DISK_NAME}"
+    mkfs -t ext4 ${DISK_NAME}
 
-  if [ -d "${FOLDER_PATH}" ]; then
+    if [ -d "${FOLDER_PATH}" ]; then
 
-    echo "making temporary mount point for ${TEMP_PATH}"
-    mkdir -p ${TEMP_PATH}
+        echo "making temporary mount point for ${TEMP_PATH}"
+        mkdir -p ${TEMP_PATH}
 
-    echo "mounting ${DISK_NAME} to ${TEMP_PATH}"
-    mount ${DISK_NAME} ${TEMP_PATH}
+        echo "mounting ${DISK_NAME} to ${TEMP_PATH}"
+        mount ${DISK_NAME} ${TEMP_PATH}
 
-    echo "migrating existing content to the temp location"
-    cp -Rax ${FOLDER_PATH}/* ${TEMP_PATH}
+        echo "migrating existing content to the temp location"
+        cp -Rax ${FOLDER_PATH}/* ${TEMP_PATH}
 
-    echo "migrate existing folder to old location"
-    mv ${FOLDER_PATH} ${OLD_PATH}
+        echo "migrate existing folder to old location"
+        mv ${FOLDER_PATH} ${OLD_PATH}
 
-    echo "unmounting ${DISK_NAME}"
-    umount ${DISK_NAME}
+        echo "unmounting ${DISK_NAME}"
+        umount ${DISK_NAME}
 
-  fi
+    fi
 
-  echo "recreate ${FOLDER_PATH}"
-  mkdir -p ${FOLDER_PATH}
+    echo "recreate ${FOLDER_PATH}"
+    mkdir -p ${FOLDER_PATH}
 
-  echo "updating /etc/fstab with UUID of ${DISK_NAME} and ${FOLDER_PATH}"
-  echo "UUID=$(blkid -s UUID -o value ${DISK_NAME}) ${FOLDER_PATH} ext4 defaults,nofail 0 1" >> /etc/fstab
+    echo "updating /etc/fstab with UUID of ${DISK_NAME} and ${FOLDER_PATH}"
+    echo "UUID=$(blkid -s UUID -o value ${DISK_NAME}) ${FOLDER_PATH} ext4 defaults,nofail 0 1" >> /etc/fstab
 
-  echo "mounting disk to system"
-  mount -a
+    echo "mounting disk to system"
+    mount -a
+
+    if selinuxenabled; then
+        restorecon -R ${FOLDER_PATH}
+    fi
 }
 
 partition_disks() {
