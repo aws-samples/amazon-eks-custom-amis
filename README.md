@@ -12,7 +12,7 @@ Lack of support in this repository does not indicate that you can't meet complia
 |:---|:---:|:---:|:---:|
 | Amazon Linux | 2 | :white_check_mark: | CIS Benchmark |
 | Ubuntu | 18.04 | :white_check_mark: | |
-| Ubuntu | 20.04 | :x: | |
+| Ubuntu | 20.04 | :white_check_mark: | |
 | Red Hat Enterprise Linux | 7 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
 | Red Hat Enterprise Linux | 8 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
 | CentOS | 7 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS |
@@ -114,8 +114,9 @@ make build-al2-1.18
 | Distribution | Version | Supported |
 |:---|:---:|:---:|
 | Ubuntu | 18.04 | `build-ubuntu1804-<eks major version>` |
+| Ubuntu | 20.04 | `build-ubuntu2004-<eks major version>` |
 
-Ubuntu 18.04 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components.
+Ubuntu AMIs are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components.
 
 ```bash
 # build ubuntu 18.04 for amazon eks 1.15
@@ -129,6 +130,20 @@ make build-ubuntu1804-1.17
 
 # build ubuntu 18.04 for amazon eks 1.18
 make build-ubuntu1804-1.18
+```
+
+```bash
+# build ubuntu 20.04 for amazon eks 1.15
+make build-ubuntu2004-1.15
+
+# build ubuntu 20.04 for amazon eks 1.16
+make build-ubuntu2004-1.16
+
+# build ubuntu 20.04 for amazon eks 1.17
+make build-ubuntu2004-1.17
+
+# build ubuntu 20.04 for amazon eks 1.18
+make build-ubuntu2004-1.18
 ```
 
 #### Red Hat Enterprise Linux
