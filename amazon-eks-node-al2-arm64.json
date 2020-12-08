@@ -76,6 +76,19 @@
   ],
   "provisioners":[
     {
+      "type": "shell",
+      "inline": [
+        "mkdir -p /etc/packer/files",
+        "chown -R {{user `source_ami_ssh_user`}}:{{user `source_ami_ssh_user`}} /etc/packer/files"
+      ],
+      "execute_command":"echo 'packer' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'"
+    },
+    {
+      "type": "file",
+      "source": "./files/",
+      "destination": "/etc/packer/files"
+    },
+    {
       "type":"shell",
       "script":"./scripts/al2/boilerplate.sh",
       "environment_vars": [

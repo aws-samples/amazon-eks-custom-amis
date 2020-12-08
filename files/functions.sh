@@ -1,56 +1,222 @@
 #!/usr/bin/env bash
 
+################################################################
+# Wait for the cloud-init process to finish before moving
+# to the next step.
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 finishes when the cloud-init process is complete
+################################################################
 wait_for_cloudinit() {
-    while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 5; done
+    while [ ! -f /var/lib/cloud/instance/boot-finished ]; do 
+        echo 'waiting for cloud-init to finish running...'
+        sleep 5 
+    done
 }
 
+get_arch() {
+    local machine_arch=$(uname -m)
+
+    if [ "$machine_arch" == "x86_64" ]; then
+        echo "amd64"
+    elif [ "$machine_arch" == "aarch64" ]; then
+        echo "arm64"
+    else
+        echo "Unknown machine architecture '$MACHINE'" >&2
+        exit 1
+    fi
+}
+
+################################################################
+# Install the AWS CLI based on the CPU architecture.
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 after a successful installation
+################################################################
 install_awscliv2() {
-    curl -o awscliv2.zip "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip"
-    unzip awscliv2.zip
+    local awscli_package_name="awscliv2.zip"
+
+    # download the awscli package from aws
+    curl -sL -o $awscli_package_name "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip"
+
+    # unzip the package
+    unzip $awscli_package_name
+
+    # install the aws cli package
     ./aws/install -i /usr/local/aws-cli -b /usr/bin
-    rm -f awscliv2.zip
+
+    # cleanup the installer
+    rm -f $awscli_package_name
 }
 
+################################################################
+# Test if it is Amazon Linux 2
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 - true
+#   1 - false
+################################################################
 is_amazonlinux2() {
-    [[ $(lsb_release -sd) == "\"Amazon Linux"* ]]
+    [[ $(lsb_release -sd) == "\"Amazon Linux release 2"* ]]
 }
 
+################################################################
+# Test if it is Ubuntu based released
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 - true
+#   1 - false
+################################################################
 is_ubuntu() {
     [[ $(lsb_release -sd) == "Ubuntu"* ]]
 }
 
+################################################################
+# Test if it is Ubuntu 18.04
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 - true
+#   1 - false
+################################################################
 is_ubuntu_18() {
     [[ $(lsb_release -sd) == "Ubuntu 18.04"* ]]
 }
 
+################################################################
+# Test if it is Ubuntu 20.04
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 - true
+#   1 - false
+################################################################
 is_ubuntu_20() {
     [[ $(lsb_release -sd) = "Ubuntu 20.04"* ]]
 }
 
+################################################################
+# Test if it is Red Hat Enterprise Linux
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 - true
+#   1 - false
+################################################################
 is_rhel() {
     [[ $(lsb_release -sd) == "\"Red Hat"* ]]
 }
 
+################################################################
+# Test if it is Red Hat Enterprise Linux 7
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 - true
+#   1 - false
+################################################################
 is_rhel_7() {
-    [[ $(lsb_release -sr) == "7"* ]]
+    [[ $(lsb_release -sd) == "\"Red Hat Enterprise Linux release 7"* ]]
 }
 
+################################################################
+# Test if it is Red Hat Enterprise Linux 8
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 - true
+#   1 - false
+################################################################
 is_rhel_8() {
-    [[ $(lsb_release -sr) == "8"* ]]
+    [[ $(lsb_release -sd) == "\"Red Hat Enterprise Linux release 8"* ]]
 }
 
+################################################################
+# Test if it is CentOS based release
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 - true
+#   1 - false
+################################################################
 is_centos() {
     [[ $(lsb_release -sd) == "\"CentOS"* ]]
 }
 
+################################################################
+# Test if it is CentOS 7 release
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 - true
+#   1 - false
+################################################################
 is_centos_7() {
     [[ $(lsb_release -sd) == "\"CentOS Linux release 7"* ]]
 }
 
+################################################################
+# Test if it is CentOS 8 release
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 - true
+#   1 - false
+################################################################
 is_centos_8() {
     [[ $(lsb_release -sd) == "\"CentOS Linux release 8"* ]]
 }
 
+################################################################
+# Install the AWS SSM agent based on the operating system
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 after a successful installation
+################################################################
 install_ssmagent() {
 
     if is_ubuntu; then
@@ -64,6 +230,16 @@ install_ssmagent() {
 
 }
 
+################################################################
+# Install the OpenSCAP based on the operating system
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   0 after a successful installation
+################################################################
 install_openscap() {
 
     if is_rhel || is_centos; then
@@ -73,27 +249,67 @@ install_openscap() {
     elif is_ubuntu; then
         apt-get install -y libopenscap8 ssg-debian ssg-debderived
     else
-        echo "operating system not supported with OpenSCAP..."
+        echo "failed to install the openscap libraries"
         exit 1
     fi
 }
 
+################################################################
+# Install jq based on the operating system
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   None
+################################################################
 install_jq() {
     curl -sL -o /usr/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
     chmod +x /usr/bin/jq
 }
 
+################################################################
+# Install iptables-restore service
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   None
+################################################################
+install_iptables_restore() {
+    mkdir -p /etc/sysconfig
+    bash -c "/sbin/iptables-save > /etc/sysconfig/iptables"
+    curl -sL -o /etc/systemd/system/iptables-restore.service https://raw.githubusercontent.com/awslabs/amazon-eks-ami/master/files/iptables-restore.service
+    systemctl daemon-reload && systemctl enable iptables-restore
+}
+
+################################################################
+# Generate the OpenSCAP fix shell script to harden to the
+# operating system
+# 
+# Globals:
+#   None
+# Arguments:
+#   1 - the openscap data source file path
+#   2 - the openscap profile name
+#   3 - (optional) the openscap tailoring file
+# Outputs:
+#   None
+################################################################
 oscap_generate_fix() {
     local oscap_source=$1
     local oscap_profile=$2
     local oscap_tailoring_file=${3:-}
 
-    echo "attempting to install OpenSCAP..."
+    # install openscap dependencies
     install_openscap
 
+    # check if the tailoring file is provided
     if [ ! -z "${oscap_tailoring_file}" ]; then
 
-        echo "generating hardening script using ${oscap_profile} from ${oscap_tailoring_file} based on ${oscap_source}..."
         oscap xccdf generate fix \
             --output /etc/packer/hardening.sh \
             --tailoring-file $oscap_tailoring_file \
@@ -102,7 +318,6 @@ oscap_generate_fix() {
 
     else
 
-        echo "generating hardening script using ${oscap_profile} from ${oscap_source}..."
         oscap xccdf generate fix \
             --output /etc/packer/hardening.sh \
             --profile $oscap_profile \
@@ -110,55 +325,63 @@ oscap_generate_fix() {
     fi
 }
 
+################################################################
+# Migrate existing folder to a new partition
+# 
+# Globals:
+#   None
+# Arguments:
+#   1 - the path of the disk or partition
+#   2 - the folder path to migration
+# Outputs:
+#   None
+################################################################
 migrate_and_mount_disk() {
-    local DISK_NAME=$1
-    local FOLDER_PATH=$2
-    local TEMP_PATH="/mnt${FOLDER_PATH}"
-    local OLD_PATH="${FOLDER_PATH}-old"
+    local disk_name=$1
+    local folder_path=$2
+    local temp_path="/mnt${folder_path}"
+    local old_path="${folder_path}-old"
 
-    echo "applying ext4 filesystem to ${DISK_NAME}"
-    mkfs -t ext4 ${DISK_NAME}
+    # install an ext4 filesystem to the disk
+    mkfs -t ext4 ${disk_name}
 
-    if [ -d "${FOLDER_PATH}" ]; then
-
-        echo "making temporary mount point for ${TEMP_PATH}"
-        mkdir -p ${TEMP_PATH}
-
-        echo "mounting ${DISK_NAME} to ${TEMP_PATH}"
-        mount ${DISK_NAME} ${TEMP_PATH}
-
-        echo "migrating existing content to the temp location"
-        cp -Rax ${FOLDER_PATH}/* ${TEMP_PATH}
-
-        echo "migrate existing folder to old location"
-        mv ${FOLDER_PATH} ${OLD_PATH}
-
-        echo "unmounting ${DISK_NAME}"
-        umount ${DISK_NAME}
-
+    # check if the folder already exists
+    if [ -d "${folder_path}" ]; then
+        mkdir -p ${temp_path}
+        mount ${disk_name} ${temp_path}
+        cp -Rax ${folder_path}/* ${temp_path}
+        mv ${folder_path} ${old_path}
+        umount ${disk_name}
     fi
 
-    echo "recreate ${FOLDER_PATH}"
-    mkdir -p ${FOLDER_PATH}
+    # create the folder
+    mkdir -p ${folder_path}
 
-    echo "updating /etc/fstab with UUID of ${DISK_NAME} and ${FOLDER_PATH}"
-    echo "UUID=$(blkid -s UUID -o value ${DISK_NAME}) ${FOLDER_PATH} ext4 defaults,nofail 0 1" >> /etc/fstab
-
-    echo "mounting disk to system"
+    # add the mount point to fstab and mount the disk
+    echo "UUID=$(blkid -s UUID -o value ${disk_name}) ${folder_path} ext4 defaults,nofail 0 1" >> /etc/fstab
     mount -a
 
+    # if selinux is enabled restore the objects on it
     if selinuxenabled; then
-        restorecon -R ${FOLDER_PATH}
+        restorecon -R ${folder_path}
     fi
 }
 
+################################################################
+# Partition the disks based on the standard layout for common
+# hardening frameworks
+# 
+# Globals:
+#   None
+# Arguments:
+#   1 - the name of the disk
+# Outputs:
+#   None
+################################################################
 partition_disks() {
     local disk_name=$1
 
-    echo "show all disks on the system"
-    lsblk
-
-    echo "partition ${disk_name} into 5 parts for /var, /var/log, /var/log/audit, /home, /var/lib/docker"
+    # partition the disk
     parted -a optimal -s $disk_name \
         mklabel gpt \
         mkpart var ext4 0% 20% \
@@ -167,10 +390,10 @@ partition_disks() {
         mkpart home ext4 60% 70% \
         mkpart varlibdocker ext4 70% 90%
 
-    echo "waiting for disks to settle"
+    # wait for the disks to settle
     sleep 5
 
-    echo "migrating /var, /var/log, /var/log/audit, /home, /var/lib/docker to new partitions"
+    # migrate and mount the existing
     migrate_and_mount_disk "${disk_name}p1" /var
     migrate_and_mount_disk "${disk_name}p2" /var/log
     migrate_and_mount_disk "${disk_name}p3" /var/log/audit
@@ -178,6 +401,17 @@ partition_disks() {
     migrate_and_mount_disk "${disk_name}p5" /var/lib/docker
 }
 
+################################################################
+# Configure the host with HTTP_PROXY, HTTPS_PROXY, and NO_PROXY
+# by setting values in /etc/environment
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   None
+################################################################
 configure_http_proxy() {
     touch /etc/environment
 
@@ -197,6 +431,34 @@ configure_http_proxy() {
     fi
 }
 
+configure_docker_environment() {
+    local docker_dir="/etc/systemd/system/docker.service.d"
+    local docker_env_file="${docker_dir}/environment.conf"
+
+    mkdir -p "${docker_dir}"
+    echo "[Service]" >> "${docker_env_file}"
+    echo "EnvironmentFile=/etc/environment" >> "${docker_env_file}"
+}
+
+configure_kubelet_environment() {
+    local kubelet_dir="/etc/systemd/system/kubelet.service.d"
+    local kubelet_env_file="${kubelet_dir}/environment.conf"
+
+    mkdir -p "${kubelet_dir}"
+    echo "[Service]" >> "${kubelet_env_file}"
+    echo "EnvironmentFile=/etc/environment" >> "${kubelet_env_file}"
+}
+
+################################################################
+# Enable FIPS 140-2 mode on the operating system
+# 
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   None
+################################################################
 enable_fips() {
 
     if is_rhel_7; then
@@ -222,6 +484,7 @@ enable_fips() {
         fips-mode-setup --enable
     else
         echo "FIPS 140-2 is not supported on this operating system."
+        exit 1
     fi
 
 }

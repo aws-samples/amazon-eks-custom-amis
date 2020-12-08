@@ -4,7 +4,7 @@ This repository contains [Packer](https://packer.io/) scripts and definitions to
 
 This repository also applies the Docker CIS Benchmark and Amazon EKS CIS Benchmark to all AMIs. We also support a number of optional hardening benchmarks such as DISA STIG, PCI-DSS, and HIPAA. These are based on [OpenSCAP](https://www.open-scap.org/) and other open source hardening guidelines.
 
-*Scripts and artifacts created by this repository do not gaurentee compliance and these AMIs are not officially supported by AWS. Ensure your security and compliance teams thoroughly review these scripts before moving AMIs into production.*
+*Scripts and artifacts created by this repository do not guarantee compliance and these AMIs are not officially supported by AWS. Ensure your security and compliance teams thoroughly review these scripts before moving AMIs into production.*
 
 Lack of support in this repository does not indicate that you can't meet compliance with Amazon EKS, it simply means it is not supported by this repository. We welcome pull requests!
 
@@ -93,7 +93,7 @@ The following operating systems are supported by this repository. This repositor
 |:---|:---:|:---:|:---:|
 | Amazon Linux | 2 | `build-al2-<eks major version>` | `hardening_flag=cis` |
 
-The Amazon Linux 2 EKS Optmized AMI is used as the base for this image. This image extends the EKS Optimized AMI to apply the Amazon Linux 2 CIS Benchmark, Docker CIS Benchmark, and Amazon EKS CIS Benchmark. These benchmarks are typically used to meet NIST 800-53 controls. Hardening is provided as a "best effort" and does not gaurentee compliance with the above frameworks.
+The Amazon Linux 2 EKS Optmized AMI is used as the base for this image. This image extends the EKS Optimized AMI to apply the Amazon Linux 2 CIS Benchmark, Docker CIS Benchmark, and Amazon EKS CIS Benchmark. These benchmarks are typically used to meet NIST 800-53 controls. Hardening is provided as a "best effort" and does not guarantee compliance with the above frameworks.
 
 ```bash
 # build amazon linux 2 for amazon eks 1.15
@@ -153,7 +153,7 @@ make build-ubuntu2004-1.18
 | Red Hat Enterprise Linux | 7 | `build-rhel7-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` | `hardening_flag=stig` |
 | Red Hat Enterprise Linux | 8 | `build-rhel8-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` | `hardening_flag=stig` |
 
-Red Hat Enterprise Linux 7/8 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components. OpenSCAP is used to apply the above hardening frameworks. Hardening is provided as a "best effort" and does not gaurentee compliance with the above frameworks. Certain adjustments are made in order to work with Amazon EKS:
+Red Hat Enterprise Linux 7/8 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components. OpenSCAP is used to apply the above hardening frameworks. Hardening is provided as a "best effort" and does not guarantee compliance with the above frameworks. Certain adjustments are made in order to work with Amazon EKS:
 
 - This repository leverages the latest version of [Docker CE](https://docs.docker.com/install/) available from Docker. The version of Docker that comes with RHEL 7 is out of date and overidden with the Docker CE repository.
 - The `firewalld` serivce is disable to support Docker and Kubernetes.
@@ -201,7 +201,7 @@ make build-rhel8-1.18
 | CentOS | 7 | `build-centos7-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` |
 | CentOS | 8 | `build-centos8-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` |
 
-CentOS 7/8 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components. OpenSCAP is used to apply the above hardening frameworks. Hardening is provided as a "best effort" and does not gaurentee compliance with the above frameworks. Certain adjustments are made in order to work with Amazon EKS:
+CentOS 7/8 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components. OpenSCAP is used to apply the above hardening frameworks. Hardening is provided as a "best effort" and does not guarantee compliance with the above frameworks. Certain adjustments are made in order to work with Amazon EKS:
 
 - The `firewalld` serivce is disable to support Docker and Kubernetes.
 - While FIPS 140-2 modules can be applied to CentOS, CentOS has not been formally validated.

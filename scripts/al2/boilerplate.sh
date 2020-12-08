@@ -21,20 +21,8 @@ partition_disks /dev/nvme2n1
 
 echo "configuring /etc/environment"
 configure_http_proxy
-
-mkdir -p /etc/systemd/system/kubelet.service.d
-
-cat > /etc/systemd/system/kubelet.service.d/environment.conf <<EOF
-[Service]
-EnvironmentFile=/etc/environment
-EOF
-
-mkdir -p /etc/systemd/system/docker.service.d
-
-cat > /etc/systemd/system/docker.service.d/environment.conf <<EOF
-[Service]
-EnvironmentFile=/etc/environment
-EOF
+configure_docker_environment
+configure_kubelet_environment
 
 echo "rebooting the instance"
 reboot

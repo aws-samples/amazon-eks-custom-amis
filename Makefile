@@ -16,16 +16,16 @@ build:
 # Amazon Linux 2
 #-----------------------------------------------------
 build-al2-1.15:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.15.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.15
 
 build-al2-1.16:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.16.13 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.16
 
 build-al2-1.17:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.17.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.17
 
 build-al2-1.18:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.18.8 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.18
 
 # Ubuntu 18.04
 #-----------------------------------------------------

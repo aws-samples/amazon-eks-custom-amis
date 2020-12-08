@@ -59,38 +59,7 @@ fi
 ################################################################################
 ### iptables ###################################################################
 ################################################################################
-
-if is_ubuntu; then
-
-echo "configuring iptables-restore for Ubuntu..."
-
-bash -c "/sbin/iptables-save > /etc/iptables.rules"
-
-cat > /etc/systemd/system/iptables-restore.service <<EOF
-[Unit]
-Description=Restore iptables
-# iptables-restore must start after docker because docker will
-# reconfigure iptables to drop forwarded packets.
-After=docker.service
-
-[Service]
-Type=oneshot
-ExecStart=/bin/bash -c "/sbin/iptables-restore < /etc/iptables.rules"
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-else
-
-echo "configuring iptables-restore for Red Hat..."
-mkdir -p /etc/sysconfig/
-bash -c "/sbin/iptables-save > /etc/sysconfig/iptables"
-curl -sL -o /etc/systemd/system/iptables-restore.service https://raw.githubusercontent.com/awslabs/amazon-eks-ami/master/files/iptables-restore.service
-
-fi
-
-systemctl daemon-reload && systemctl enable iptables-restore
+install_iptables_restore
 
 ################################################################################
 ### Logrotate ##################################################################
@@ -165,10 +134,7 @@ chown root:root /etc/systemd/system/kubelet.service
 curl -sL -o /etc/kubernetes/kubelet/kubelet-config.json https://raw.githubusercontent.com/awslabs/amazon-eks-ami/master/files/kubelet-config.json
 chown root:root /etc/kubernetes/kubelet/kubelet-config.json
 
-cat > /etc/systemd/system/kubelet.service.d/environment.conf <<EOF
-[Service]
-EnvironmentFile=/etc/environment
-EOF
+configure_kubelet_environment
 
 systemctl daemon-reload && systemctl disable kubelet
 

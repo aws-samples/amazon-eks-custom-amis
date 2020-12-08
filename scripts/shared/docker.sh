@@ -6,15 +6,7 @@ set -o errexit
 
 source /etc/packer/files/functions.sh
 
-MACHINE=$(uname -m)
-if [ "$MACHINE" == "x86_64" ]; then
-    ARCH="amd64"
-elif [ "$MACHINE" == "aarch64" ]; then
-    ARCH="arm64"
-else
-    echo "Unknown machine architecture '$MACHINE'" >&2
-    exit 1
-fi
+ARCH=$(get_arch)
 
 if (is_rhel && is_rhel_7) || (is_centos && is_centos_7); then
 
@@ -116,11 +108,7 @@ EOF
 
 chown root:root /etc/docker/daemon.json
 
-# add an environment file
-cat > /etc/systemd/system/docker.service.d/environment.conf <<EOF
-[Service]
-EnvironmentFile=/etc/environment
-EOF
+configure_docker_environment
 
 systemctl daemon-reload
 systemctl enable docker && systemctl start docker
