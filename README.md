@@ -15,8 +15,8 @@ Lack of support in this repository does not indicate that you can't meet complia
 | Ubuntu | 20.04 | :white_check_mark: | |
 | Red Hat Enterprise Linux | 7 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
 | Red Hat Enterprise Linux | 8 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
-| CentOS | 7 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS |
-| CentOS | 8 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS|
+| CentOS | 7 | :warning: ([deprecated](https://blog.centos.org/2020/12/future-is-centos-stream/)) | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS |
+| CentOS | 8 | :warning: ([deprecated](https://blog.centos.org/2020/12/future-is-centos-stream/)) | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS|
 
 ## Installing Dependencies
 

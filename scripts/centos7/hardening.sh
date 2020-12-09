@@ -45,3 +45,7 @@ if [ -f /etc/packer/hardening.sh ]; then
   bash /etc/packer/hardening.sh
 fi
 
+if [ -f /etc/packer/hardening.sh ]; then
+  bash /etc/packer/hardening.sh
+fi
+

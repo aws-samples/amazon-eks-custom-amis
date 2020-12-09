@@ -9,16 +9,7 @@ source /etc/packer/files/functions.sh
 ################################################################################
 ### Machine Architecture #######################################################
 ################################################################################
-
-MACHINE=$(uname -m)
-if [ "$MACHINE" == "x86_64" ]; then
-    ARCH="amd64"
-elif [ "$MACHINE" == "aarch64" ]; then
-    ARCH="arm64"
-else
-    echo "Unknown machine architecture '$MACHINE'" >&2
-    exit 1
-fi
+ARCH=$(get_arch)
 
 # install dependencies
 
