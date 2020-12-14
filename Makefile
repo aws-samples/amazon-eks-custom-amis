@@ -30,85 +30,85 @@ build-al2-1.18:
 # Ubuntu 18.04
 #-----------------------------------------------------
 build-ubuntu1804-1.15:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=1.15.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=1.15.12 eks_build_date=2020-11-02
 
 build-ubuntu1804-1.16:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=1.16.13 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=1.16.15 eks_build_date=2020-11-02
 
 build-ubuntu1804-1.17:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=1.17.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=1.17.12 eks_build_date=2020-11-02
 
 build-ubuntu1804-1.18:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=1.18.8 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=1.18.9 eks_build_date=2020-11-02
 
 # Ubuntu 20.04
 #-----------------------------------------------------
 build-ubuntu2004-1.15:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=1.15.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=1.15.12 eks_build_date=2020-11-02
 
 build-ubuntu2004-1.16:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=1.16.13 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=1.16.15 eks_build_date=2020-11-02
 
 build-ubuntu2004-1.17:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=1.17.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=1.17.12 eks_build_date=2020-11-02
 
 build-ubuntu2004-1.18:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=1.18.8 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=1.18.9 eks_build_date=2020-11-02
 
 # RHEL 7
 #-----------------------------------------------------
 build-rhel7-1.15:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=1.15.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=1.15.12 eks_build_date=2020-11-02
 
 build-rhel7-1.16:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=1.16.13 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=1.16.15 eks_build_date=2020-11-02
 
 build-rhel7-1.17:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=1.17.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=1.17.12 eks_build_date=2020-11-02
 
 build-rhel7-1.18:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=1.18.8 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=1.18.9 eks_build_date=2020-11-02
 
 # RHEL 8
 #-----------------------------------------------------
 build-rhel8-1.15:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=1.15.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=1.15.12 eks_build_date=2020-11-02
 
 build-rhel8-1.16:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=1.16.13 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=1.16.15 eks_build_date=2020-11-02
 
 build-rhel8-1.17:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=1.17.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=1.17.12 eks_build_date=2020-11-02
 
 build-rhel8-1.18:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=1.18.8 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=1.18.9 eks_build_date=2020-11-02
 
 # CentOS 7
 #-----------------------------------------------------
 build-centos7-1.15:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=1.15.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=1.15.12 eks_build_date=2020-11-02
 
 build-centos7-1.16:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=1.16.13 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=1.16.15 eks_build_date=2020-11-02
 
 build-centos7-1.17:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=1.17.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=1.17.12 eks_build_date=2020-11-02
 
 build-centos7-1.18:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=1.18.8 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=1.18.9 eks_build_date=2020-11-02
 
 # CentOS 8
 #-----------------------------------------------------
 build-centos8-1.15:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=1.15.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=1.15.12 eks_build_date=2020-11-02
 
 build-centos8-1.16:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=1.16.13 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=1.16.15 eks_build_date=2020-11-02
 
 build-centos8-1.17:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=1.17.11 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=1.17.12 eks_build_date=2020-11-02
 
 build-centos8-1.18:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=1.18.8 eks_build_date=2020-09-18
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=1.18.9 eks_build_date=2020-11-02
 
 
