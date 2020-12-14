@@ -244,13 +244,12 @@ make build-centos8-1.18
 
 Amazon EKS builds and tests specific versions of Kubernetes together for compatability. It is important that you use versions that have been tested together.
 
-| Kubernetes Version | Build Date | CNI Plugins Version |
+| Kubernetes Version | Build Date |
 |---|:---:|:---:|
-| 1.18.8 | 2020-09-18 | v0.8.6 |
-| 1.17.11 | 2020-09-18 | v0.8.6 |
-| 1.16.13 | 2020-09-18 | v0.8.6 |
-| 1.15.11 | 2020-09-18 | v0.8.6 |
-| 1.14.9 | 2020-09-18 | v0.8.6 |
+| 1.18.9 | 2020-11-02 |
+| 1.17.12 | 2020-11-02 |
+| 1.16.15 | 2020-11-02 |
+| 1.15.12 | 2020-11-02 |
 
 To get the list of support Kubernetes versions run the following command:
 
