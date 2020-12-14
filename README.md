@@ -15,8 +15,8 @@ Lack of support in this repository does not indicate that you can't meet complia
 | Ubuntu | 20.04 | :white_check_mark: | |
 | Red Hat Enterprise Linux | 7 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
 | Red Hat Enterprise Linux | 8 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
-| CentOS | 7 | :warning: ([deprecated](https://blog.centos.org/2020/12/future-is-centos-stream/)) | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS |
-| CentOS | 8 | :warning: ([deprecated](https://blog.centos.org/2020/12/future-is-centos-stream/)) | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS|
+| CentOS | 7 | :warning: ([Changing to CentOS Stream](https://blog.centos.org/2020/12/future-is-centos-stream/)) | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS |
+| CentOS | 8 | :warning: ([Changing to CentOS Stream](https://blog.centos.org/2020/12/future-is-centos-stream/)) | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS|
 
 ## Installing Dependencies
 
@@ -41,8 +41,8 @@ make build-<operating system>-<eks major version>
 | `AWS_REGION` | | The AWS Region to use for the packer instance |
 | `VPC_ID` | | The AWS VPC to use for the packer instance |
 | `SUBNET_ID`| | The AWS Subnet to use for the packer instance |
-| `eks_version`| `1.18.8` | The version of Kubernetes to install. See blow for information on how to get this value. |
-| `eks_build_date`| `2020-09-18` | The build date of the Kubernetes build |
+| `eks_version`| `1.18.9` | The version of Kubernetes to install. See blow for information on how to get this value. |
+| `eks_build_date`| `2020-11-02` | The build date of the Kubernetes build |
 | `cni_plugin_version`| `v0.8.6` | The version of the Kubernetes Container Networking Interface (CNI) plugin to install |
 | `http_proxy` |  | Specify an HTTP Proxy to use when running commands on the server. This will set the `http_proxy` and `HTTP_PROXY` environment variables on the server while commands are running. |
 | `https_proxy` |  | Specify an HTTPS Proxy to use when running commands on the server. This will set the `https_proxy` and `HTTPS_PROXY` environment variables on the server while commands are running. |
