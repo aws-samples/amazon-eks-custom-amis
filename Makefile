@@ -25,6 +25,35 @@ build:
 		$(foreach packerVar,$(PACKER_VARIABLES), $(if $($(packerVar)),--var $(packerVar)='$($(packerVar))',)) \
 		$(PACKER_FILE)
 
+all-1.16:
+	$(MAKE) build-al2-1.16
+	$(MAKE) build-ubuntu1804-1.16
+	$(MAKE) build-ubuntu2004-1.16
+	$(MAKE) build-rhel7-1.16
+	$(MAKE) build-rhel8-1.16
+	$(MAKE) build-centos7-1.16
+	$(MAKE) build-centos8-1.16
+
+
+all-1.17:
+	$(MAKE) build-al2-1.17
+	$(MAKE) build-ubuntu1804-1.17
+	$(MAKE) build-ubuntu2004-1.17
+	$(MAKE) build-rhel7-1.17
+	$(MAKE) build-rhel8-1.17
+	$(MAKE) build-centos7-1.17
+	$(MAKE) build-centos8-1.17
+
+
+all-1.18:
+	$(MAKE) build-al2-1.18
+	$(MAKE) build-ubuntu1804-1.18
+	$(MAKE) build-ubuntu2004-1.18
+	$(MAKE) build-rhel7-1.18
+	$(MAKE) build-rhel8-1.18
+	$(MAKE) build-centos7-1.18
+	$(MAKE) build-centos8-1.18
+
 # Amazon Linux 2
 #-----------------------------------------------------
 build-al2-1.15:

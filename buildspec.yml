@@ -1,0 +1,11 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - yum install -y yum-utils
+      - yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+      - yum -y install packer make
+  build:
+    commands:
+      - make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID $TARGET_NAME  
