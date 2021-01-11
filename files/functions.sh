@@ -218,7 +218,6 @@ is_centos_8() {
 #   0 after a successful installation
 ################################################################
 install_ssmagent() {
-
     if is_ubuntu; then
         snap install amazon-ssm-agent --classic
         systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
@@ -241,7 +240,6 @@ install_ssmagent() {
 #   0 after a successful installation
 ################################################################
 install_openscap() {
-
     if is_rhel || is_centos; then
         yum install -y openscap openscap-scanner scap-security-guide
     elif is_amazonlinux2; then
@@ -460,7 +458,6 @@ configure_kubelet_environment() {
 #   None
 ################################################################
 enable_fips() {
-
     if is_rhel_7; then
 
         # install dependencies
@@ -486,5 +483,4 @@ enable_fips() {
         echo "FIPS 140-2 is not supported on this operating system."
         exit 1
     fi
-
 }
