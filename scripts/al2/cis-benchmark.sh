@@ -15,10 +15,9 @@ tmpfs_and_mount() {
 unload_module() {
   local fsname=$1
 
-  if rmmod ${fsname}; then
-    mkdir -p /etc/modprobe.d/
-    echo "install ${fsname} /bin/true" > /etc/modprobe.d/${fsname}.conf
-  fi
+  rmmod "${fsname}" || true
+  mkdir -p /etc/modprobe.d/
+  echo "install ${fsname} /bin/true" > "/etc/modprobe.d/${fsname}.conf"
 }
 
 systemd_disable() {
