@@ -12,10 +12,7 @@
 #   0 finishes when the cloud-init process is complete
 ################################################################
 wait_for_cloudinit() {
-    while [ ! -f /var/lib/cloud/instance/boot-finished ]; do 
-        echo 'waiting for cloud-init to finish running...'
-        sleep 5 
-    done
+    cloud-init status --wait
 }
 
 get_arch() {
