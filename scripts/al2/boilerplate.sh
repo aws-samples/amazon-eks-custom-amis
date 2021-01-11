@@ -17,7 +17,7 @@ yum install -y parted system-lsb-core
 amazon-linux-extras install epel -y
 
 echo "ensure secondary disk is mounted to proper locations"
-partition_disks /dev/nvme2n1
+partition_disks /dev/nvme1n1
 
 echo "configuring /etc/environment"
 configure_http_proxy

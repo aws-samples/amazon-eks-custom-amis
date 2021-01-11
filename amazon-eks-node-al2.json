@@ -3,7 +3,7 @@
     "aws_region":"us-east-2",
     "ami_description":"EKS Kubernetes Worker AMI on AmazonLinux2 image (k8s: {{user `eks_version`}})",
     "eks_version":"1.18",
-    "volume_size":"100",
+    "volume_size":"10",
     "vpc_id":"",
     "subnet_id":"",
     "http_proxy": "",
@@ -41,8 +41,8 @@
       "subnet_id":"{{user `subnet_id`}}",
       "launch_block_device_mappings":[
         {
-          "device_name":"/dev/sda1",
-          "volume_size":25,
+          "device_name":"/dev/xvda",
+          "volume_size":4,
           "volume_type":"gp2",
           "delete_on_termination":true
         },
@@ -54,6 +54,12 @@
         }
       ],
       "ami_block_device_mappings":[
+        {
+          "device_name":"/dev/xvda",
+          "volume_size":4,
+          "volume_type":"gp2",
+          "delete_on_termination":true
+        },
         {
           "device_name":"/dev/sdb",
           "volume_size":"{{user `volume_size`}}",
