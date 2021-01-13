@@ -35,7 +35,6 @@ yum_remove() {
   if rpm -q $package_name; then
     yum remove -y $package_name
   fi
-
 }
 
 sysctl_entry() {
@@ -104,7 +103,7 @@ echo "1.1.12 - ensure separate partition exists for /var/log/audit"
 
 echo "1.1.13 - ensure separate partition exists for /home"
 
-echo "1.1.15 - ensure nodev,nosuid,noexec option set on /dev/shm"
+echo "1.1.15 - 1.1.17 - ensure nodev,nosuid,noexec option set on /dev/shm"
 echo "tmpfs  /dev/shm  tmpfs  defaults,nodev,nosuid,noexec  0 0" >> /etc/fstab
 mount -a
 
@@ -480,7 +479,7 @@ echo "4.2.2.1 - ensure syslog-ng service is enabled"
 yum install -y syslog-ng
 systemctl enable syslog-ng && systemctl start syslog-ng
 
-echo "4.2.2.1 - ensure syslog-ng service is enabled"
+echo "4.2.2.2 - Ensure logging is configured"
 echo "log { source(src); source(chroots); filter(f_console); destination(console); };" >> /etc/syslog-ng/conf.d/cis.conf
 echo "log { source(src); source(chroots); filter(f_console); destination(xconsole); };" >> /etc/syslog-ng/conf.d/cis.conf
 echo "log { source(src); source(chroots); filter(f_newscrit); destination(newscrit); };" >> /etc/syslog-ng/conf.d/cis.conf
@@ -619,7 +618,7 @@ ocredit = -1
 lcredit = -1
 EOF
 
-echo "5.3.2 -5.3.4 - Configure PAM"
+echo "5.3.2 - 5.3.4 - Configure PAM"
 cat > /etc/pam.d/password-auth <<EOF
 auth        required      pam_env.so
 auth        sufficient    pam_unix.so try_first_pass nullok
@@ -699,7 +698,7 @@ cat /etc/securetty
 echo "5.6 - ensure access to the su command is restricted"
 echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su
 
-echo "6.1.2 - nsure permissions on /etc/passwd are configured"
+echo "6.1.2 - ensure permissions on /etc/passwd are configured"
 chown root:root /etc/passwd
 chmod 644 /etc/passwd
 

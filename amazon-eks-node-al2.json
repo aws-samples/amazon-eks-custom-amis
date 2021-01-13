@@ -101,7 +101,7 @@
     },
     {
       "type":"shell",
-      "scripts":[
+      "scripts": [
         "./scripts/al2/cis-benchmark.sh",
         "./scripts/shared/cis-docker.sh",
         "./scripts/shared/cis-eks.sh",
