@@ -694,6 +694,10 @@ grep "^root:" /etc/passwd | cut -f4 -d:
 echo "5.4.4 - ensure default user umask is 027 or more restrictive"
 echo "umask 027" >> /etc/bashrc
 echo "umask 027" >> /etc/profile
+# Just adding the umask isn't enough, all existing entries need to be fixed as
+# well.
+sed -i -e 's/\bumask\s\+\(002\|022\)/umask 027/' \
+  /etc/bashrc /etc/profile /etc/profile.d/*.sh
 
 echo "5.4.5 - ensure default user shell timeout is 900 seconds or less"
 echo "TMOUT=600" >> /etc/bashrc
