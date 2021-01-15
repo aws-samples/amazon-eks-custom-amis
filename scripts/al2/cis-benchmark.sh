@@ -512,6 +512,14 @@ echo "4.2.3 - ensure rsyslog or syslog-ng is installed"
 echo "[not scored] - handled by previous steps"
 
 echo "4.2.4 - ensure permissions on all logfiles are configured"
+# Update the systemd unit that produces the dmesg log to have a corrected umask,
+# which results in correct permissions.
+cp /usr/lib/systemd/system/rhel-dmesg.service /etc/systemd/system/rhel-dmesg.service
+sed -i -e '/[Service]/a UMask=0027' /etc/systemd/system/rhel-dmesg.service
+# Update tmpfiles settings to correct the permissions on the wtmp file:
+cp /usr/lib/tmpfiles.d/var.conf /etc/tmpfiles.d/var.conf
+sed -i -e 's|/var/log/wtmp 0664|/var/log/wtmp 0660|' /etc/tmpfiles.d/var.conf
+systemctl daemon-reload
 find /var/log -type f -exec chmod g-wx,o-rwx {} +
 
 echo "4.3 - ensure logrotate is configured"
