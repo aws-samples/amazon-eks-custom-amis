@@ -21,8 +21,8 @@ jobs:
           unzip packer_${VER}_linux_amd64.zip
       - run: echo "`pwd`" >> $GITHUB_PATH
       - run: |
-          export AWS_ACCESS_KEY_ID=sAKIAYFIVTSX2VM6GTVNH
-          export AWS_SECRET_ACCESS_KEY=WAUOZBRqzBfDqyQ4pgkn8FkOyq2mHgGBjVldyipY
+          export AWS_ACCESS_KEY_ID=AKIAYFIVTSX2QXRN5XLX
+          export AWS_SECRET_ACCESS_KEY=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
           export AWS_DEFAULT_REGION=ap-south-1
           make build-al2-1.18
         
