@@ -21,5 +21,7 @@ jobs:
           export VER="1.5.6"
           wget https://releases.hashicorp.com/packer/${VER}/packer_${VER}_linux_amd64.zip
           unzip packer_${VER}_linux_amd64.zip
-          mv packer /usr/local/bin
-          make build-al2-1.18
+      - run: echo "`pwd`" >> $GITHUB_PATH
+      - run: make build-al2-1.18      
+        
+          
