@@ -33,7 +33,7 @@
         ],
         "most_recent":true
       },
-      "instance_type":"m5.xlarge",
+      "instance_type":"m4.xlarge",
       "ssh_username":"{{user `source_ami_ssh_user`}}",
       "ssh_pty":true,
       "subnet_id":"{{user `subnet_id`}}",
