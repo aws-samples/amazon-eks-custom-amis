@@ -8,12 +8,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1.0.1
-        with:
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v1.0.1
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ap-south-
+      - name: Test
+        env:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
+        run: |
+          echo $aws-access-key-id
+          echo $aws-secret-access-key  
       - run: |
           sudo apt-get install build-essential unzip
           export VER="1.5.6"
