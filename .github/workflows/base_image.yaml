@@ -13,8 +13,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: "AKIAYFIVTSX2VM6GTVNH"
-          aws-secret-access-key: "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"
+          aws-access-key-id: ${{ sAKIAYFIVTSX2VM6GTVNH }}
+          aws-secret-access-key: ${{ WAUOZBRqzBfDqyQ4pgkn8FkOyq2mHgGBjVldyipY }}
           aws-region: ap-south-1
       - run: |
           sudo apt-get install build-essential unzip
