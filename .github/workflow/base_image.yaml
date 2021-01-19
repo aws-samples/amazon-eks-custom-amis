@@ -2,7 +2,7 @@ name: cis
 on:
   pull_request:
     branches:
-      - master
+      - main
 jobs:
   pipelines:
     runs-on: ubuntu-latest
