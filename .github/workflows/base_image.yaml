@@ -5,6 +5,7 @@ on:
       - main
 jobs:
   pipelines:
+    environment: AUDIT
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
