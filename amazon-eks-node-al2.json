@@ -1,6 +1,6 @@
 {
   "variables":{
-    "aws_region":"ap-south-1",
+    "aws_region":"us-east-2",
     "ami_description":"EKS Kubernetes Worker AMI on AmazonLinux2 image (k8s: {{user `eks_version`}})",
     "eks_version":"1.18",
     "volume_size":"100",
@@ -11,6 +11,7 @@
     "no_proxy": "",
 
     "source_ami_owner":"602401143452",
+    "source_ami_owner_govcloud":"219670896067",
     "source_ami_ssh_user":"ec2-user",
     "source_ami_arch":"x86_64",
     "source_ami_name":"amazon-eks-node-{{user `eks_version`}}-*",
@@ -29,7 +30,8 @@
           "architecture":"{{user `source_ami_arch`}}"
         },
         "owners":[
-          "{{user `source_ami_owner`}}"
+          "{{user `source_ami_owner`}}",
+          "{{user `source_ami_owner_govcloud`}}"
         ],
         "most_recent":true
       },
@@ -75,16 +77,15 @@
     {
       "type": "shell",
       "inline": [
-        "mkdir -p /tmp/files",
-        "mkdir -p /root/scripts",
-        "chown -R {{user `source_ami_ssh_user`}}:{{user `source_ami_ssh_user`}} /tmp/files"
+        "mkdir -p /etc/packer/files",
+        "chown -R {{user `source_ami_ssh_user`}}:{{user `source_ami_ssh_user`}} /etc/packer/files"
       ],
       "execute_command":"echo 'packer' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'"
     },
     {
       "type": "file",
       "source": "./files/",
-      "destination": "/tmp/files"
+      "destination": "/etc/packer/files"
     },
     {
       "type":"shell",
@@ -97,19 +98,6 @@
       "execute_command":"echo 'packer' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'",
       "expect_disconnect":true,
       "pause_after":"15s"
-    },
-    {
-      "type": "file",
-      "source": "./scripts/al2/cis_script.py",
-      "destination": "/tmp/"
-    },
-    {
-      "type": "shell",
-      "inline": [
-        "ls -ll /tmp",
-        "python /tmp/cis_script.py"
-      ],
-      "execute_command":"echo 'packer' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'"
     },
     {
       "type":"shell",
