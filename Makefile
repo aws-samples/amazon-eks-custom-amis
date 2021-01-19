@@ -1,8 +1,8 @@
 
 PACKER_VARIABLES := binary_bucket_name binary_bucket_region eks_version eks_build_date cni_plugin_version hardening_flag http_proxy https_proxy no_proxy
-VPC_ID := vpc-0e8cf1ce122b1b059
-SUBNET_ID := subnet-0eddf1d7d0f9f9772
-AWS_REGOIN := us-east-2
+VPC_ID := vpc-01f75f42b4d6531e3
+SUBNET_ID := subnet-0758d5842ffe82859
+AWS_REGOIN := ap-south-1
 PACKER_FILE := 
 
 EKS_BUILD_DATE := 2020-11-02

@@ -113,6 +113,7 @@ echo "1.2.1 - ensure package manager repositories are configured"
 yum repolist
 
 echo "1.2.2 - ensure GPG keys are configured"
+
 rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} --> %{summary}\n'
 
 echo "1.2.3 - ensure gpgcheck is globally activated"
