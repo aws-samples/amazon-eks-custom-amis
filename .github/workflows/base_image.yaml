@@ -13,7 +13,7 @@ jobs:
         with:
           aws-access-key-id: sAKIAYFIVTSX2VM6GTVNH
           aws-secret-access-key: WAUOZBRqzBfDqyQ4pgkn8FkOyq2mHgGBjVldyipY
-          aws-region: ap-south-1:
+          aws-region: ap-south-1
       - run: |
           sudo apt-get install build-essential unzip
           export VER="1.5.6"
