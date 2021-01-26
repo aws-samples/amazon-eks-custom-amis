@@ -12,10 +12,7 @@
 #   0 finishes when the cloud-init process is complete
 ################################################################
 wait_for_cloudinit() {
-    while [ ! -f /var/lib/cloud/instance/boot-finished ]; do 
-        echo 'waiting for cloud-init to finish running...'
-        sleep 5 
-    done
+    cloud-init status --wait
 }
 
 get_arch() {
@@ -218,7 +215,6 @@ is_centos_8() {
 #   0 after a successful installation
 ################################################################
 install_ssmagent() {
-
     if is_ubuntu; then
         snap install amazon-ssm-agent --classic
         systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
@@ -241,7 +237,6 @@ install_ssmagent() {
 #   0 after a successful installation
 ################################################################
 install_openscap() {
-
     if is_rhel || is_centos; then
         yum install -y openscap openscap-scanner scap-security-guide
     elif is_amazonlinux2; then
@@ -333,12 +328,14 @@ oscap_generate_fix() {
 # Arguments:
 #   1 - the path of the disk or partition
 #   2 - the folder path to migration
+#   3 - the mount options to use.
 # Outputs:
 #   None
 ################################################################
 migrate_and_mount_disk() {
     local disk_name=$1
     local folder_path=$2
+    local mount_options=$3
     local temp_path="/mnt${folder_path}"
     local old_path="${folder_path}-old"
 
@@ -358,7 +355,7 @@ migrate_and_mount_disk() {
     mkdir -p ${folder_path}
 
     # add the mount point to fstab and mount the disk
-    echo "UUID=$(blkid -s UUID -o value ${disk_name}) ${folder_path} ext4 defaults,nofail 0 1" >> /etc/fstab
+    echo "UUID=$(blkid -s UUID -o value ${disk_name}) ${folder_path} ext4 ${mount_options} 0 1" >> /etc/fstab
     mount -a
 
     # if selinux is enabled restore the objects on it
@@ -394,11 +391,11 @@ partition_disks() {
     sleep 5
 
     # migrate and mount the existing
-    migrate_and_mount_disk "${disk_name}p1" /var
-    migrate_and_mount_disk "${disk_name}p2" /var/log
-    migrate_and_mount_disk "${disk_name}p3" /var/log/audit
-    migrate_and_mount_disk "${disk_name}p4" /home
-    migrate_and_mount_disk "${disk_name}p5" /var/lib/docker
+    migrate_and_mount_disk "${disk_name}p1" /var            defaults,nofail,nodev
+    migrate_and_mount_disk "${disk_name}p2" /var/log        defaults,nofail,nodev,nosuid
+    migrate_and_mount_disk "${disk_name}p3" /var/log/audit  defaults,nofail,nodev,nosuid
+    migrate_and_mount_disk "${disk_name}p4" /home           defaults,nofail,nodev,nosuid
+    migrate_and_mount_disk "${disk_name}p5" /var/lib/docker defaults,nofail
 }
 
 ################################################################
@@ -460,7 +457,6 @@ configure_kubelet_environment() {
 #   None
 ################################################################
 enable_fips() {
-
     if is_rhel_7; then
 
         # install dependencies
@@ -486,5 +482,4 @@ enable_fips() {
         echo "FIPS 140-2 is not supported on this operating system."
         exit 1
     fi
-
 }
