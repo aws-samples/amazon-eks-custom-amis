@@ -762,3 +762,22 @@ find / -xdev -type f -perm -2000
 
 echo "6.2.1 - ensure password fields are not empty"
 cat /etc/shadow | awk -F: '($2 == "" ) { print $1 " does not have a password "}'
+
+
+# Allow user supplied userdata code
+sudo yum install -y amazon-ssm-agent
+sudo systemctl enable amazon-ssm-agent
+sudo systemctl start amazon-ssm-agent
+sudo amazon-linux-extras install epel -y
+sudo yum install clamav clamd -y
+sudo sed -i -e "s:#DatabaseDirectory /var/lib/clamav:DatabaseDirectory /var/lib/clamav:" /etc/freshclam.conf
+sudo sed -i -e "s:#UpdateLogFile /var/log/freshclam.log:UpdateLogFile /var/log/freshclam.log:" /etc/freshclam.conf
+sudo freshclam
+sudo wget https://inspector-agent.amazonaws.com/linux/latest/install
+sudo /bin/bash install && sudo rm -f install
+
+# this is use for aide installation and genrating the report
+aide --init
+mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gzabcd
+aide --check 
+
