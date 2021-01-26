@@ -2,7 +2,7 @@
 PACKER_VARIABLES := binary_bucket_name binary_bucket_region eks_version eks_build_date cni_plugin_version hardening_flag http_proxy https_proxy no_proxy
 VPC_ID := vpc-0e8cf1ce122b1b059
 SUBNET_ID := subnet-0eddf1d7d0f9f9772
-AWS_REGOIN := us-east-2
+AWS_REGION := us-east-2
 PACKER_FILE := 
 
 EKS_BUILD_DATE := 2020-11-02
@@ -13,7 +13,7 @@ EKS_118_VERSION := 1.18.9
 
 build:
 	packer build \
-		--var 'aws_region=$(AWS_REGOIN)' \
+		--var 'aws_region=$(AWS_REGION)' \
 		--var 'vpc_id=$(VPC_ID)' \
 		--var 'subnet_id=$(SUBNET_ID)' \
 		$(foreach packerVar,$(PACKER_VARIABLES), $(if $($(packerVar)),--var $(packerVar)='$($(packerVar))',)) \
