@@ -144,7 +144,7 @@ is_rhel() {
 #   1 - false
 ################################################################
 is_rhel_7() {
-    [[ $(lsb_release -sd) == "\"Red Hat Enterprise Linux release 7"* ]]
+    [[ $(lsb_release -sd) == "\"Red Hat Enterprise Linux Server release 7"* ]]
 }
 
 ################################################################

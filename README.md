@@ -48,6 +48,8 @@ make build-<operating system>-<eks major version>
 | `https_proxy` |  | Specify an HTTPS Proxy to use when running commands on the server. This will set the `https_proxy` and `HTTPS_PROXY` environment variables on the server while commands are running. |
 | `no_proxy` |  | Specify the no proxy configuration to use when running commands on the server. This will set the `no_proxy` and `NO_PROXY` environment variables on the server while commands are running. |
 | `hardening_flag` | `false` | This flag specifies the hardening to apply to the instance. The default is only the Docker and EKS benchmark. |
+| `root_volume_size` | `10` | The size of the root volume on the host. |
+| `data_volume_size` | `50` | The size of the data volume that is attached to those. This volume houses docker, var, and logs. |
 
 ### Using the AMI
 
@@ -69,6 +71,7 @@ The excerpt from a `cluster.yml` shows how to supply a Launch Template ID:
 ```yaml
 managedNodeGroups:
   - name: ng-1
+    ami: <id of created AMI>
     instanceType: t3.xlarge
     minSize: 3
     desiredCapacity: 3
