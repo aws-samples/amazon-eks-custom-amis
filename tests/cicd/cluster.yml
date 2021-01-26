@@ -1,0 +1,27 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: custom-amis
+  region: us-east-2
+
+vpc:
+  clusterEndpoints:
+    publicAccess: true
+    privateAccess: true
+
+iam:
+  withOIDC: true
+
+managedNodeGroups:
+  - name: ng-1
+    instanceType: t3.xlarge
+    minSize: 1
+    desiredCapacity: 3
+    maxSize: 4
+    privateNetworking: true
+    labels:
+      role: worker
+    tags:
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/custom-amis: "true"

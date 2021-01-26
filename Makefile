@@ -16,7 +16,6 @@ EKS_119_VERSION := 1.19.6
 
 build:
 	packer build \
-		-on-error=ask \
 		--var 'aws_region=$(AWS_REGION)' \
 		--var 'vpc_id=$(VPC_ID)' \
 		--var 'subnet_id=$(SUBNET_ID)' \
