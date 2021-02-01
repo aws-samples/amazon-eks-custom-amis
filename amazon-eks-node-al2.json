@@ -61,7 +61,8 @@
       ],
       "tags":{
         "Name":"{{user `target_ami_name`}}",
-        "BuildDate":"{{ isotime }}"
+        "BuildDate":"{{ isotime }}",
+        "Type":"Custom"
       },
       "ami_name":"{{user `target_ami_name`}}",
       "ami_description":"{{user `ami_description` }}",
