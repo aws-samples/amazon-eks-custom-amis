@@ -16,12 +16,5 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
           aws-region: ap-south-1
       - run: |
-          sudo apt-get install build-essential unzip
-          wget https://releases.hashicorp.com/packer/${VER}/packer_${VER}_linux_amd64.zip
-          unzip packer_${VER}_linux_amd64.zip
-        env:
-          VER: "1.5.6" 
-      - run: |
-          make build-al2-1.18
           ami=`aws ec2 describe-images --region ap-south-1  --filters "Name=tag:Type,Values=Custom"  --query "reverse(sort_by(Images, &CreationDate))[:1].ImageId"   --output text`
           aws ec2 modify-image-attribute --region ap-south-1 --image-id $ami  --launch-permission "Add=[{UserId=913108190184, UserId=454518750364}]"
