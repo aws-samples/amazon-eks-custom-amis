@@ -6,7 +6,7 @@ set -o errexit
 
 source /etc/packer/files/functions.sh
 
-# enable dod stig
+# enable dod stig  
 if [ "${HARDENING_FLAG}" = "nist" ]; then
 
     # install and enable fips modules
