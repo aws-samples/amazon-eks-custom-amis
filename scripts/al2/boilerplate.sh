@@ -6,7 +6,7 @@ set -o errexit
 
 source /tmp/files/functions.sh
 
-# wait for cloud-init to finish
+# wait for cloud-init   to finish
 wait_for_cloudinit
 
 # upgrade the operating system
