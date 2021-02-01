@@ -10,7 +10,7 @@
     "https_proxy": "",
     "no_proxy": "",
 
-    "source_ami_owner":"602401143452",
+    "source_ami_owner":"516580504223",
     "source_ami_ssh_user":"ec2-user",
     "source_ami_arch":"x86_64",
     "source_ami_name":"amazon-eks-node-{{user `eks_version`}}-*",
