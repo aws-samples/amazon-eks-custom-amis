@@ -1,0 +1,91 @@
+{
+  "variables":{
+    "aws_region":"us-east-2",
+    "ami_description":"EKS Kubernetes Worker AMI on Windows 2004 Full image (k8s: {{user `eks_version`}})",
+    "eks_version":"1.18",
+    "root_volume_size": "50",
+    "vpc_id":"",
+    "subnet_id":"",
+    "http_proxy": "",
+    "https_proxy": "",
+    "no_proxy": "",
+
+    "source_ami_owner":"801119661308",
+    "source_ami_owner_govcloud":"077303321853",
+    "source_ami_arch":"x86_64",
+    "source_ami_name":"Windows_Server-2004-English-Core-EKS_Optimized-{{user `eks_version`}}-*",
+    "target_ami_name": "amazon-eks-node-{{user `eks_version`}}-windows2004full-{{ timestamp }}"
+  },
+  "builders":[
+    {
+      "type":"amazon-ebs",
+      "region":"{{user `aws_region`}}",
+      "source_ami_filter":{
+        "filters":{
+          "name":"{{user `source_ami_name`}}",
+          "root-device-type":"ebs",
+          "state":"available",
+          "virtualization-type":"hvm",
+          "architecture":"{{user `source_ami_arch`}}"
+        },
+        "owners":[
+          "{{user `source_ami_owner`}}",
+          "{{user `source_ami_owner_govcloud`}}"
+        ],
+        "most_recent":true
+      },
+      "instance_type":"m5.large",
+      "iam_instance_profile": "AdminRoleForEC2",
+      "user_data_file":"./scripts/windows/UserData.ps1",
+      "communicator": "winrm",
+      "winrm_username": "Administrator",
+      "winrm_insecure": true,
+      "winrm_use_ssl": true,
+      "subnet_id": "{{user `subnet_id`}}",
+      "launch_block_device_mappings":[
+        {
+          "device_name": "/dev/sda1",
+          "volume_size": "{{user `root_volume_size`}}",
+          "volume_type": "gp2",
+          "delete_on_termination":true
+        }
+      ],
+      "tags":{
+        "Name":"{{user `target_ami_name`}}",
+        "BuildDate":"{{ isotime }}"
+      },
+      "ami_name":"{{user `target_ami_name`}}",
+      "ami_description":"{{user `ami_description` }}",
+      "ami_virtualization_type":"hvm",
+      "run_tags":{
+        "Name":"packer-{{user `target_ami_name`}}"
+      }
+    }
+  ],
+  "provisioners":[
+    {
+      "type": "powershell",
+      "scripts": [
+        "./scripts/windows/DisableUAC.ps1",
+        "./scripts/windows/UpdateWindows.ps1",
+        "./scripts/windows/UpdateDocker.ps1"
+      ],
+      "elevated_user": "Administrator",
+      "elevated_password": "{{ build `Password`}}"
+    },
+    {
+      "type": "windows-restart",
+      "restart_check_command": "powershell -command \"& {Write-Output 'restarted.'}\""
+    },
+    {
+      "type": "powershell",
+      "inline": [
+        "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\Scripts\\SendWindowsIsReady.ps1 -Schedule",
+        "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\Scripts\\InitializeInstance.ps1 -Schedule",
+        "C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\Scripts\\SysprepInstance.ps1 -NoShutdown"
+      ],
+      "elevated_user": "Administrator",
+      "elevated_password": "{{ build `Password`}}"
+    }
+  ]
+}

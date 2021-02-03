@@ -8,7 +8,7 @@ This repository also applies the Docker CIS Benchmark and Amazon EKS CIS Benchma
 
 Lack of support in this repository does not indicate that you can't meet compliance with Amazon EKS, it simply means it is not supported by this repository. We welcome pull requests!
 
-| Distribution | Version | Supported | Supported Hardening |
+| Distribution | Version | Available | Supported Hardening |
 |:---|:---:|:---:|:---:|
 | Amazon Linux | 2 | :white_check_mark: | CIS Benchmark |
 | Ubuntu | 18.04 | :white_check_mark: | |
@@ -17,6 +17,8 @@ Lack of support in this repository does not indicate that you can't meet complia
 | Red Hat Enterprise Linux | 8 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
 | CentOS | 7 | :warning: ([Changing to CentOS Stream](https://blog.centos.org/2020/12/future-is-centos-stream/)) | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS |
 | CentOS | 8 | :warning: ([Changing to CentOS Stream](https://blog.centos.org/2020/12/future-is-centos-stream/)) | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS|
+| Windows | 18.09 | :white_check_mark: | |
+| Windows | 20.04 | :white_check_mark: | |
 
 ## Installing Dependencies
 
@@ -241,6 +243,28 @@ make build-centos8-1.17
 
 # build centos 8 for amazon eks 1.18
 make build-centos8-1.18
+```
+
+#### Windows Server
+
+| Distribution | Version | Build Command | CIS Benchmark |
+|:---|:---:|:---:|:---:|
+| Windows Server Core | 18.09 | `build-windows1809core-<eks major version>` | |
+| Windows Server Full | 18.09 | `build-windows1809full-<eks major version>` | |
+| Windows Server Core | 20.04 | `build-windows2004core-<eks major version>` | |
+
+The Windows Server EKS Optmized AMI is used as the base for this image.
+
+```bash
+# build windows for amazon eks 1.17
+make build-windows1809core-1.17
+make build-windows1809full-1.17
+make build-windows2004core-1.17
+
+# build windows for amazon eks 1.18
+make build-windows1809core-1.18
+make build-windows1809full-1.18
+make build-windows2004core-1.18
 ```
 
 ### Fetching the Kubernetes Build Information
