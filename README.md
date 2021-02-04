@@ -247,6 +247,8 @@ make build-centos8-1.18
 
 #### Windows Server
 
+*Note: This build may not work while on a corporate VPN as it uses WinRM to communicate with the instance.*
+
 | Distribution | Version | Build Command | CIS Benchmark |
 |:---|:---:|:---:|:---:|
 | Windows Server Core | 18.09 | `build-windows1809core-<eks major version>` | |
@@ -256,6 +258,11 @@ make build-centos8-1.18
 The Windows Server EKS Optmized AMI is used as the base for this image.
 
 ```bash
+# build windows for amazon eks 1.16
+make build-windows1809core-1.16
+make build-windows1809full-1.16
+make build-windows2004core-1.16
+
 # build windows for amazon eks 1.17
 make build-windows1809core-1.17
 make build-windows1809full-1.17
