@@ -35,17 +35,17 @@ build-al2-1.18:
 
 # Ubuntu 18.04
 #-----------------------------------------------------
-build-ubuntu1804-1.15:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=$(EKS_115_VERSION) eks_build_date=$(EKS_BUILD_DATE)
+build-ubuntu1809-1.15:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1809.json eks_version=$(EKS_115_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
-build-ubuntu1804-1.16:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=$(EKS_116_VERSION) eks_build_date=$(EKS_BUILD_DATE)
+build-ubuntu1809-1.16:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1809.json eks_version=$(EKS_116_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
-build-ubuntu1804-1.17:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=$(EKS_117_VERSION) eks_build_date=$(EKS_BUILD_DATE)
+build-ubuntu1809-1.17:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1809.json eks_version=$(EKS_117_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
-build-ubuntu1804-1.18:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=$(EKS_118_VERSION) eks_build_date=$(EKS_BUILD_DATE)
+build-ubuntu1809-1.18:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1809.json eks_version=$(EKS_118_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 # Ubuntu 20.04
 #-----------------------------------------------------
@@ -118,3 +118,35 @@ build-centos8-1.18:
 	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=$(EKS_118_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 
+# Windows 1809 Full
+#-----------------------------------------------------
+build-windows1809full-1.16:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809full.json eks_version=1.16
+
+build-windows1809full-1.17:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809full.json eks_version=1.17
+
+build-windows1809full-1.18:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809full.json eks_version=1.18
+
+# Windows 1809 Core
+#-----------------------------------------------------
+build-windows1809core-1.16:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809core.json eks_version=1.16
+
+build-windows1809core-1.17:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809core.json eks_version=1.17
+
+build-windows1809core-1.18:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809core.json eks_version=1.18
+
+# Windows 2004 Core
+#-----------------------------------------------------
+build-windows2004core-1.16:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-windows2004core.json eks_version=1.16
+
+build-windows2004core-1.17:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-windows2004core.json eks_version=1.17
+
+build-windows2004core-1.18:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-windows2004core.json eks_version=1.18
