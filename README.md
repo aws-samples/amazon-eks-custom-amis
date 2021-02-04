@@ -11,14 +11,14 @@ Lack of support in this repository does not indicate that you can't meet complia
 | Distribution | Version | Available | Supported Hardening |
 |:---|:---:|:---:|:---:|
 | Amazon Linux | 2 | :white_check_mark: | CIS Benchmark |
-| Ubuntu | 18.04 | :white_check_mark: | |
-| Ubuntu | 20.04 | :white_check_mark: | |
+| Ubuntu | 18.04 | :white_check_mark: | None |
+| Ubuntu | 20.04 | :white_check_mark: | None |
 | Red Hat Enterprise Linux | 7 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
 | Red Hat Enterprise Linux | 8 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
 | CentOS | 7 | :warning: ([Changing to CentOS Stream](https://blog.centos.org/2020/12/future-is-centos-stream/)) | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS |
 | CentOS | 8 | :warning: ([Changing to CentOS Stream](https://blog.centos.org/2020/12/future-is-centos-stream/)) | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS|
-| Windows | 18.09 | :white_check_mark: | |
-| Windows | 20.04 | :white_check_mark: | |
+| Windows | 18.09 | :white_check_mark: | None |
+| Windows | 20.04 | :white_check_mark: | None |
 
 ## Installing Dependencies
 
