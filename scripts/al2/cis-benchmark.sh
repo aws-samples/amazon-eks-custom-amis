@@ -762,3 +762,7 @@ find / -xdev -type f -perm -2000
 
 echo "6.2.1 - ensure password fields are not empty"
 cat /etc/shadow | awk -F: '($2 == "" ) { print $1 " does not have a password "}'
+
+
+#Install security patch
+sudo yum --security update -y
