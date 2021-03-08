@@ -765,4 +765,4 @@ cat /etc/shadow | awk -F: '($2 == "" ) { print $1 " does not have a password "}'
 
 
 #Install security patch
-sudo yum --security update
+sudo yum --security update -y
