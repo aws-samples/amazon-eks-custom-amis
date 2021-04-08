@@ -52,7 +52,7 @@ build-ubuntu1804-1.18:
 	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=$(EKS_118_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 build-ubuntu1804-1.19:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=$(EKS_119_VERSION) eks_build_date=2021-01-05
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu1804.json eks_version=$(EKS_119_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 # Ubuntu 20.04
 #-----------------------------------------------------
@@ -69,7 +69,7 @@ build-ubuntu2004-1.18:
 	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=$(EKS_118_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 build-ubuntu2004-1.19:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=$(EKS_119_VERSION) eks_build_date=2021-01-05
+	$(MAKE) build PACKER_FILE=amazon-eks-node-ubuntu2004.json eks_version=$(EKS_119_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 # RHEL 7
 #-----------------------------------------------------
@@ -86,7 +86,7 @@ build-rhel7-1.18:
 	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=$(EKS_118_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 build-rhel7-1.19:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=$(EKS_119_VERSION) eks_build_date=2021-01-05
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel7.json eks_version=$(EKS_119_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 # RHEL 8
 #-----------------------------------------------------
@@ -103,7 +103,7 @@ build-rhel8-1.18:
 	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=$(EKS_118_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 build-rhel8-1.19:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=$(EKS_119_VERSION) eks_build_date=2021-01-05
+	$(MAKE) build PACKER_FILE=amazon-eks-node-rhel8.json eks_version=$(EKS_119_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 # CentOS 7
 #-----------------------------------------------------
@@ -120,7 +120,7 @@ build-centos7-1.18:
 	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=$(EKS_118_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 build-centos7-1.19:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=$(EKS_119_VERSION) eks_build_date=2021-01-05
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos7.json eks_version=$(EKS_119_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 # CentOS 8
 #-----------------------------------------------------
@@ -137,7 +137,7 @@ build-centos8-1.18:
 	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=$(EKS_118_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 build-centos8-1.19:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=$(EKS_119_VERSION) eks_build_date=2021-01-05
+	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=$(EKS_119_VERSION) eks_build_date=$(EKS_BUILD_DATE)
 
 
 # Windows 1809 Full
