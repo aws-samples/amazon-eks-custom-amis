@@ -1,3 +1,7 @@
+variable "tag_map" {
+  type    = string
+  default = ""
+}
 
 variable "aws_region" {
   type    = string
