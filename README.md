@@ -53,6 +53,12 @@ make build-<operating system>-<eks major version>
 | `root_volume_size` | `10` | The size of the root volume on the host. |
 | `data_volume_size` | `50` | The size of the data volume that is attached to those. This volume houses docker, var, and logs. |
 
+## Usage by Parameters
+The command demonstrated how to use the custom parameters to build eks_version 1.21 in HK(ap-east-1) region.
+```
+make build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.21  VPC_ID=<must be your hk region VPC> SUBNET_ID=<must be your hk region public subnet> AWS_REGION=ap-east-1 source_ami_owner=800184023465
+```
+
 ### Using the AMI
 
 The AMI can be used with [self-managed node groups](https://docs.aws.amazon.com/eks/latest/userguide/worker.html) and [managed node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) within EKS. The AMIs built in this repository use the same [bootstrap script](https://github.com/awslabs/amazon-eks-ami/blob/master/files/bootstrap.sh) used in the EKS Optimized AMI. To join the cluster, run the following command on boot:
