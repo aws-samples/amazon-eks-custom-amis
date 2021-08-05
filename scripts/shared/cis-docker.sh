@@ -20,7 +20,8 @@ echo "1.1.1 - ensure the container host has been hardened"
 echo "[not scored] - 1.1.1 ensure the container host has been hardened"
 
 echo "1.1.2 - ensure that the version of Docker is up to date"
-docker version
+# docker version 
+# comment this line is because the base AMI shall install the corresponding docker version
 
 echo "1.2.1 - ensure a separate partition for containers has been created"
 grep '/var/lib/docker\s' /proc/mounts

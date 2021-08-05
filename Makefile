@@ -1,5 +1,5 @@
 
-PACKER_VARIABLES := binary_bucket_name binary_bucket_region eks_version eks_build_date cni_plugin_version root_volume_size data_volume_size hardening_flag http_proxy https_proxy no_proxy
+PACKER_VARIABLES := binary_bucket_name binary_bucket_region eks_version eks_build_date cni_plugin_version root_volume_size data_volume_size hardening_flag http_proxy https_proxy no_proxy source_ami_owner
 VPC_ID := vpc-0e8cf1ce122b1b059
 SUBNET_ID := subnet-0eddf1d7d0f9f9772
 AWS_REGION := us-east-2
