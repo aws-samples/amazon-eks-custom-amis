@@ -569,7 +569,8 @@ chown root:root /etc/ssh/sshd_config
 chmod og-rwx /etc/ssh/sshd_config
 
 echo "5.2.2 - ensure permissions on SSH private host key files are configured"
-find /etc/ssh -xdev -type f -name 'ssh_host_*_key' -exec chown root:ssh_keys {} \;
+# find /etc/ssh -xdev -type f -name 'ssh_host_*_key' -exec chown root:ssh_keys {} \;
+find /etc/ssh -xdev -type f -name 'ssh_host_*_key' -exec chown root:root {} \;
 find /etc/ssh -xdev -type f -name 'ssh_host_*_key' -exec chmod 0640 {} \;
 
 echo "5.2.3 - ensure permissions on SSH public host key files are configured"
@@ -761,3 +762,40 @@ find / -xdev -type f -perm -2000
 
 echo "6.2.1 - ensure password fields are not empty"
 cat /etc/shadow | awk -F: '($2 == "" ) { print $1 " does not have a password "}'
+
+
+echo "3.2.2: Ensure ICMP redirects are not accepted"
+sysctl_entry "net.ipv4.conf.all.accept_redirects = 0"
+sysctl_entry "net.ipv4.conf.default.accept_redirects = 0"
+
+echo "3.2.3: Ensure secure ICMP redirects are not accepted "
+sysctl_entry "net.ipv4.conf.all.secure_redirects = 0"
+sysctl_entry "net.ipv4.conf.default.secure_redirects = 0"
+
+echo "3.2.4: Ensure suspicious packets are logged"
+sysctl_entry "net.ipv4.conf.all.log_martians = 1"
+sysctl_entry "net.ipv4.conf.default.log_martians = 1"
+
+echo "3.2.9: Ensure IPv6 router advertisements are not accepted"
+sysctl_entry "net.ipv6.conf.all.accept_ra = 0"
+sysctl_entry "net.ipv6.conf.default.accept_ra = 0"
+
+echo "3.3.3: Ensure /etc/hosts.deny is configured"
+echo "This is not recommended in the latest version v2.0 of Amazon Linux 2 CIS Guideline."
+
+echo "3.5.1.1: Ensure default deny firewall policy"
+echo "3.5.1.4: Ensure firewall rules exist for all open ports"
+echo "This configuration is risky and may resulted in Kubernetes Node stop working as expected. Not recommended."
+
+echo "3.5.2.1: Ensure IPv6 default deny firewall policy"
+echo "3.5.2.4: Ensure IPv6 firewall rules exist for all open ports"
+ip6tables -P INPUT DROP
+ip6tables -P OUTPUT DROP
+ip6tables -P FORWARD DROP
+ 
+echo "5.2.2: Ensure permissions on SSH private host key files are configured"
+echo "...Corrected in above scripts"
+
+echo "5.2.18: Ensure SSH access is limited"
+echo "AllowUsers ec2-user" >> /etc/ssh/sshd_config
+

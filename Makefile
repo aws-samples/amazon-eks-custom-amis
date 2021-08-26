@@ -1,8 +1,8 @@
 
 PACKER_VARIABLES := binary_bucket_name binary_bucket_region eks_version eks_build_date cni_plugin_version root_volume_size data_volume_size hardening_flag http_proxy https_proxy no_proxy source_ami_owner
-VPC_ID := vpc-0e8cf1ce122b1b059
-SUBNET_ID := subnet-0eddf1d7d0f9f9772
-AWS_REGION := us-east-2
+VPC_ID := vpc-027db8599a32b83e2
+SUBNET_ID := subnet-042ead640f1def9de
+AWS_REGION := us-west-2
 PACKER_FILE := 
 
 EKS_BUILD_DATE := 2020-11-02
@@ -36,6 +36,10 @@ build-al2-1.18:
 
 build-al2-1.19:
 	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.19
+
+build-al2-1.21:
+	$(MAKE) build PACKER_FILE=amazon-eks-node-al2.json eks_version=1.21
+
 
 # Ubuntu 18.04
 #-----------------------------------------------------

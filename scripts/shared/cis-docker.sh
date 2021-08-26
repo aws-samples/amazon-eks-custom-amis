@@ -46,6 +46,10 @@ echo "-w /usr/bin/docker-runc -k docker" >> /etc/audit/rules.d/docker.rules
 echo "-w ${DOCKER_SERVICE_PATH} -k docker" >> /etc/audit/rules.d/docker.rules
 echo "-w ${DOCKER_SOCKET_PATH} -k docker" >> /etc/audit/rules.d/docker.rules
 
+# Docker CIS Benchmark
+echo "1.2.12 Ensure auditing is configured for Docker files and directories - /usr/sbin/runc"
+echo "-w /usr/sbin/runc -k docker" >> /etc/audit/rules.d/cis.rules
+
 echo "2.1 - 2.17 - ensure the docker configuration is secure"
 cat > /etc/docker/daemon.json <<EOF
 {
