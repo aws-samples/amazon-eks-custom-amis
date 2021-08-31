@@ -6,9 +6,9 @@ metadata:
   region: us-west-2
 
 nodeGroups:
-  - name: ng-2-cis-harden
+  - name: ng-3-cis-harden
     minSize: 1
-    ami: ami-06cd47fc084c58d8c
+    ami: ami-0377cda16c5ed69df
     amiFamily: AmazonLinux2
     desiredCapacity: 1
     maxSize: 5
