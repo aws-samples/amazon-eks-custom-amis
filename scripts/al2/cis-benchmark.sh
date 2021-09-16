@@ -130,6 +130,9 @@ echo "0 5 * * * /usr/sbin/aide --check" > /etc/cron.d/aide
 echo "1.4.1 - ensure permissions on bootloader config are configured"
 chown root:root /boot/grub2/grub.cfg
 chmod og-rwx /boot/grub2/grub.cfg
+chown root:root /boot/efi/EFI/amzn/grub.cfg
+chmod og-rwx /boot/efi/EFI/amzn/grub.cfg
+
 
 echo "1.4.2 - ensure authentication required for single user mode"
 cat > /usr/lib/systemd/system/rescue.service <<EOF
@@ -710,8 +713,8 @@ echo "TMOUT=600" >> /etc/profile
 echo "5.5 - ensure root login is restricted to system console"
 cat /etc/securetty
 
-echo "5.6 - ensure access to the su command is restricted"
-echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su
+# echo "5.6 - ensure access to the su command is restricted"
+# echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su
 
 echo "6.1.2 - ensure permissions on /etc/passwd are configured"
 chown root:root /etc/passwd
@@ -799,3 +802,13 @@ echo "...Corrected in above scripts"
 echo "5.2.18: Ensure SSH access is limited"
 echo "AllowUsers ec2-user" >> /etc/ssh/sshd_config
 
+echo "5.2.2 Ensure sudo commands use pty (Automated)"
+echo "Defaults use_pty" > /etc/sudoers.d/default_use_pty
+chmod 440 /etc/sudoers.d/default_use_pty
+
+echo "5.2.3 Ensure sudo log file exists "
+echo "Defaults logfile=""/var/log/sudo.log""" >> /etc/sudoers.d/default_use_pty
+
+echo "5.7 Ensure access to the su command is restricted (Automated)"
+groupadd sugroup
+echo "auth required pam_wheel.so use_uid group=sugroup" >> /etc/pam.d/su

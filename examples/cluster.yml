@@ -2,13 +2,13 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: custom-amis
+  name: cis-harden
   region: us-west-2
 
 nodeGroups:
-  - name: ng-3-cis-harden
+  - name: ng-18
     minSize: 1
-    ami: ami-0377cda16c5ed69df
+    ami: ami-02fdba5a57257f67b
     amiFamily: AmazonLinux2
     desiredCapacity: 1
     maxSize: 5
