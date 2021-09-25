@@ -346,7 +346,7 @@ migrate_and_mount_disk() {
     if [ -d "${folder_path}" ]; then
         mkdir -p ${temp_path}
         mount ${disk_name} ${temp_path}
-        cp -Rax ${folder_path}/* ${temp_path}
+        [ "$(ls -A ${folder_path})" ] && cp -Rax ${folder_path}/* ${temp_path}  || echo "Nothing to copy from ${folder_path} dir"
         mv ${folder_path} ${old_path}
         umount ${disk_name}
     fi
