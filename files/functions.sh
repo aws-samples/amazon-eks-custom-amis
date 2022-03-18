@@ -344,9 +344,14 @@ migrate_and_mount_disk() {
 
     # check if the folder already exists
     if [ -d "${folder_path}" ]; then
+        FILE=$(ls -A ${folder_path})
+        >&2 echo $FILE
         mkdir -p ${temp_path}
         mount ${disk_name} ${temp_path}
-        cp -Rax ${folder_path}/* ${temp_path}
+        # Empty folder give error on /*
+        if [ ! -z "$FILE" ]; then
+            cp -Rax ${folder_path}/* ${temp_path}
+        fi
         mv ${folder_path} ${old_path}
         umount ${disk_name}
     fi

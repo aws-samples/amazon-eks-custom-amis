@@ -1,7 +1,8 @@
 
 PACKER_VARIABLES := binary_bucket_name binary_bucket_region eks_version eks_build_date cni_plugin_version root_volume_size data_volume_size hardening_flag http_proxy https_proxy no_proxy
-VPC_ID := vpc-0e8cf1ce122b1b059
-SUBNET_ID := subnet-0eddf1d7d0f9f9772
+VPC_ID := vpc-04421521831249174
+SUBNET_ID := subnet-049ea2459d1e821a1
+SECURITY_GROUP := sg-0d2795ad6a120d9ff
 AWS_REGION := us-east-2
 PACKER_FILE := 
 
@@ -14,9 +15,11 @@ EKS_119_VERSION := 1.19.6
 
 build:
 	packer build \
+		-on-error=ask \
 		--var 'aws_region=$(AWS_REGION)' \
 		--var 'vpc_id=$(VPC_ID)' \
 		--var 'subnet_id=$(SUBNET_ID)' \
+		--var 'security_group_id=$(SECURITY_GROUP)' \
 		$(foreach packerVar,$(PACKER_VARIABLES), $(if $($(packerVar)),--var $(packerVar)='$($(packerVar))',)) \
 		$(PACKER_FILE)
 
