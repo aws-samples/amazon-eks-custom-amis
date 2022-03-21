@@ -3,6 +3,7 @@ PACKER_VARIABLES := binary_bucket_name binary_bucket_region eks_version eks_buil
 VPC_ID := vpc-04421521831249174
 SUBNET_ID := subnet-049ea2459d1e821a1
 SECURITY_GROUP := sg-0d2795ad6a120d9ff
+INSTANCE_PROFILE := ManagedInstanceSSM
 AWS_REGION := us-east-2
 PACKER_FILE := 
 
@@ -20,6 +21,7 @@ build:
 		--var 'vpc_id=$(VPC_ID)' \
 		--var 'subnet_id=$(SUBNET_ID)' \
 		--var 'security_group_id=$(SECURITY_GROUP)' \
+		--var 'iam_instance_profile=$(INSTANCE_PROFILE)' \
 		$(foreach packerVar,$(PACKER_VARIABLES), $(if $($(packerVar)),--var $(packerVar)='$($(packerVar))',)) \
 		$(PACKER_FILE)
 

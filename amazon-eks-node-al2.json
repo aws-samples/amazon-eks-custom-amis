@@ -10,6 +10,7 @@
     "http_proxy": "",
     "https_proxy": "",
     "no_proxy": "",
+    "iam_instance_profile": "",
 
     "source_ami_owner":"602401143452",
     "source_ami_owner_govcloud":"219670896067",
@@ -37,6 +38,7 @@
         "most_recent":true
       },
       "instance_type":"m5.xlarge",
+      "iam_instance_profile":"{{user `iam_instance_profile`}}",
       "ssh_username":"{{user `source_ami_ssh_user`}}",
       "ssh_pty":true,
       "subnet_id":"{{user `subnet_id`}}",
