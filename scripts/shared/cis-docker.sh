@@ -16,6 +16,9 @@ mkdir -p /etc/docker
 mkdir -p /var/lib/docker
 mkdir -p /etc/docker/certs.d/
 
+echo '1. Ensure docker is running'
+systemctl start docker
+
 echo "1.1.1 - ensure the container host has been hardened"
 echo "[not scored] - 1.1.1 ensure the container host has been hardened"
 
