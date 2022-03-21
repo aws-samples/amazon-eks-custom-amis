@@ -186,6 +186,12 @@ Resources:
       ServiceRole: !GetAtt [CodeBuildRole, Arn]
       Source: 
         Type: CODEPIPELINE
+      VpcConfig:
+        SecurityGroupIds:
+          - !GetAtt ["VPC", "DefaultSecurityGroup"]
+        Subnets:
+          - !Ref PrivateSubnet1
+        VpcId: !Ref VPC
 
   CodePipelineArtifactStoreBucket:
     Type: 'AWS::S3::Bucket'
