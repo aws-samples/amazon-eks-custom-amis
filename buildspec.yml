@@ -3,9 +3,9 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - yum install -y yum-utils
-      - yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
-      - yum -y install packer make
+      - curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+      - sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+      - sudo apt update && sudo apt -y install packer
   build:
     commands:
-      - make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID $TARGET_NAME  
+      - make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID $TARGET_NAME
