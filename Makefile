@@ -53,6 +53,15 @@ all-1.18:
 	$(MAKE) build-centos7-1.18
 	$(MAKE) build-centos8-1.18
 
+all-1.19:
+	$(MAKE) build-al2-1.19
+	$(MAKE) build-ubuntu1804-1.19
+	$(MAKE) build-ubuntu2004-1.19
+	$(MAKE) build-rhel7-1.19
+	$(MAKE) build-rhel8-1.19
+	$(MAKE) build-centos7-1.19
+	$(MAKE) build-centos8-1.19
+
 # Amazon Linux 2
 #-----------------------------------------------------
 build-al2-1.15:
