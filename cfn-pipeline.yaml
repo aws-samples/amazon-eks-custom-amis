@@ -54,6 +54,13 @@ Resources:
         - Key: Name
           Value: eks-custom-ami-public-rt
   
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  
   PublicSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -72,10 +79,12 @@ Resources:
         Tags:
         - Key: stack
           Value: production
+  
   NATGatewayEIP:
      Type: AWS::EC2::EIP
      Properties:
         Domain: vpc
+  
   Route:
      Type: AWS::EC2::Route
      Properties:
@@ -269,6 +278,7 @@ Resources:
                 ProjectName: eks-custom-ami-build
                 PrimarySource: Source
                 EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"build-al2-1.19","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
+
   AmazonCloudWatchEventRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -296,6 +306,7 @@ Resources:
                     - !Ref 'AWS::AccountId'
                     - ':'
                     - !Ref CodePipeline
+
   AmazonCloudWatchEventRule:
     Type: 'AWS::Events::Rule'
     Properties:
@@ -321,3 +332,14 @@ Resources:
             - branch
           referenceName:
             - !Ref BranchName
+      Targets:
+        - Arn: !Join
+                  - ''
+                  - - 'arn:aws:codepipeline:'
+                    - !Ref 'AWS::Region'
+                    - ':'
+                    - !Ref 'AWS::AccountId'
+                    - ':'
+                    - !Ref CodePipeline
+          RoleArn: !GetAtt AmazonCloudWatchEventRole.Arn
+          Id: codepipeline-eks-custom-ami
