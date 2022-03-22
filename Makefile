@@ -12,7 +12,8 @@ EKS_115_VERSION := 1.15.12
 EKS_116_VERSION := 1.16.15
 EKS_117_VERSION := 1.17.12
 EKS_118_VERSION := 1.18.9
-EKS_119_VERSION := 1.19.6
+EKS_119_VERSION := 1.19.15
+EKS_119_BUILD_DATE := 2021-11-10
 
 EKS_VERSION := 1.19
 
@@ -252,5 +253,10 @@ amazon-eks-node-linux-ubuntu2004
 .PHONY: linux-amis
 linux-amis: $(LINUX_AMIS)
 
-amazon-eks-node-linux-%: amazon-eks-node-linux-%.json
+amazon-eks-node-linux-al%: amazon-eks-node-linux-al%.json
 	$(call build_ami,$<,$(EKS_VERSION))
+
+amazon-eks-node-linux%: amazon-eks-node-linux%.json
+	#Dynamic fetching of build-date : aws s3 ls amazon-eks/1.19.13/2021-09-02/bin/linux/amd64/ --region=us-west-2
+	eks_build_date=${EKS_$(subst .,,$(EKS_VERSION))_BUILD_DATE}
+	$(call build_ami,$<,$(EKS_VERSION), $(eks_build_date))
