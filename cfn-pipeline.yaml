@@ -263,9 +263,9 @@ Resources:
                 BranchName: !Ref BranchName
                 RepositoryName: !Ref RepositoryName
                 PollForSourceChanges: false
-        - Name: Build
+        - Name: Build_Ami
           Actions:
-            - Name: Build_Ami
+            - Name: Build_Ami_Linux_Al2_Arm64
               RunOrder: 1
               InputArtifacts:
                 - Name: SourceOutput
@@ -277,7 +277,72 @@ Resources:
               Configuration:
                 ProjectName: eks-custom-ami-build
                 PrimarySource: Source
-                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"linux-amis","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-al2-arm64","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
+            - Name: Build_Ami_Linux_Al2
+              RunOrder: 1
+              InputArtifacts:
+                - Name: SourceOutput
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: eks-custom-ami-build
+                PrimarySource: Source
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-al2","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
+            - Name: Build_Ami_Linux_Rhel7
+              RunOrder: 1
+              InputArtifacts:
+                - Name: SourceOutput
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: eks-custom-ami-build
+                PrimarySource: Source
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-rhel7","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
+            - Name: Build_Ami_Linux_Rhel8
+              RunOrder: 1
+              InputArtifacts:
+                - Name: SourceOutput
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: eks-custom-ami-build
+                PrimarySource: Source
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-rhel8","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
+            - Name: Build_Ami_Linux_Ubuntu1804
+              RunOrder: 1
+              InputArtifacts:
+                - Name: SourceOutput
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: eks-custom-ami-build
+                PrimarySource: Source
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-ubuntu1804","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
+            - Name: Build_Ami_Linux_Ubuntu2004
+              RunOrder: 1
+              InputArtifacts:
+                - Name: SourceOutput
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: eks-custom-ami-build
+                PrimarySource: Source
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-ubuntu2004","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
   AmazonCloudWatchEventRole:
     Type: 'AWS::IAM::Role'
     Properties:
