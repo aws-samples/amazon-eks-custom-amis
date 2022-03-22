@@ -1,5 +1,5 @@
 
-PACKER_VARIABLES := binary_bucket_name binary_bucket_region eks_version eks_build_date cni_plugin_version root_volume_size data_volume_size hardening_flag http_proxy https_proxy no_proxy
+PACKER_VARIABLES := binary_bucket_name binary_bucket_region eks_version eks_version_withminor eks_build_date cni_plugin_version root_volume_size data_volume_size hardening_flag http_proxy https_proxy no_proxy
 VPC_ID := vpc-04421521831249174
 SUBNET_ID := subnet-049ea2459d1e821a1
 SECURITY_GROUP := sg-0d2795ad6a120d9ff
@@ -15,7 +15,9 @@ EKS_118_VERSION := 1.18.9
 EKS_119_VERSION := 1.19.15
 EKS_119_BUILD_DATE := 2021-11-10
 
-EKS_VERSION := 1.19
+eks_version := 1.19
+eks_build_date := ${EKS_$(subst .,,$(EKS_VERSION))_BUILD_DATE}
+eks_version_withminor := ${EKS_$(subst .,,$(EKS_VERSION))_VERSION}
 
 MAKEFLAGS += -j8
 
@@ -236,7 +238,6 @@ define build_ami
 		--var 'subnet_id=$(SUBNET_ID)' \
 		--var 'security_group_id=$(SECURITY_GROUP)' \
 		--var 'iam_instance_profile=$(INSTANCE_PROFILE)' \
-		--var 'eks_version=$(EKS_VERSION)' \
 		$(foreach packerVar,$(PACKER_VARIABLES), $(if $($(packerVar)),--var $(packerVar)='$($(packerVar))',)) \
 		$(1)
 endef
@@ -253,10 +254,6 @@ amazon-eks-node-linux-ubuntu2004
 .PHONY: linux-amis
 linux-amis: $(LINUX_AMIS)
 
-amazon-eks-node-linux-al%: amazon-eks-node-linux-al%.json
-	$(call build_ami,$<,$(EKS_VERSION))
-
 amazon-eks-node-linux%: amazon-eks-node-linux%.json
 	#Dynamic fetching of build-date : aws s3 ls amazon-eks/1.19.13/2021-09-02/bin/linux/amd64/ --region=us-west-2
-	eks_build_date=${EKS_$(subst .,,$(EKS_VERSION))_BUILD_DATE}
-	$(call build_ami,$<,$(EKS_VERSION), $(eks_build_date))
+	$(call build_ami,$<)
