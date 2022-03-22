@@ -14,6 +14,10 @@ EKS_117_VERSION := 1.17.12
 EKS_118_VERSION := 1.18.9
 EKS_119_VERSION := 1.19.6
 
+EKS_VERSION := 1.19
+
+MAKEFLAGS += -j8
+
 build:
 	packer build \
 		--var 'aws_region=$(AWS_REGION)' \
@@ -223,3 +227,30 @@ build-windows2004core-1.18:
 
 build-windows2004core-1.19:
 	$(MAKE) build PACKER_FILE=amazon-eks-node-windows2004core.json eks_version=1.19
+
+define build_ami
+	packer build \
+		--var 'aws_region=$(AWS_REGION)' \
+		--var 'vpc_id=$(VPC_ID)' \
+		--var 'subnet_id=$(SUBNET_ID)' \
+		--var 'security_group_id=$(SECURITY_GROUP)' \
+		--var 'iam_instance_profile=$(INSTANCE_PROFILE)' \
+		--var 'eks_version=$(EKS_VERSION)' \
+		$(foreach packerVar,$(PACKER_VARIABLES), $(if $($(packerVar)),--var $(packerVar)='$($(packerVar))',)) \
+		$(1)
+endef
+
+LINUX_AMIS = amazon-eks-node-linux-al2-arm64 \
+amazon-eks-node-linux-al2 \
+amazon-eks-node-linux-centos7 \
+amazon-eks-node-linux-centos8 \
+amazon-eks-node-linux-rhel7 \
+amazon-eks-node-linux-rhel8 \
+amazon-eks-node-linux-ubuntu1804 \
+amazon-eks-node-linux-ubuntu2004
+
+.PHONY: linux-amis
+linux-amis: $(LINUX_AMIS)
+
+amazon-eks-node-linux-%: amazon-eks-node-linux-%.json
+	$(call build_ami,$<,$(EKS_VERSION))

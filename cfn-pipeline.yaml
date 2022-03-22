@@ -277,8 +277,7 @@ Resources:
               Configuration:
                 ProjectName: eks-custom-ami-build
                 PrimarySource: Source
-                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"build-al2-1.19","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
-
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"linux-amis","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
   AmazonCloudWatchEventRole:
     Type: 'AWS::IAM::Role'
     Properties:
