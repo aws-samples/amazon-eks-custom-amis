@@ -16,8 +16,8 @@ EKS_119_VERSION := 1.19.15
 EKS_119_BUILD_DATE := 2021-11-10
 
 eks_version := 1.19
-eks_build_date := ${EKS_$(subst .,,$(EKS_VERSION))_BUILD_DATE}
-eks_version_withminor := ${EKS_$(subst .,,$(EKS_VERSION))_VERSION}
+eks_build_date := ${EKS_$(subst .,,$(eks_version))_BUILD_DATE}
+eks_version_withminor := ${EKS_$(subst .,,$(eks_version))_VERSION}
 
 MAKEFLAGS += -j8
 
