@@ -10,6 +10,10 @@ Parameters:
     Description: CodeComit repository name
     Type: String
     Default: myrepo
+  EKSVersion:
+    Description: Version of k8s to build image for
+    Type: String
+    Default: 1.19
 
 Resources:
   VPC:
@@ -237,7 +241,6 @@ Resources:
             Condition:
               Bool:
                 'aws:SecureTransport': false
-
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties: 
@@ -277,7 +280,7 @@ Resources:
               Configuration:
                 ProjectName: eks-custom-ami-build
                 PrimarySource: Source
-                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-al2-arm64","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-al2-arm64","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"},{"name":"eks_version","value":"${EKSVersion}","type":"PLAINTEXT"}]'
             - Name: Build_Ami_Linux_Al2
               RunOrder: 1
               InputArtifacts:
@@ -290,7 +293,7 @@ Resources:
               Configuration:
                 ProjectName: eks-custom-ami-build
                 PrimarySource: Source
-                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-al2","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-al2","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"},{"name":"eks_version","value":"${EKSVersion}","type":"PLAINTEXT"}]'
             - Name: Build_Ami_Linux_Rhel7
               RunOrder: 1
               InputArtifacts:
@@ -303,7 +306,7 @@ Resources:
               Configuration:
                 ProjectName: eks-custom-ami-build
                 PrimarySource: Source
-                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-rhel7","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-rhel7","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"},{"name":"eks_version","value":"${EKSVersion}","type":"PLAINTEXT"}]'
             - Name: Build_Ami_Linux_Rhel8
               RunOrder: 1
               InputArtifacts:
@@ -316,7 +319,7 @@ Resources:
               Configuration:
                 ProjectName: eks-custom-ami-build
                 PrimarySource: Source
-                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-rhel8","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-rhel8","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"},{"name":"eks_version","value":"${EKSVersion}","type":"PLAINTEXT"}]'
             - Name: Build_Ami_Linux_Ubuntu1804
               RunOrder: 1
               InputArtifacts:
@@ -329,7 +332,7 @@ Resources:
               Configuration:
                 ProjectName: eks-custom-ami-build
                 PrimarySource: Source
-                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-ubuntu1804","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-ubuntu1804","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"},{"name":"eks_version","value":"${EKSVersion}","type":"PLAINTEXT"}]'
             - Name: Build_Ami_Linux_Ubuntu2004
               RunOrder: 1
               InputArtifacts:
@@ -342,7 +345,46 @@ Resources:
               Configuration:
                 ProjectName: eks-custom-ami-build
                 PrimarySource: Source
-                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-ubuntu2004","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"}]'
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-linux-ubuntu2004","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"},{"name":"eks_version","value":"${EKSVersion}","type":"PLAINTEXT"}]'
+            - Name: Build_Ami_Windows1809core
+              RunOrder: 1
+              InputArtifacts:
+                - Name: SourceOutput
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: eks-custom-ami-build
+                PrimarySource: Source
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-windows1809core","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"},{"name":"eks_version","value":"${EKSVersion}","type":"PLAINTEXT"}]'
+            - Name: Build_Ami_Windows1809full
+              RunOrder: 1
+              InputArtifacts:
+                - Name: SourceOutput
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: eks-custom-ami-build
+                PrimarySource: Source
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-windows1809full","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"},{"name":"eks_version","value":"${EKSVersion}","type":"PLAINTEXT"}]'
+            - Name: Build_Ami_Windows2004full
+              RunOrder: 1
+              InputArtifacts:
+                - Name: SourceOutput
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: eks-custom-ami-build
+                PrimarySource: Source
+                EnvironmentVariables: !Sub '[{"name":"TARGET_NAME","value":"amazon-eks-node-windows2004core","type":"PLAINTEXT"},{"name":"VPC_ID","value":"${VPC}","type":"PLAINTEXT"},{"name":"SUBNET_ID","value":"${PublicSubnet1}","type":"PLAINTEXT"},{"name":"eks_version","value":"${EKSVersion}","type":"PLAINTEXT"}]'
   AmazonCloudWatchEventRole:
     Type: 'AWS::IAM::Role'
     Properties:

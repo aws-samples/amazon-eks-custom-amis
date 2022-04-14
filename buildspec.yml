@@ -8,4 +8,4 @@ phases:
       - sudo apt-get update && sudo apt-get install packer
   build:
     commands:
-      - make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID $TARGET_NAME
+      - make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID EKS_VERSION=$EKS_VERSION $TARGET_NAME
