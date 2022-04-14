@@ -1,24 +1,23 @@
-
-PACKER_VARIABLES := binary_bucket_name binary_bucket_region eks_version eks_version_withminor eks_build_date cni_plugin_version root_volume_size data_volume_size hardening_flag http_proxy https_proxy no_proxy
+packer_variables := binary_bucket_name binary_bucket_region EKS_VERSION eks_version_withminor eks_build_date cni_plugin_version root_volume_size data_volume_size hardening_flag http_proxy https_proxy no_proxy
 VPC_ID := vpc-04421521831249174
 SUBNET_ID := subnet-049ea2459d1e821a1
 SECURITY_GROUP := sg-0d2795ad6a120d9ff
 INSTANCE_PROFILE := ManagedInstanceSSM
 AWS_REGION := us-east-2
-PACKER_FILE := 
 PACKER_OPTIONS = 
 
-EKS_119_VERSION := 1.19.15
-EKS_119_BUILD_DATE := 2021-11-10
+EKS_VERSION = 1.19
+# Definition should be dynamically fetch
+eks_119_version := 1.19.15
+eks_119_build_date := 2021-11-10
 
-eks_version = 1.19
-eks_build_date = ${EKS_$(subst .,,$(eks_version))_BUILD_DATE}
-eks_version_withminor = ${EKS_$(subst .,,$(eks_version))_VERSION}
+eks_build_date = ${eks_$(subst .,,$(EKS_VERSION))_build_date}
+eks_version_withminor = ${eks_(subst .,,$(EKS_VERSION))_version}
 
 MAKEFLAGS += -j8
 
 # Backward compatibility target
-all-1.19: eks_version = 1.19
+all-1.19: EKS_VERSION = 1.19
 all-1.19: $(linux_amis) $(windows_amis)
 build-al2-1.19: amazon-eks-node-linux-al2
 build-ubuntu1804-1.19: amazon-eks-node-linux-ubuntu1804
@@ -41,7 +40,7 @@ define build_ami
 		--var 'subnet_id=$(SUBNET_ID)' \
 		--var 'security_group_id=$(SECURITY_GROUP)' \
 		--var 'iam_instance_profile=$(INSTANCE_PROFILE)' \
-		$(foreach packerVar,$(PACKER_VARIABLES), $(if $($(packerVar)),--var $(packerVar)='$($(packerVar))',)) \
+		$(foreach packerVar,$(packer_variables), $(if $($(packerVar)),--var $(packerVar)='$($(packerVar))',)) \
 		$(1)
 endef
 
