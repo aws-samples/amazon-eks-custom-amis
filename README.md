@@ -6,7 +6,7 @@ This repository also applies the Docker CIS Benchmark and Amazon EKS CIS Benchma
 
 *Scripts and artifacts created by this repository do not guarantee compliance and these AMIs are not officially supported by AWS. Ensure your security and compliance teams thoroughly review these scripts before moving AMIs into production.*
 
-Lack of support in this repository does not indicate that you can't meet compliance with Amazon EKS, it simply means it is not supported by this repository. We welcome pull requests!
+Lack of support in this repository does not indicate that you can't meet compliance with Amazon EKS, it simply means it is not supported by this repository.
 
 | Distribution | Version | Available | Supported Hardening |
 |:---|:---:|:---:|:---:|
@@ -15,8 +15,6 @@ Lack of support in this repository does not indicate that you can't meet complia
 | Ubuntu | 20.04 | :white_check_mark: | None |
 | Red Hat Enterprise Linux | 7 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
 | Red Hat Enterprise Linux | 8 | :white_check_mark: | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS, DISA STIG |
-| CentOS | 7 | :warning: ([Changing to CentOS Stream](https://blog.centos.org/2020/12/future-is-centos-stream/)) | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS |
-| CentOS | 8 | :warning: ([Changing to CentOS Stream](https://blog.centos.org/2020/12/future-is-centos-stream/)) | CIS Benchmark, NIST 800-171, ACSC, HIPAA, OSPP, PCI-DSS|
 | Windows | 18.09 | :white_check_mark: | None |
 | Windows | 20.04 | :white_check_mark: | None |
 
@@ -35,7 +33,10 @@ You will also need to provision a VPC with a single public Subnet. You can lever
 The Packer commands are encapsulated in Make commands. Packer handles provisioning the instance, the temporary ssh key, temporary security group, and creating the AMI. Below are the variables accepted by the `build` command. The Make commands folllow the following naming convention:
 
 ```bash
-make build-<operating system>-<eks major version>
+make amazon-eks-node-linux-<distro>
+
+For arm (only al2 is supported) : make amazon-eks-node-linux-al2-arm64
+
 ```
 
 | Parameter | Default | Description |
@@ -101,15 +102,6 @@ The following operating systems are supported by this repository. This repositor
 The Amazon Linux 2 EKS Optmized AMI is used as the base for this image. This image extends the EKS Optimized AMI to apply the Amazon Linux 2 CIS Benchmark, Docker CIS Benchmark, and Amazon EKS CIS Benchmark. These benchmarks are typically used to meet NIST 800-53 controls. Hardening is provided as a "best effort" and does not guarantee compliance with the above frameworks.
 
 ```bash
-# build amazon linux 2 for amazon eks 1.15
-make build-al2-1.15
-
-# build amazon linux 2 for amazon eks 1.16
-make build-al2-1.16
-
-# build amazon linux 2 for amazon eks 1.17
-make build-al2-1.17
-
 # build amazon linux 2 for amazon eks 1.18
 make build-al2-1.18
 ```
@@ -123,33 +115,6 @@ make build-al2-1.18
 
 Ubuntu AMIs are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components.
 
-```bash
-# build ubuntu 18.04 for amazon eks 1.15
-make build-ubuntu1804-1.15
-
-# build ubuntu 18.04 for amazon eks 1.16
-make build-ubuntu1804-1.16
-
-# build ubuntu 18.04 for amazon eks 1.17
-make build-ubuntu1804-1.17
-
-# build ubuntu 18.04 for amazon eks 1.18
-make build-ubuntu1804-1.18
-```
-
-```bash
-# build ubuntu 20.04 for amazon eks 1.15
-make build-ubuntu2004-1.15
-
-# build ubuntu 20.04 for amazon eks 1.16
-make build-ubuntu2004-1.16
-
-# build ubuntu 20.04 for amazon eks 1.17
-make build-ubuntu2004-1.17
-
-# build ubuntu 20.04 for amazon eks 1.18
-make build-ubuntu2004-1.18
-```
 
 #### Red Hat Enterprise Linux
 
@@ -167,38 +132,6 @@ Red Hat Enterprise Linux 7/8 are aimed to provide a similar experience to the EK
 - **Hardening frameworks such as the DISA STIG that enable SELinux require the VPC CNI `aws-node` container be run in privileged mode.**
 - Packer does not support RHEL 8 in FIPS mode. SSH authentication breaks once FIPS is enabled. This repository enables FIPS as the last step as a workaround.
 
-```bash
-# Red Hat Enterprise Linux 7
-################################
-
-# build red hat enterprise linux 7 for amazon eks 1.15
-make build-rhel7-1.15
-
-# build red hat enterprise linux 7 for amazon eks 1.16
-make build-rhel7-1.16
-
-# build red hat enterprise linux 7 for amazon eks 1.17
-make build-rhel7-1.17
-
-# build red hat enterprise linux 7 for amazon eks 1.18
-make build-rhel7-1.18
-
-# Red Hat Enterprise Linux 8
-################################
-
-# build red hat enterprise linux 8 for amazon eks 1.15
-make build-rhel8-1.15
-
-# build red hat enterprise linux 8 for amazon eks 1.16
-make build-rhel8-1.16
-
-# build red hat enterprise linux 8 for amazon eks 1.17
-make build-rhel8-1.17
-
-# build red hat enterprise linux 8 for amazon eks 1.18
-make build-rhel8-1.18
-```
-
 #### CentOS
 
 | Distribution | Version | Build Command  | CIS Benchmark | NIST 800-171 | E8 | HIPAA | OSPP | PCI |
@@ -213,38 +146,6 @@ CentOS 7/8 are aimed to provide a similar experience to the EKS Optimized AMI. T
 - The SELinux boolean `container_manage_cgroup` is enabled to support containers.
 - Hardening is applied using RHEL hardening guides.
 
-```bash
-# CentOS 7
-################################
-
-# build centos 7 for amazon eks 1.15
-make build-centos7-1.15
-
-# build centos 7 for amazon eks 1.16
-make build-centos7-1.16
-
-# build centos 7 for amazon eks 1.17
-make build-centos7-1.17
-
-# build centos 7 for amazon eks 1.18
-make build-centos7-1.18
-
-# CentOS 8
-################################
-
-# build centos 8 for amazon eks 1.15
-make build-centos8-1.15
-
-# build centos 8 for amazon eks 1.16
-make build-centos8-1.16
-
-# build centos 8 for amazon eks 1.17
-make build-centos8-1.17
-
-# build centos 8 for amazon eks 1.18
-make build-centos8-1.18
-```
-
 #### Windows Server
 
 *Note: This build may not work while on a corporate VPN as it uses WinRM to communicate with the instance.*
@@ -258,20 +159,10 @@ make build-centos8-1.18
 The Windows Server EKS Optmized AMI is used as the base for this image.
 
 ```bash
-# build windows for amazon eks 1.16
-make build-windows1809core-1.16
-make build-windows1809full-1.16
-make build-windows2004core-1.16
-
-# build windows for amazon eks 1.17
-make build-windows1809core-1.17
-make build-windows1809full-1.17
-make build-windows2004core-1.17
-
 # build windows for amazon eks 1.18
-make build-windows1809core-1.18
-make build-windows1809full-1.18
-make build-windows2004core-1.18
+make build-windows1809core-1.19
+make build-windows1809full-1.19
+make build-windows2004core-1.19
 ```
 
 ### Fetching the Kubernetes Build Information
@@ -280,10 +171,7 @@ Amazon EKS builds and tests specific versions of Kubernetes together for compata
 
 | Kubernetes Version | Build Date |
 |---|:---:|
-| 1.18.9 | 2020-11-02 |
-| 1.17.12 | 2020-11-02 |
-| 1.16.15 | 2020-11-02 |
-| 1.15.12 | 2020-11-02 |
+| 1.19.5 | 2021-11-10 |
 
 To get the list of support Kubernetes versions run the following command:
 
@@ -305,3 +193,16 @@ aws s3 ls s3://amazon-eks/1.15.10/ --region=us-west-2
 ## License
 
 This library is licensed under the MIT-0 License. See the [LICENSE file](./LICENSE).
+
+
+# Update new target in makefile
+
+If you need to debug packer and want to keep the resources around, you can launch with -debug an -on-error like so :
+```bash
+make amazon-eks-node-linux-rhel7 -e PACKER_OPTIONS="-debug -on-error=ask"
+```
+
+or for more control : 
+```bash
+make amazon-eks-node-linux-rhel7 -e PACKER_OPTIONS="-on-error=ask"
+```
