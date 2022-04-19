@@ -44,11 +44,16 @@ define build_ami
 		$(1)
 endef
 
-GET_LATEST_EKS = $(shell aws s3 ls amazon-eks --region=us-west-2 | grep $(EKS_VERSION) | sort -V -r | head -n 1 | sed 's|PRE \(.*\)/|\1|')
-set_eks_version_minor = $(eval eks_version_withminor=$(GET_LATEST_EKS))
+get_latest_eks = $(shell aws s3 ls amazon-eks --region=us-west-2 | grep $(EKS_VERSION) | sort -V -r | head -n 1 | sed 's|PRE \(.*\)/|\1|')
+set_eks_version_minor = $(eval eks_version_withminor=$(get_latest_eks))
+
+get_latest_build_date = $(shell aws s3 ls amazon-eks/$(eks_version_withminor)/ --region=us-west-2 | sort -V -r | head -n 1 | sed 's|PRE \(.*\)/|\1|')
+set_eks_build_date = $(eval eks_build_date=$(get_latest_build_date))
 
 .PHONY: amazon-eks-node-linux%
 amazon-eks-node-%: amazon-eks-node-%.json
 	$(set_eks_version_minor)
-	@echo $(eks_version_withminor)
+	@echo EKS minor : $(eks_version_withminor)
+	$(set_eks_build_date)
+	@echo EKS Build date : $(eks_build_date)
 	$(call build_ami,$<)
