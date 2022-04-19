@@ -1,7 +1,7 @@
 {
   "variables":{
     "aws_region":"us-east-2",
-    "ami_description":"EKS Kubernetes Worker AMI on AmazonLinux2 image (k8s: {{user `eks_version`}})",
+    "ami_description":"EKS Kubernetes Worker AMI on AmazonLinux2 image (k8s: {{user `EKS_VERSION`}})",
     "eks_version":"",
     "root_volume_size": "10",
     "data_volume_size": "50",
@@ -16,8 +16,8 @@
     "source_ami_owner_govcloud":"219670896067",
     "source_ami_ssh_user":"ec2-user",
     "source_ami_arch":"x86_64",
-    "source_ami_name":"amazon-eks-node-{{user `eks_version`}}-*",
-    "target_ami_name": "amazon-eks-node-{{user `eks_version`}}-al2-{{ timestamp }}"
+    "source_ami_name":"amazon-eks-node-{{user `EKS_VERSION`}}-*",
+    "target_ami_name": "amazon-eks-node-{{user `EKS_VERSION`}}-al2-{{ timestamp }}"
   },
   "builders":[
     {
