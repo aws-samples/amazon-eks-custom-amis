@@ -44,7 +44,11 @@ define build_ami
 		$(1)
 endef
 
+GET_LATEST_EKS = $(shell aws s3 ls amazon-eks --region=us-west-2 | grep $(EKS_VERSION) | sort -V -r | head -n 1 | sed 's|PRE \(.*\)/|\1|')
+set_eks_version_minor = $(eval eks_version_withminor=$(GET_LATEST_EKS))
+
 .PHONY: amazon-eks-node-linux%
 amazon-eks-node-%: amazon-eks-node-%.json
-	#Dynamic fetching of build-date : aws s3 ls amazon-eks/1.19.13/2021-09-02/bin/linux/amd64/ --region=us-west-2
+	$(set_eks_version_minor)
+	@echo $(eks_version_withminor)
 	$(call build_ami,$<)
