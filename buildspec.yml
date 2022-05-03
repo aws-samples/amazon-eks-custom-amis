@@ -8,4 +8,14 @@ phases:
       - sudo apt-get update && sudo apt-get install packer
   build:
     commands:
-      - make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID EKS_VERSION=$EKS_VERSION $TARGET_NAME
+      - make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID EKS_VERSION=$EKS_VERSION $TARGET_NAME | tee build.log
+  post_build:
+    commands:
+      - NAME=$(tail -n 30 build.log | grep Name | cut -d: -f4 | tr -d '" ')
+      - AMI=$(tail -n 10 build.log | grep ami | cut -d: -f2 | tr-d ' ')
+      - aws ec2 create-launch-template --launch-template-name $NAME --version-description $TARGET_NAME-$EKS_VERSION --launch-template-data "{\"ImageId\": \"$AMI\"}"
+      - echo "{ \"NAME\": \"$NAME\", \"TARGET_NAME\" : \"$TARGET_NAME\", \"DATE\": \"$(date +%Y-%m-%d)\", \"EKS_VERSION\": \"$EKS_VERSION\", \"STATUS\": \"PASSED\" }" > artifacts.json
+artifacts:
+  files:
+    - artifacts.json
+  name: eks-${TARGET_NAME}-${EKS_VERSION}-$(date +%Y-%m-%d)
