@@ -11,8 +11,10 @@ phases:
       - make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID EKS_VERSION=$EKS_VERSION $TARGET_NAME | tee build.log
   post_build:
     commands:
-      - aws ec2 create-launch-template --launch-template-name $NAME --version-description $TARGET_NAME-$EKS_VERSION --launch-template-data "{\"ImageId\": \"$AMI\"}"
-      - echo "$NAME, $TARGET_NAME, date +%Y-%m-%d, $EKS_VERSION, PASSED" > artifacts.json
+      - 'NAME=$(tail -n 30 build.log | grep Name | cut -d: -f4 | tr -d ''" '')'
+      - 'AMI=$(tail -n 10 build.log | grep ami | cut -d: -f2 | tr -d '' '')'
+      - 'aws ec2 create-launch-template --launch-template-name $NAME --version-description $TARGET_NAME-$EKS_VERSION --launch-template-data "{\"ImageId\": \"$AMI\"}"'
+      - 'echo "$NAME, $TARGET_NAME, date +%Y-%m-%d, $EKS_VERSION, PASSED" > artifacts.json'
 artifacts:
   files:
     - artifacts.json
