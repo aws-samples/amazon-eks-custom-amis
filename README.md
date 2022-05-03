@@ -44,8 +44,9 @@ For arm (only al2 is supported) : make amazon-eks-node-linux-al2-arm64
 | `AWS_REGION` | | The AWS Region to use for the packer instance |
 | `VPC_ID` | | The AWS VPC to use for the packer instance |
 | `SUBNET_ID`| | The AWS Subnet to use for the packer instance |
-| `eks_version`| `1.18.9` | The version of Kubernetes to install. See blow for information on how to get this value. |
-| `eks_build_date`| `2020-11-02` | The build date of the Kubernetes build |
+| `EKS_VERSION`| `1.19` | The version of Kubernetes to install. See blow for information on how to get this value. |
+| `eks_version_withminor`| `1.19.x` | Default to last minor available |
+| `eks_build_date`| `latest` | The build date of the Kubernetes build |
 | `cni_plugin_version`| `v0.8.6` | The version of the Kubernetes Container Networking Interface (CNI) plugin to install |
 | `http_proxy` |  | Specify an HTTP Proxy to use when running commands on the server. This will set the `http_proxy` and `HTTP_PROXY` environment variables on the server while commands are running. |
 | `https_proxy` |  | Specify an HTTPS Proxy to use when running commands on the server. This will set the `https_proxy` and `HTTPS_PROXY` environment variables on the server while commands are running. |
@@ -102,16 +103,16 @@ The following operating systems are supported by this repository. This repositor
 The Amazon Linux 2 EKS Optmized AMI is used as the base for this image. This image extends the EKS Optimized AMI to apply the Amazon Linux 2 CIS Benchmark, Docker CIS Benchmark, and Amazon EKS CIS Benchmark. These benchmarks are typically used to meet NIST 800-53 controls. Hardening is provided as a "best effort" and does not guarantee compliance with the above frameworks.
 
 ```bash
-# build amazon linux 2 for amazon eks 1.18
-make build-al2-1.18
+# build amazon linux 2 for amazon eks
+make amazon-eks-node-linux-al2
 ```
 
 #### Ubuntu
 
 | Distribution | Version | Supported |
 |:---|:---:|:---:|
-| Ubuntu | 18.04 | `build-ubuntu1804-<eks major version>` |
-| Ubuntu | 20.04 | `build-ubuntu2004-<eks major version>` |
+| Ubuntu | 18.04 | `amazon-eks-node-linux-ubuntu-1804` |
+| Ubuntu | 20.04 | `amazon-eks-node-linux-ubuntu-2004` |
 
 Ubuntu AMIs are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components.
 
@@ -120,8 +121,8 @@ Ubuntu AMIs are aimed to provide a similar experience to the EKS Optimized AMI. 
 
 | Distribution | Version | Build Command  | CIS Benchmark | NIST 800-171 | E8 | HIPAA | OSPP | PCI | DISA STIG |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| Red Hat Enterprise Linux | 7 | `build-rhel7-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` | `hardening_flag=stig` |
-| Red Hat Enterprise Linux | 8 | `build-rhel8-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` | `hardening_flag=stig` |
+| Red Hat Enterprise Linux | 7 | `amazon-eks-node-linux-rhel7` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` | `hardening_flag=stig` |
+| Red Hat Enterprise Linux | 8 | `amazon-eks-node-linux-rhel8` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` | `hardening_flag=stig` |
 
 Red Hat Enterprise Linux 7/8 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components. OpenSCAP is used to apply the above hardening frameworks. Hardening is provided as a "best effort" and does not guarantee compliance with the above frameworks. Certain adjustments are made in order to work with Amazon EKS:
 
@@ -131,20 +132,6 @@ Red Hat Enterprise Linux 7/8 are aimed to provide a similar experience to the EK
 - The SELinux boolean `container_manage_cgroup` is enabled to support containers.
 - **Hardening frameworks such as the DISA STIG that enable SELinux require the VPC CNI `aws-node` container be run in privileged mode.**
 - Packer does not support RHEL 8 in FIPS mode. SSH authentication breaks once FIPS is enabled. This repository enables FIPS as the last step as a workaround.
-
-#### CentOS
-
-| Distribution | Version | Build Command  | CIS Benchmark | NIST 800-171 | E8 | HIPAA | OSPP | PCI |
-|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| CentOS | 7 | `build-centos7-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` |
-| CentOS | 8 | `build-centos8-<eks major version>` | `hardening_flag=cis` | `hardening_flag=cui` | `hardening_flag=e8` | `hardening_flag=hipaa` | `hardening_flag=ospp` | `hardening_flag=pci-dss` |
-
-CentOS 7/8 are aimed to provide a similar experience to the EKS Optimized AMI. This reposiroty installs Docker and the Amazon EKS components. OpenSCAP is used to apply the above hardening frameworks. Hardening is provided as a "best effort" and does not guarantee compliance with the above frameworks. Certain adjustments are made in order to work with Amazon EKS:
-
-- The `firewalld` serivce is disable to support Docker and Kubernetes.
-- While FIPS 140-2 modules can be applied to CentOS, CentOS has not been formally validated.
-- The SELinux boolean `container_manage_cgroup` is enabled to support containers.
-- Hardening is applied using RHEL hardening guides.
 
 #### Windows Server
 
