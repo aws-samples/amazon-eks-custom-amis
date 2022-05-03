@@ -140,8 +140,7 @@
     {
       "type":"shell",
       "scripts": [
-        "./scripts/rhel8/hardening.sh",
-        "./scripts/rhel8/cleanup.sh"
+        "./scripts/rhel8/hardening.sh"
       ],
       "environment_vars": [
         "HTTP_PROXY={{user `http_proxy`}}",

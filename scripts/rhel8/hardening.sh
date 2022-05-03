@@ -45,3 +45,7 @@ if [ -f /etc/packer/hardening.sh ]; then
   bash /etc/packer/hardening.sh
 fi
 
+if [ -f ./cleanup.sh ]; then
+  echo 'Running Cleanup'
+  bash ./cleanup.sh
+fi
