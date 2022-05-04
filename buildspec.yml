@@ -8,6 +8,13 @@ phases:
       - aws --version
       - sudo apt-get update && sudo apt-get -y install packer awscli
       - aws --version
+      - sudo mkdir /usr/local/awscliv2
+      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      - unzip -q awscliv2.zip
+      - >
+        sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/awscliv2 --update
+      - export PATH="/usr/local/bin:$PATH"
+      - aws --version
   build:
     commands:
       - echo 'Build' #make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID EKS_VERSION=$EKS_VERSION $TARGET_NAME | tee build.log
