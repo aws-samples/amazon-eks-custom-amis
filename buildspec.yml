@@ -5,7 +5,9 @@ phases:
     commands:
       - curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
       - sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-      - sudo apt-get update && sudo apt-get install packer
+      - aws --version
+      - sudo apt-get update && sudo apt-get install packer aws-cli
+      - aws --version
   build:
     commands:
       - echo 'Build' #make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID EKS_VERSION=$EKS_VERSION $TARGET_NAME | tee build.log
