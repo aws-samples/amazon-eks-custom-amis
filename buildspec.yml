@@ -20,7 +20,7 @@ phases:
       - echo 'Build' #make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID EKS_VERSION=$EKS_VERSION $TARGET_NAME | tee build.log
   post_build:
     commands:
-      - 'if [ "$CODEBUILD_BUILD_SUCCEEDING" == "0" ]; then exit 1; fi'
+      - 'if [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ]; then exit 1; fi'
       - 'NG_ROLE=arn:aws:iam::878698112157:role/AmazonEKSNodeRole'
       - 'CLUSTER_NAME=$(echo ''hardening-$EKS_VERSION'' | tr -d ''.'')'
       - 'NAME=$(tail -n 30 build.log | grep Name | cut -d: -f4 | tr -d ''" '')' 
@@ -30,7 +30,7 @@ phases:
       - 'LT_NAME=$(echo $LT | jq .LaunchTemplate.LaunchTemplateName)'
       - 'LT_VERSION=$(echo $LT | jq .LaunchTemplate.LatestVersionNumber)'
       - 'echo "$NAME, $TARGET_NAME, date +%Y-%m-%d, $EKS_VERSION, PASSED" > artifacts.json'
-      - 'NG=$(aws eks create-nodegroup --cluster-name $CLUSTER_NAME --subnets $SUBNET_ID --launch_template name=$LT_NAME,version=$LT_VERSION --nodegroup-name $LT_NAME --node-role $NG_ROLE --scaling-config minSize=0,maxSize=1,desiredSize=1)'
+      - 'NG=$(aws eks create-nodegroup --cluster-name $CLUSTER_NAME --subnets $SUBNET_ID --launch-template name=$LT_NAME,version=$LT_VERSION --nodegroup-name $LT_NAME --node-role $NG_ROLE --scaling-config minSize=0,maxSize=1,desiredSize=1)'
       - 'STATUS=CREATING; while [ "$STATUS" = "CREATING" ]; do sleep 20; STATUS=$(aws eks describe-nodegroup --cluster-name $CLUSTER_NAME --nodegroup-name amazon-eks-node-121-al2-1651609010 | jq -r .nodegroup.status); echo $STATUS; done'
       - 'aws eks update-nodegroup-config --cluster-name $CLUSTER_NAME --nodegroup-name $LT_NAME --scaling-config minSize=0,maxSize=1,desiredSize=0'
       - 'if [ "$STATUS" != "ACTIVE" ]; then exit 1; fi'
