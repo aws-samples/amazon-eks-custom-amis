@@ -17,7 +17,7 @@ phases:
       - 'NAME=$(tail -n 30 build.log | grep Name | cut -d: -f4 | tr -d ''" '')' 
       - 'AMI=$(tail -n 10 build.log | grep ami | cut -d: -f2 | tr -d '' '')'
       - 'echo "Value found: $NAME, $AMI, $TARGET_NAME, $EKS_VERSION"'
-      - 'LT=$(aws ec2 create-launch-template --launch-template-name $NAME --version-description $TARGET_NAME-$EKS_VERSION --launch-template-data "{\"ImageId\": \"$AMI\"}"')
+      - 'LT=$(aws ec2 create-launch-template --launch-template-name $NAME --version-description $TARGET_NAME-$EKS_VERSION --launch-template-data "{\"ImageId\": \"$AMI\"}")'
       - 'LT_NAME=$(echo $LT | jq .LaunchTemplate.LaunchTemplateName)'
       - 'LT_VERSION=$(echo $LT | jq .LaunchTemplate.LatestVersioNumber)'
       - 'echo "$NAME, $TARGET_NAME, date +%Y-%m-%d, $EKS_VERSION, PASSED" > artifacts.json'
