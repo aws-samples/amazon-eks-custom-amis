@@ -5,15 +5,7 @@ phases:
     commands:
       - curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
       - sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-      - aws --version
-      - sudo apt-get update && sudo apt-get -y install packer awscli
-      - aws --version
-      - sudo mkdir /usr/local/awscliv2
-      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-      - unzip -q awscliv2.zip
-      - >
-        sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/awscliv2 --update
-      - export PATH="/usr/local/bin:$PATH"
+      - sudo apt-get update && sudo apt-get -y install packer
       - aws --version
   build:
     commands:
@@ -26,7 +18,7 @@ phases:
       - 'NAME=$(tail -n 30 build.log | grep Name | cut -d: -f4 | tr -d ''" '')' 
       - 'AMI=$(tail -n 10 build.log | grep ami | cut -d: -f2 | tr -d '' '')'
       - 'LT=$(aws ec2 create-launch-template --launch-template-name $NAME --version-description $TARGET_NAME-$EKS_VERSION --launch-template-data "{\"ImageId\": \"$AMI\"}")'
-      - 'LT_NAME=$(echo $LT | jq .LaunchTemplate.LaunchTemplateName)'
+      - 'LT_NAME=$(echo $LT.$$ | jq -r .LaunchTemplate.LaunchTemplateName)'
       - 'LT_VERSION=$(echo $LT | jq .LaunchTemplate.LatestVersionNumber)'
       - 'NG_NAME=$(echo $LT_NAME | tr -d ''.'')'
       - 'echo "Value found: $NAME, $AMI, $TARGET_NAME, $EKS_VERSION, $NG_ROLE, $CLUSTER_NAME, $LT_NAME, $LT_VERSION"'
