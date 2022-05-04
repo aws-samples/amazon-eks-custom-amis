@@ -1,87 +1,10 @@
-    amazon-ebs: + echo '3.1 - 3.2 - ensure that the docker.service file ownership is set to root:root'
-    amazon-ebs: 3.1 - 3.2 - ensure that the docker.service file ownership is set to root:root
-    amazon-ebs: + chmod -R 0644 /usr/lib/systemd/system/docker.service
-    amazon-ebs: + chown -R root:root /usr/lib/systemd/system/docker.service
-    amazon-ebs: + chmod -R 0644 /usr/lib/systemd/system/docker.socket
-    amazon-ebs: + chown -R root:root /usr/lib/systemd/system/docker.socket
-    amazon-ebs: + echo '3.5 - 3.6 - ensure that the /etc/docker file ownership is set to root:root'
-    amazon-ebs: 3.5 - 3.6 - ensure that the /etc/docker file ownership is set to root:root
-    amazon-ebs: + chmod -R 0755 /etc/docker
-    amazon-ebs: + chown -R root:root /etc/docker
-    amazon-ebs: + echo '3.7 - 3.8 - Ensure that the /etc/docker file ownership is set to root:root'
-    amazon-ebs: 3.7 - 3.8 - Ensure that the /etc/docker file ownership is set to root:root
-    amazon-ebs: + chmod -R 0444 /etc/docker/certs.d/
-    amazon-ebs: + chown -R root:root /etc/docker/certs.d/
-    amazon-ebs: + echo '3.9 - 3.14 - ensure proper file persions on docker tls certificates'
-    amazon-ebs: 3.9 - 3.14 - ensure proper file persions on docker tls certificates
-    amazon-ebs: + echo '[not scored] - does not apply because the docker daemon is not exposed outside of the host'
-    amazon-ebs: [not scored] - does not apply because the docker daemon is not exposed outside of the host
-    amazon-ebs: + echo '3.15 - ensure that the /var/run/docker.sock file ownership is set to root:docker'
-    amazon-ebs: 3.15 - ensure that the /var/run/docker.sock file ownership is set to root:docker
-    amazon-ebs: + chmod -R 0660 /var/run/docker.sock
-    amazon-ebs: + chown -R root:docker /var/run/docker.sock
-    amazon-ebs: + echo '3.17 - 3.18 - ensure that the daemon.json file ownership is set to root:root'
-    amazon-ebs: 3.17 - 3.18 - ensure that the daemon.json file ownership is set to root:root
-    amazon-ebs: + touch /etc/docker/daemon.json
-    amazon-ebs: + chmod -R 0644 /etc/docker/daemon.json
-    amazon-ebs: + chown -R root:root /etc/docker/daemon.json
-    amazon-ebs: + echo '3.19 - 3.21 - ensure that the file ownership is set to root:root'
-    amazon-ebs: 3.19 - 3.21 - ensure that the file ownership is set to root:root
-    amazon-ebs: + touch /etc/default/docker
-    amazon-ebs: + chmod -R 0644 /etc/default/docker
-    amazon-ebs: + chown -R root:root /etc/default/docker
-    amazon-ebs: + touch /etc/sysconfig/docker
-    amazon-ebs: + chmod -R 0644 /etc/sysconfig/docker
-    amazon-ebs: + chown -R root:root /etc/sysconfig/docker
-==> amazon-ebs: Provisioning with shell script: ./scripts/shared/cis-eks.sh
-    amazon-ebs: + set -o pipefail
-    amazon-ebs: + set -o nounset
-    amazon-ebs: + set -o errexit
-    amazon-ebs: + echo '1 - control plane configuration'
-    amazon-ebs: 1 - control plane configuration
-    amazon-ebs: + echo '[not scored] - not applicable for worker node'
-    amazon-ebs: [not scored] - not applicable for worker node
-    amazon-ebs: + echo '2 - control plane configuration'
-    amazon-ebs: 2 - control plane configuration
-    amazon-ebs: + echo '[not scored] - not applicable for worker node'
-    amazon-ebs: [not scored] - not applicable for worker node
-    amazon-ebs: + echo '3.1.1 - ensure that the kubeconfig file permissions are set to 644 or more restrictive'
-    amazon-ebs: 3.1.1 - ensure that the kubeconfig file permissions are set to 644 or more restrictive
-    amazon-ebs: + chmod 644 /var/lib/kubelet/kubeconfig
-    amazon-ebs: + echo '3.1.2 - ensure that the kubelet kubeconfig file ownership is set to root:root'
-    amazon-ebs: 3.1.2 - ensure that the kubelet kubeconfig file ownership is set to root:root
-    amazon-ebs: + chown root:root /var/lib/kubelet/kubeconfig
-    amazon-ebs: + echo '3.1.3 - ensure that the kubelet configuration file permissions are set to 644 or more restrictive'
-    amazon-ebs: 3.1.3 - ensure that the kubelet configuration file permissions are set to 644 or more restrictive
-    amazon-ebs: + chmod 644 /etc/kubernetes/kubelet/kubelet-config.json
-    amazon-ebs: + echo '3.1.4 - ensure that the kubelet configuration file ownership is set to root:root'
-    amazon-ebs: 3.1.4 - ensure that the kubelet configuration file ownership is set to root:root
-    amazon-ebs: + chown root:root /etc/kubernetes/kubelet/kubelet-config.json
-    amazon-ebs: + echo '3.2 - kubelet'
-    amazon-ebs: 3.2 - kubelet
-    amazon-ebs: + cat
+mazon-ebs: Pausing 15s after this provisioner...
 ==> amazon-ebs: Provisioning with shell script: ./scripts/al2/cleanup.sh
     amazon-ebs: + set -o pipefail
     amazon-ebs: + set -o nounset
     amazon-ebs: + set -o errexit
     amazon-ebs: + yum clean all
     amazon-ebs: Loaded plugins: priorities, update-motd, versionlock
-    amazon-ebs: Existing lock /var/run/yum.pid: another copy is running as pid 3683.
-    amazon-ebs: Another app is currently holding the yum lock; waiting for it to exit...
-    amazon-ebs:   The other application is: yum
-    amazon-ebs:     Memory : 286 M RSS (501 MB VSZ)
-    amazon-ebs:     Started: Tue May  3 19:13:23 2022 - 00:03 ago
-    amazon-ebs:     State  : Running, pid: 3683
-    amazon-ebs: Another app is currently holding the yum lock; waiting for it to exit...
-    amazon-ebs:   The other application is: yum
-    amazon-ebs:     Memory : 328 M RSS (544 MB VSZ)
-    amazon-ebs:     Started: Tue May  3 19:13:23 2022 - 00:05 ago
-    amazon-ebs:     State  : Running, pid: 3683
-    amazon-ebs: Another app is currently holding the yum lock; waiting for it to exit...
-    amazon-ebs:   The other application is: yum
-    amazon-ebs:     Memory : 328 M RSS (544 MB VSZ)
-    amazon-ebs:     Started: Tue May  3 19:13:23 2022 - 00:07 ago
-    amazon-ebs:     State  : Running, pid: 3683
     amazon-ebs: Cleaning repos: amzn2-core amzn2extra-docker amzn2extra-epel
     amazon-ebs:               : amzn2extra-kernel-5.4 epel
     amazon-ebs: Cleaning up everything
@@ -92,32 +15,32 @@
 ==> amazon-ebs: Stopping the source instance...
     amazon-ebs: Stopping instance
 ==> amazon-ebs: Waiting for the instance to stop...
-==> amazon-ebs: Creating AMI amazon-eks-node-1.21-al2-1651605060 from instance i-050411df332c9c22f
-    amazon-ebs: AMI: ami-02d2f82ad29a025ff
+==> amazon-ebs: Creating AMI amazon-eks-node-1.21-al2-1651687444 from instance i-0a31cfe2179654d84
+    amazon-ebs: AMI: ami-02c101c6939bcd41d
 ==> amazon-ebs: Waiting for AMI to become ready...
 ==> amazon-ebs: Skipping Enable AMI deprecation...
-==> amazon-ebs: Modifying attributes on AMI (ami-02d2f82ad29a025ff)...
+==> amazon-ebs: Modifying attributes on AMI (ami-02c101c6939bcd41d)...
     amazon-ebs: Modifying: description
-==> amazon-ebs: Modifying attributes on snapshot (snap-06d8ea3055f34932f)...
-==> amazon-ebs: Modifying attributes on snapshot (snap-040cf04979d4f9ee8)...
-==> amazon-ebs: Modifying attributes on snapshot (snap-0c93cf97719e42e1b)...
-==> amazon-ebs: Adding tags to AMI (ami-02d2f82ad29a025ff)...
-==> amazon-ebs: Tagging snapshot: snap-06d8ea3055f34932f
-==> amazon-ebs: Tagging snapshot: snap-040cf04979d4f9ee8
-==> amazon-ebs: Tagging snapshot: snap-0c93cf97719e42e1b
+==> amazon-ebs: Modifying attributes on snapshot (snap-0d33d3151a8bd30a4)...
+==> amazon-ebs: Modifying attributes on snapshot (snap-06639a6cc819fbe4a)...
+==> amazon-ebs: Modifying attributes on snapshot (snap-0abf4fb2e8fb7e7b8)...
+==> amazon-ebs: Adding tags to AMI (ami-02c101c6939bcd41d)...
+==> amazon-ebs: Tagging snapshot: snap-0d33d3151a8bd30a4
+==> amazon-ebs: Tagging snapshot: snap-06639a6cc819fbe4a
+==> amazon-ebs: Tagging snapshot: snap-0abf4fb2e8fb7e7b8
 ==> amazon-ebs: Creating AMI tags
-    amazon-ebs: Adding tag: "Name": "amazon-eks-node-1.21-al2-1651605060"
-    amazon-ebs: Adding tag: "BuildDate": "2022-05-03T19:11:00Z"
+    amazon-ebs: Adding tag: "Name": "amazon-eks-node-1.21-al2-1651687444"
+    amazon-ebs: Adding tag: "BuildDate": "2022-05-04T18:04:04Z"
 ==> amazon-ebs: Creating snapshot tags
 ==> amazon-ebs: Terminating the source AWS instance...
 ==> amazon-ebs: Cleaning up any extra volumes...
 ==> amazon-ebs: No volumes to clean up, skipping
 ==> amazon-ebs: Deleting temporary security group...
 ==> amazon-ebs: Deleting temporary keypair...
-Build 'amazon-ebs' finished after 9 minutes 21 seconds.
+Build 'amazon-ebs' finished after 9 minutes 14 seconds.
 
-==> Wait completed after 9 minutes 21 seconds
+==> Wait completed after 9 minutes 14 seconds
 
 ==> Builds finished. The artifacts of successful builds are:
 --> amazon-ebs: AMIs were created:
-us-east-2: ami-02d2f82ad29a025ff
+us-east-2: ami-02c101c6939bcd41d
