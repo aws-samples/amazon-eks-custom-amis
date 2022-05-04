@@ -22,7 +22,7 @@ phases:
     commands:
       - 'if [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ]; then exit 1; fi'
       - 'NG_ROLE=arn:aws:iam::878698112157:role/AmazonEKSNodeRole'
-      - 'CLUSTER_NAME=$(echo ''hardening-$EKS_VERSION'' | tr -d ''.'')'
+      - 'CLUSTER_NAME=$(echo "hardening-$EKS_VERSION" | tr -d ''.'')'
       - 'NAME=$(tail -n 30 build.log | grep Name | cut -d: -f4 | tr -d ''" '')' 
       - 'AMI=$(tail -n 10 build.log | grep ami | cut -d: -f2 | tr -d '' '')'
       - 'LT=$(aws ec2 create-launch-template --launch-template-name $NAME --version-description $TARGET_NAME-$EKS_VERSION --launch-template-data "{\"ImageId\": \"$AMI\"}")'
