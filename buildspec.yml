@@ -21,7 +21,7 @@ phases:
       - 'LT_NAME=$(echo $LT | jq .LaunchTemplate.LaunchTemplateName)'
       - 'LT_VERSION=$(echo $LT | jq .LaunchTemplate.LatestVersioNumber)'
       - 'echo "$NAME, $TARGET_NAME, date +%Y-%m-%d, $EKS_VERSION, PASSED" > artifacts.json'
-      - 'NG=$(aws eks create-nodegroup --cluster-name $CLUSTER_NAME --subnets --launch_template name=$LT_NAME,version=$LT_VERSION --nodegroup-name $LT_NAME --node-role $NG_ROLE --scaling-config minSize=0,maxSize=1,desiredSize=1)'
+      - 'NG=$(aws eks create-nodegroup --cluster-name $CLUSTER_NAME --subnets $SUBNET_ID --launch_template name=$LT_NAME,version=$LT_VERSION --nodegroup-name $LT_NAME --node-role $NG_ROLE --scaling-config minSize=0,maxSize=1,desiredSize=1)'
       - 'STATUS=CREATING; while [ "$STATUS" = "CREATING" ]; do sleep 20; STATUS=$(aws eks describe-nodegroup --cluster-name $CLUSTER_NAME --nodegroup-name amazon-eks-node-121-al2-1651609010 | jq -r .nodegroup.status); echo $STATUS; done'
       - 'aws eks update-nodegroup-config --cluster-name $CLUSTER_NAME --nodegroup-name $LT_NAME --scaling-config minSize=0,maxSize=1,desiredSize=0'
       - 'if [ "$STATUS" != "ACTIVE" ]; then exit 1; fi'
