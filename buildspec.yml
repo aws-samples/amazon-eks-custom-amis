@@ -11,11 +11,17 @@ phases:
       - echo 'Build' #make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID EKS_VERSION=$EKS_VERSION $TARGET_NAME | tee build.log
   post_build:
     commands:
+      - 'NG_ROLE=arn:aws:iam::878698112157:role/AmazonEKSNodeRole'
+      - 'CLUSTER_NAME=hardening-121'
       - 'NAME=$(tail -n 30 build.log | grep Name | cut -d: -f4 | tr -d ''" '')' 
       - 'AMI=$(tail -n 10 build.log | grep ami | cut -d: -f2 | tr -d '' '')'
       - 'echo "Value found: $NAME, $AMI, $TARGET_NAME, $EKS_VERSION"'
-      - 'aws ec2 create-launch-template --launch-template-name $NAME --version-description $TARGET_NAME-$EKS_VERSION --launch-template-data "{\"ImageId\": \"$AMI\"}"'
+      - 'LT=$(aws ec2 create-launch-template --launch-template-name $NAME --version-description $TARGET_NAME-$EKS_VERSION --launch-template-data "{\"ImageId\": \"$AMI\"}"')
+      - 'LT_NAME=$(echo $LT | jq .LaunchTemplate.LaunchTemplateName)'
+      - 'LT_VERSION=$(echo $LT | jq .LaunchTemplate.LatestVersioNumber)'
       - 'echo "$NAME, $TARGET_NAME, date +%Y-%m-%d, $EKS_VERSION, PASSED" > artifacts.json'
+      - 'NG=$(aws eks create-nodegroup --cluster-name hardening-$EKS_VERSION --subnets --launch_template name=$LaunchTemplateName,version=$LT_VERSION --nodegroup-name $LaunchTemplateName --node-role $NG_ROLE --scaling-config minSize=0,maxSize=1,desiredSize=1)'
+      - 'while [ "$STATUS" = "CREATING" ]; do sleep 20; STATUS=$(aws eks describe-nodegroup --cluster-name hardening-121 --nodegroup-name amazon-eks-node-121-al2-1651609010 | jq -r .nodegroup.status); echo $STATUS; done'
 artifacts:
   files:
     - artifacts.json
