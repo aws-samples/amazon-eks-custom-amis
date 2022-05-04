@@ -23,9 +23,9 @@ phases:
       - 'NG_NAME=$(echo $LT_NAME | tr -d ''.'')'
       - 'echo "Value found: $NAME, $AMI, $TARGET_NAME, $EKS_VERSION, $NG_ROLE, $CLUSTER_NAME, $LT_NAME, $LT_VERSION"'
       - 'echo "$NAME, $TARGET_NAME, date +%Y-%m-%d, $EKS_VERSION, PASSED" > artifacts.json'
-      - 'NG=$(aws eks create-nodegroup --cluster-name $CLUSTER_NAME --subnets $SUBNET_ID --launch-template name=$LT_NAME,version=$LT_VERSION --nodegroup-name $NG_NAME  --node-role $NG_ROLE --scaling-config minSize=0,maxSize=1,desiredSize=1)'
-      - 'STATUS=CREATING; while [ "$STATUS" = "CREATING" ]; do sleep 20; STATUS=$(aws eks describe-nodegroup --cluster-name $CLUSTER_NAME --nodegroup-name amazon-eks-node-121-al2-1651609010 | jq -r .nodegroup.status); echo $STATUS; done'
-      - 'aws eks update-nodegroup-config --cluster-name $CLUSTER_NAME --nodegroup-name $LT_NAME --scaling-config minSize=0,maxSize=1,desiredSize=0'
+      - 'NG=$(aws eks create-nodegroup --cluster-name $CLUSTER_NAME --subnets $SUBNET_ID --launch-template name=$LT_NAME,version=$LT_VERSION --nodegroup-name $NG_NAME --node-role $NG_ROLE --scaling-config minSize=0,maxSize=1,desiredSize=1)'
+      - 'STATUS=CREATING; while [ "$STATUS" = "CREATING" ]; do sleep 20; STATUS=$(aws eks describe-nodegroup --cluster-name $CLUSTER_NAME --nodegroup-name $NG_NAME | jq -r .nodegroup.status); echo $STATUS; done'
+      - 'aws eks update-nodegroup-config --cluster-name $CLUSTER_NAME --nodegroup-name $NG_NAME --scaling-config minSize=0,maxSize=1,desiredSize=0'
       - 'if [ "$STATUS" != "ACTIVE" ]; then exit 1; fi'
 artifacts:
   files:
