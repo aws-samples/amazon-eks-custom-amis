@@ -9,7 +9,7 @@ phases:
       - aws --version
   build:
     commands:
-      - echo 'Build' #make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID EKS_VERSION=$EKS_VERSION $TARGET_NAME | tee build.log
+      - make VPC_ID=$VPC_ID SUBNET_ID=$SUBNET_ID EKS_VERSION=$EKS_VERSION $TARGET_NAME | tee build.log
   post_build:
     commands:
       - 'if [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ]; then exit 1; fi'
