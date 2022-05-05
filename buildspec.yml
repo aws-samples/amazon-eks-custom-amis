@@ -20,6 +20,7 @@ phases:
       - 'NG_NAME=$(echo $NAME | tr -d ''.'')'
       - 'USER_DATA=$(echo "#!/bin/bash\n/etc/eks/bootstrap.sh ${CLUSTER_NAME} --kubelet-extra-args ''--node-labels=eks.amazonaws.com/nodegroup=${NG_NAME},eks.amazonaws.com/nodegroup-image=${AMI}''" | base64 -w 0)'
       - 'echo "Value found: $NAME, $AMI, $TARGET_NAME, $EKS_VERSION, $NG_ROLE, $CLUSTER_NAME, $USER_DATA"'
+      - 'echo aws ec2 create-launch-template --launch-template-name $NAME --version-description $TARGET_NAME-$EKS_VERSION --launch-template-data "{\"ImageId\": \"$AMI\", \"UserData\": \"$USER_DATA\"}"'
       - 'LT=$(aws ec2 create-launch-template --launch-template-name $NAME --version-description $TARGET_NAME-$EKS_VERSION --launch-template-data "{\"ImageId\": \"$AMI\", \"UserData\": \"$USER_DATA\"}")'
       - 'LT_VERSION=1'
       - 'echo "$NAME, $TARGET_NAME, date +%Y-%m-%d, $EKS_VERSION, PASSED" > artifacts.json'
