@@ -31,4 +31,5 @@ phases:
 artifacts:
   files:
     - artifacts.json
+    - build.log
   name: eks-${TARGET_NAME}-${EKS_VERSION}-$(date +%Y-%m-%d)
