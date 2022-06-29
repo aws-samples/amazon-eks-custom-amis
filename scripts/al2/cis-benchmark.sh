@@ -179,7 +179,7 @@ chmod 0644 /etc/systemd/system/aidecheck.*
 systemctl daemon-reload 
  
 systemctl enable aidecheck.service 
-systemctl --now enable aidecheck.timer"
+systemctl --now enable aidecheck.timer
 
 echo "1.4.1 Ensure permissions on bootloader config are configured (Automated)"
 chown root:root /boot/grub2/grub.cfg 
@@ -198,215 +198,86 @@ default""","Edit /usr/lib/systemd/system/rescue.service and
 ExecStart=-/bin/sh -c ""/sbin/sulogin; /usr/bin/systemctl --fail --no-block 
 default"""
 
-echo "1.5.1 Ensure core dumps are restricted (Automated),"Run the following commands and verify output matches: 
-# grep -E ""^\s*\*\s+hard\s+core"" /etc/security/limits.conf 
-/etc/security/limits.d/* 
+echo "1.5.1 Ensure core dumps are restricted (Automated),"
+echo "* hard core 0" >> /etc/security/cis.conf
+sysctl_entry fs.suid_dumpable = 0 
+sysctl -w fs.suid_dumpable=0
+
+echo "1.5.2 Ensure XD/NX support is enabled (Automated),"
+journalctl | grep 'protection: active' 
  
-* hard core 0 
-# sysctl fs.suid_dumpable 
+# kernel: NX (Execute Disable) protection: active 
+
+echo "1.5.3 Ensure address space layout randomization (ASLR) is enabled (Automated)"
+sysctl_entry kernel.randomize_va_space 
  
-fs.suid_dumpable = 0 
-# grep ""fs\.suid_dumpable"" /etc/sysctl.conf /etc/sysctl.d/* 
+echo "1.5.4 Ensure prelink is not installed (Automated)"
+rpm -q prelink
+
+echo "1.6.1.1 Ensure SELinux is installed (Automated)"
+rpm -q libselinux 
  
-fs.suid_dumpable = 0 
-Run the following command to check if systemd-coredump is installed: 
-# systemctl is-enabled coredump.service 
-If enabled or disabled is returned systemd-coredump is installed","Add the following line to /etc/security/limits.conf or a /etc/security/limits.d/* 
-file: 
-* hard core 0 
-Set the following parameter in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-fs.suid_dumpable = 0 
-Run the following command to set the active kernel parameter: 
-# sysctl -w fs.suid_dumpable=0 
-If systemd-coredump is installed: 
-edit /etc/systemd/coredump.conf and add/modify the following lines: 
-Storage=none 
-ProcessSizeMax=0 
-Run the command: 
-systemctl daemon-reload"
-1.5.2 Ensure XD/NX support is enabled (Automated),"Run the following command and verify your kernel has identified and activated NX/XD 
-protection. 
-# journalctl | grep 'protection: active' 
- 
-kernel: NX (Execute Disable) protection: active 
-OR 
-on systems without journalctl: 
-# [[ -n $(grep noexec[0-9]*=off /proc/cmdline) || -z $(grep -E -i ' (pae|nx) 
-' /proc/cpuinfo) || -n $(grep '\sNX\s.*\sprotection:\s' /var/log/dmesg | grep 
--v active) ]] && echo ""NX Protection is not active"" 
- 
-Nothing should be returned","On 32 bit systems install a kernel with PAE support, no installation is required on 64 bit 
-systems: 
-If necessary configure your bootloader to load the new kernel and reboot the system. 
-You may need to enable NX or XD support in your bios."
-"1.5.3 Ensure address space layout randomization (ASLR) is enabled 
-(Automated)","Run the following commands and verify output matches: 
-# sysctl kernel.randomize_va_space 
- 
-kernel.randomize_va_space = 2 
-# grep ""kernel\.randomize_va_space"" /etc/sysctl.conf /etc/sysctl.d/* 
- 
-kernel.randomize_va_space = 2","Set the following parameter in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-kernel.randomize_va_space = 2 
-Run the following command to set the active kernel parameter: 
-# sysctl -w kernel.randomize_va_space=2"
-1.5.4 Ensure prelink is not installed (Automated),"Verify prelink is not installed. 
-Run the following command: 
-# rpm -q prelink 
- 
-package prelink is not installed","Run the following command to restore binaries to normal: 
-# prelink -ua 
-Run the following command to uninstall prelink: 
-# yum remove prelink"
-1.6.1.1 Ensure SELinux is installed (Automated),"Verify SELinux is installed. 
-Run the following command: 
-# rpm -q libselinux 
- 
-libselinux-<version>","Run the following command to install SELinux: 
-# yum install libselinux"
-"1.6.1.2 Ensure SELinux is not disabled in bootloader configuration 
-(Automated)","Run the following script to verify that no linux line has the selinux=0 or enforcing=0 
-parameters set: 
-#!/bin/bash 
- 
+echo "1.6.1.2 Ensure SELinux is not disabled in bootloader configuration (Automated)"
 # IF check passes return PASSED 
 efidir=$(find /boot/efi/EFI/* -type d -not -name 'BOOT') 
 gbdir=$(find /boot -maxdepth 1 -type d -name 'grub*') 
-if [ -f ""$efidir""/grub.cfg ]; then 
-   grep ""^\s*linux"" ""$efidir""/grub.cfg | grep -Eq ""(selinux=0|enforcing=0)"" 
-&& echo ""FAILED: \""$()\"" exists"" || echo ""PASSED"" 
-elif [ -f ""$gbdir""/grub.cfg ]; then 
-   grep ""^\s*linux"" ""$gbdir""/grub.cfg | grep -Eq ""(selinux=0|enforcing=0)"" && 
-echo ""FAILED: \""$()\"" exists"" || echo ""PASSED"" 
+if [ -f "$efidir"/grub.cfg ]; then 
+   grep "^\s*linux" "$efidir"/grub.cfg | grep -Eq "(selinux=0|enforcing=0)" && \ 
+echo "FAILED: \"$()\" exists" || echo "PASSED" 
+elif [ -f "$gbdir"/grub.cfg ]; then 
+   grep "^\s*linux" "$gbdir"/grub.cfg | grep -Eq "(selinux=0|enforcing=0)" && \ 
+echo "FAILED: \"$()\" exists" || echo "PASSED" 
 else 
-   echo ""FAILED"" 
-fi","Edit /etc/default/grub and remove all instances of selinux=0 and enforcing=0 from all 
-CMDLINE_LINUX parameters: 
-GRUB_CMDLINE_LINUX_DEFAULT=""quiet"" 
- 
-GRUB_CMDLINE_LINUX="""" 
-Run the following command to update the grub2 configuration: 
-# grub2-mkconfig -o /boot/grub2/grub.cfg"
-1.6.1.3 Ensure SELinux policy is configured (Automated),"Run the following commands and ensure output matches either "" targeted "" or "" mls "": 
-# grep SELINUXTYPE= /etc/selinux/config 
- 
-SELINUXTYPE=targeted 
-# sestatus | grep 'Loaded policy' 
- 
-Loaded policy name:             targeted","Edit the /etc/selinux/config file to set the SELINUXTYPE parameter: 
-SELINUXTYPE=targeted"
-1.6.1.4 Ensure the SELinux mode is enforcing or permissive (Automated),"Run the following commands and ensure output matches: 
-Run the following command to verify SELinux's current mode: 
-# getenforce 
- 
-Enforcing 
--OR- 
-Permissive 
-Run the following command to verify SELinux's configured mode: 
-# grep -Ei '^\s*SELINUX=(enforcing|permissive)' /etc/selinux/config 
- 
-SELINUX=enforcing 
--OR- 
-SELINUX=permissive","Run one of the following commands to set SELinux's running mode: 
-To set SELinux mode to Enforcing: 
-# setenforce 1 
-OR 
-To set SELinux mode to Permissive: 
-# setenforce 0 
+   echo "FAILED" 
+fi
+
+echo "1.6.1.3 Ensure SELinux policy is configured (Automated)"
+grep SELINUXTYPE= /etc/selinux/config 
+sestatus | grep 'Loaded policy' 
+
+echo "1.6.1.4 Ensure the SELinux mode is enforcing or permissive (Automated)"
+setenforce 1 
 Edit the /etc/selinux/config file to set the SELINUX parameter: 
-For Enforcing mode: 
-SELINUX=enforcing 
-OR 
-For Permissive mode: 
-SELINUX=permissive 
-References: 
-1. https://access.redhat.com/documentation/en-
-us/red_hat_enterprise_linux/7/html/selinux_users_and_administrators_guide/sect-
-security-enhanced_linux-introduction-selinux_modes"
-1.6.1.5 Ensure the SELinux mode is enforcing (Automated),"Run the following commands and ensure output matches: 
+sed -i -e 's/^SELINUX=.*/SELINUX=enforcing/' /etc/selinux/config
+
+echo "1.6.1.5 Ensure the SELinux mode is enforcing (Automated)"
 Run the following command to verify SELinux's current mode: 
-# getenforce 
+getenforce 
+
+grep -i SELINUX=enforcing /etc/selinux/config 
  
-Enforcing 
-Run the following command to verify SELinux's configured mode: 
-# grep -i SELINUX=enforcing /etc/selinux/config 
+echo "1.6.1.6 Ensure no unconfined services exist (Automated)"
+ps -eZ | grep unconfined_service_t
+
+echo "1.6.1.7 Ensure SETroubleshoot is not installed (Automated)"
+rpm -q setroubleshoot 
  
-SELINUX=enforcing","Run the following command to set SELinux's running mode: 
-# setenforce 1 
-Edit the /etc/selinux/config file to set the SELINUX parameter: 
-For Enforcing mode: 
-SELINUX=enforcing 
-References: 
-1. https://access.redhat.com/documentation/en-
-us/red_hat_enterprise_linux/7/html/selinux_users_and_administrators_guide/sect-
-security-enhanced_linux-introduction-selinux_modes"
-1.6.1.6 Ensure no unconfined services exist (Automated),"Run the following command and verify not output is produced: 
-# ps -eZ | grep unconfined_service_t","Investigate any unconfined processes found during the audit action. They may need to have 
-an existing security context assigned to them or a policy built for them."
-1.6.1.7 Ensure SETroubleshoot is not installed (Automated),"Verify setroubleshoot is not installed. 
-Run the following command: 
-# rpm -q setroubleshoot 
+echo "1.6.1.8 Ensure the MCS Translation Service (mcstrans) is not installed"
+rpm -q mcstrans 
  
-package setroubleshoot is not installed","Run the following command to Uninstall setroubleshoot: 
-# yum remove setroubleshoot"
-"1.6.1.8 Ensure the MCS Translation Service (mcstrans) is not installed 
-(Automated)","Verify mcstrans is not installed. 
-Run the following command: 
-# rpm -q mcstrans 
+echo "1.7.1 Ensure message of the day is configured properly (Automated)"
+cat /etc/motd 
+grep -E -i "(\\\v|\\\r|\\\m|\\\s|$(grep '^ID=' /etc/os-release | cut -d= -f2 | sed -e 's/"//g'))" /etc/motd
+
+echo "1.7.2 Ensure local login warning banner is configured properly (Automated)"
+echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue
+
+echo "1.7.3 Ensure remote login warning banner is configured properly (Automated)"
+echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue.net
+
+echo "1.7.4 Ensure permissions on /etc/motd are configured (Automated)"
+stat /etc/motd
+stat -L /etc/motd 
  
-package mcstrans is not installed","Run the following command to uninstall mcstrans: 
-# yum remove mcstrans"
-1.7.1 Ensure message of the day is configured properly (Automated),"Run the following command and verify that the contents match site policy: 
-# cat /etc/motd 
-Run the following command and verify no results are returned: 
-# grep -E -i ""(\\\v|\\\r|\\\m|\\\s|$(grep '^ID=' /etc/os-release | cut -d= -
-f2 | sed -e 's/""//g'))"" /etc/motd","Edit the /etc/motd file with the appropriate contents according to your site policy, remove 
-any instances of \m , \r , \s , \v or references to the OS platform 
-OR 
-If the motd is not used, this file can be removed. 
-Run the following command to remove the motd file: 
-# rm /etc/motd"
-"1.7.2 Ensure local login warning banner is configured properly 
-(Automated)","Run the following command and verify that the contents match site policy: 
-# cat /etc/issue 
-Run the following command and verify no results are returned: 
-# grep -E -i ""(\\\v|\\\r|\\\m|\\\s|$(grep '^ID=' /etc/os-release | cut -d= -
-f2 | sed -e 's/""//g'))"" /etc/issue","Edit the /etc/issue file with the appropriate contents according to your site policy, 
-remove any instances of \m , \r , \s , \v or references to the OS platform 
-# echo ""Authorized uses only. All activity may be monitored and reported."" > 
-/etc/issue"
-"1.7.3 Ensure remote login warning banner is configured properly 
-(Automated)","Run the following command and verify that the contents match site policy: 
-# cat /etc/issue.net 
-Run the following command and verify no results are returned: 
-# grep -E -i ""(\\\v|\\\r|\\\m|\\\s|$(grep '^ID=' /etc/os-release | cut -d= -
-f2 | sed -e 's/""//g'))"" /etc/issue.net","Edit the /etc/issue.net file with the appropriate contents according to your site policy, 
-remove any instances of \m , \r , \s , \v or references to the OS platform 
-# echo ""Authorized uses only. All activity may be monitored and reported."" > 
-/etc/issue.net"
-1.7.4 Ensure permissions on /etc/motd are configured (Automated),"Run the following command and verify Uid and Gid are both 0/root and Access is 644 : 
-# stat /etc/motd 
+echo "1.7.5 Ensure permissions on /etc/issue are configured (Automated)"
+stat /etc/issue 
  
-Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)","Run the following commands to set permissions on /etc/motd : 
-# chown root:root /etc/motd 
-# chmod u-x,go-wx /etc/motd"
-1.7.5 Ensure permissions on /etc/issue are configured (Automated),"Run the following command and verify Uid and Gid are both 0/root and Access is 644 : 
-# stat /etc/issue 
+echo "1.7.6 Ensure permissions on /etc/issue.net are configured (Automated)"
+stat /etc/issue.net 
  
-Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)","Run the following commands to set permissions on /etc/issue : 
-# chown root:root /etc/issue 
-# chmod u-x,go-wx /etc/issue"
-1.7.6 Ensure permissions on /etc/issue.net are configured (Automated),"Run the following command and verify Uid and Gid are both 0/root and Access is 644 : 
-# stat /etc/issue.net 
- 
-Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)","Run the following commands to set permissions on /etc/issue.net : 
-# chown root:root /etc/issue.net 
-# chmod u-x,go-wx /etc/issue.net"
-"1.8 Ensure updates, patches, and additional security software are 
-installed (Manual)","Run the following command to verify there are no updates or patches to install. 
-# yum check-update","Use your package manager to update all packages on the system according to site policy. 
-The following command will install all available packages 
-# yum update"
+echo "1.8 Ensure updates, patches, and additional security software are installed (Manual)"
+yum update -y
+
 2.1.1.1 Ensure time synchronization is in use (Manual),"Run the following commands to verify that a time synchronization packages is installed: 
 # rpm -q chrony ntp 
  
