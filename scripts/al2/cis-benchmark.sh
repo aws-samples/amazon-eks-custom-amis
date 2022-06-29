@@ -473,7 +473,7 @@ echo "3.3.8 Ensure TCP SYN Cookies is enabled (Automated),"Run the following com
 sysctl_entry "net.ipv4.tcp_syncookies=1"
 sysctl -w net.ipv4.route.flush=1
 
-3.3.9 Ensure IPv6 router advertisements are not accepted (Automated),"Run the following commands and verify output matches: 
+echo "3.3.9 Ensure IPv6 router advertisements are not accepted (Automated)"
 [ -n "$passing" ] && passing=""
 [ -z "$(grep "^\s*linux" /boot/grub2/grub.cfg | grep -v ipv6.disable=1)" ] && passing="true"
 grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" /etc/sysctl.conf \
@@ -488,297 +488,67 @@ else
 echo "IPv6 is enabled on the system" 
 fi
 
-3.4.1 Ensure DCCP is disabled (Automated),"Run the following commands and verify the output is as indicated: 
-# modprobe -n -v dccp 
-install /bin/true 
+echo "3.4.1 Ensure DCCP is disabled (Automated)"
+unload_module dccp
  
-# lsmod | grep dccp 
-<No output>","Edit or create a file in the /etc/modprobe.d/ directory ending in .conf 
-Example: vim /etc/modprobe.d/dccp.conf 
-Add the following line: 
-install dccp /bin/true"
-3.4.2 Ensure SCTP is disabled (Automated),"Run the following commands and verify the output is as indicated: 
-# modprobe -n -v sctp 
-install /bin/true 
+echo "3.4.2 Ensure SCTP is disabled (Automated)"
+unload_module sctp 
+
+echo "3.5.1.1 Ensure firewalld is installed (Automated)"
+yum install firewalld iptables
+
+echo "3.5.1.2 Ensure iptables-services not installed with firewalld (Automated)"
+rpm -q iptables-services
  
-# lsmod | grep sctp 
-<No output>","Edit or create a file in the /etc/modprobe.d/ directory ending in .conf 
-Example: vim /etc/modprobe.d/sctp.conf 
-Add the following line: 
-install sctp /bin/true"
-3.5.1.1 Ensure firewalld is installed (Automated),"Run the following command to verify that FirewallD and iptables are installed: 
-# rpm -q firewalld iptables 
+echo "3.5.1.3 Ensure nftables either not installed or masked with firewalld (Automated)"
+rpm -q nftables 
+
+echo "3.5.1.4 Ensure firewalld service enabled and running (Automated)"
+systemctl unmask firewalld 
+systemctl --now enable firewalld
+
+echo "3.5.1.5 Ensure firewalld default zone is set (Automated)"
+firewall-cmd --get-default-zone
+
+echo "3.5.1.6 Ensure network interfaces are assigned to appropriate zone (Manual)"
+firewall-cmd --zone=public --change-interface=eth0 # VERIFY
+
+echo "3.5.1.7 Ensure firewalld drops unnecessary services and ports (Manual)"
+firewall-cmd --get-active-zones | awk '!/:/ {print $1}' | while read ZN; do firewall-cmd --list-all --zone=$ZN; done
+
+echo "3.5.2.1 Ensure nftables is installed (Automated)"
+echo "pass-over for firewalld"
  
-firewalld-<version> 
-iptables-<version>","Run the following command to install FirewallD and iptables: 
-# yum install firewalld iptables"
-3.5.1.2 Ensure iptables-services not installed with firewalld (Automated),"Run the following commands to verify that the iptables-services package is not installed 
-# rpm -q iptables-services 
+echo "3.5.2.2 Ensure firewalld is either not installed or masked with nftables (Automated)"
+echo "pass-over for firewalld"
+
+echo "3.5.2.3 Ensure iptables-services not installed with nftables (Automated)"
+echo "pass-over for firewalld"
  
-package iptables-services is not installed","Run the following commands to stop the services included in the iptables-services 
-package and remove the iptables-services package 
-# systemctl stop iptables 
-# systemctl stop ip6tables 
-# yum remove iptables-services"
-"3.5.1.3 Ensure nftables either not installed or masked with firewalld 
-(Automated)","Run the following commend to verify that nftables is not installed: 
-# rpm -q nftables 
- 
-package nftables is not installed 
-OR 
-Run the following commands to verify that nftables is stopped: 
-# systemctl status nftables | grep "Active: " | grep -E  " active 
-\((running|exited)\) " 
- 
-No output should be returned 
-Run the following command to verify nftables.service is masked: 
-# systemctl is-enabled nftables 
- 
-masked","Run the following command to remove nftables: 
-# yum remove nftables 
-OR 
-Run the following command to stop and mask nftables" 
-systemctl --now mask nftables"
-3.5.1.4 Ensure firewalld service enabled and running (Automated),"Run the following command to verify that firewalld is enabled: 
-# systemctl is-enabled firewalld 
- 
-enabled 
-Run the following command to verify that firewalld is running 
-# firewall-cmd --state 
- 
-running","Run the following command to unmask firewalld 
-# systemctl unmask firewalld 
-Run the following command to enable and start firewalld 
-# systemctl --now enable firewalld"
-3.5.1.5 Ensure firewalld default zone is set (Automated),"Run the following command and verify that the default zone adheres to company policy: 
-# firewall-cmd --get-default-zone","Run the following command to set the default zone: 
-# firewall-cmd --set-default-zone=<NAME_OF_ZONE> 
-Example: 
-# firewall-cmd --set-default-zone=public 
-References: 
-1. https://firewalld.org/documentation 
-2. https://firewalld.org/documentation/man-pages/firewalld.zone"
-"3.5.1.6 Ensure network interfaces are assigned to appropriate zone 
-(Manual)","Run the following and verify that the interface(s) follow site policy for zone assignment 
-# find /sys/class/net/* -maxdepth 1 | awk -F"/" '{print $NF}' | while read -r 
-netint; do [ "$netint" != "lo" ] && firewall-cmd --get-active-zones | grep -
-B1 $netint; done 
-Example output: 
-<custom zone> 
-   eth0","Run the following command to assign an interface to the approprate zone. 
-# firewall-cmd --zone=<Zone NAME> --change-interface=<INTERFACE NAME> 
-Example: 
-# firewall-cmd --zone=customezone --change-interface=eth0"
-3.5.1.7 Ensure firewalld drops unnecessary services and ports (Manual),"Run the following command and review output to ensure that listed services and ports 
-follow site policy. 
-# firewall-cmd --get-active-zones | awk '!/:/ {print $1}' | while read ZN; do 
-firewall-cmd --list-all --zone=$ZN; done","Run the following command to remove an unnecessary service: 
-# firewall-cmd --remove-service=<service> 
-Example: 
-# firewall-cmd --remove-service=cockpit 
-Run the following command to remove an unnecessary port: 
-# firewall-cmd --remove-port=<port-number>/<port-type> 
-Example: 
-# firewall-cmd --remove-port=25/tcp 
-Run the following command to make new settings persistent: 
-# firewall-cmd --runtime-to-permanent 
-References: 
-1. firewalld.service(5) 
-2. https://access.redhat.com/documentation/en-
-us/red_hat_enterprise_linux/8/html/securing_networks/using-and-configuring-
-firewalls_securing-networks"
-3.5.2.1 Ensure nftables is installed (Automated),"Run the following command to verify that nftables is installed: 
-# rpm -q nftables 
- 
-nftables-<version>","Run the following command to install nftables 
-# yum install nftables"
-"3.5.2.2 Ensure firewalld is either not installed or masked with nftables 
-(Automated)","Run the following command to verify that firewalld is not installed: 
-# rpm -q firewalld 
- 
-package firewalld is not installed 
-OR 
-Run the following command to verify that FirewallD is not running 
-command -v firewall-cmd >/dev/null && firewall-cmd --state | grep 'running' 
- 
-not running 
-Run the following command to verify that FirewallD is masked 
-# systemctl is-enabled firewalld 
- 
-masked","Run the following command to remove firewalld 
-# yum remove firewalld 
-OR 
-Run the following command to stop and mask firewalld 
-# systemctl --now mask firewalld"
-3.5.2.3 Ensure iptables-services not installed with nftables (Automated),"Run the following commands to verify that the iptables-services package is not installed 
-# rpm -q iptables-services 
- 
-package iptables-services is not installed","Run the following commands to stop the services included in the iptables-services 
-package and remove the iptables-services package 
-# systemctl stop iptables 
-# systemctl stop ip6tables 
- 
-# yum remove iptables-services"
-3.5.2.4 Ensure iptables are flushed with nftables (Manual),"Run the following commands to ensure not iptables rules exist 
-For iptables: 
-# iptables -L 
- 
-No rules should be returned 
-For ip6tables: 
-# ip6tables -L 
- 
-No rules should be returned","Run the following commands to flush iptables: 
-For iptables: 
-# iptables -F 
-For ip6tables: 
-# ip6tables -F"
-3.5.2.5 Ensure an nftables table exists (Automated),"Run the following command to verify that a nftables table exists: 
-# nft list tables 
-Return should include a list of nftables: 
-Example: 
-table inet filter","Run the following command to create a table in nftables 
-# nft create table inet <table name> 
-Example: 
-# nft create table inet filter"
-3.5.2.6 Ensure nftables base chains exist (Automated),"Run the following commands and verify that base chains exist for INPUT, FORWARD, and 
-OUTPUT. 
-# nft list ruleset | grep 'hook input' 
- 
-type filter hook input priority 0; 
- 
-# nft list ruleset | grep 'hook forward' 
- 
-type filter hook forward priority 0; 
- 
-# nft list ruleset | grep 'hook output' 
- 
-type filter hook output priority 0;","Run the following command to create the base chains: 
-# nft create chain inet <table name> <base chain name> { type filter hook 
-<(input|forward|output)> priority 0 \; } 
-Example: 
-# nft create chain inet filter input { type filter hook input priority 0 \; } 
-# nft create chain inet filter forward { type filter hook forward priority 0 
-\; } 
-# nft create chain inet filter output { type filter hook output priority 0 \; 
-}"
-3.5.2.7 Ensure nftables loopback traffic is configured (Automated),"Run the following commands to verify that the loopback interface is configured: 
-# nft list ruleset | awk '/hook input/,/}/' | grep 'iif "lo" accept' 
- 
-iif "lo" accept 
- 
-# nft list ruleset | awk '/hook input/,/}/' | grep 'ip saddr' 
- 
-ip saddr 127.0.0.0/8 counter packets 0 bytes 0 drop 
-IF IPv6 is enabled, run the following command to verify that the IPv6 loopback interface is 
-configured: 
-# nft list ruleset | awk '/hook input/,/}/' | grep 'ip6 saddr' 
- 
-ip6 saddr ::1 counter packets 0 bytes 0 drop 
-OR 
-Verify that IPv6 is disabled: 
-Run the following script. Output will confirm if IPv6 is disabled on the system.","Run the following commands to implement the loopback rules: 
-# nft add rule inet filter input iif lo accept 
-# nft create rule inet filter input ip saddr 127.0.0.0/8 counter drop 
-IF IPv6 is enabled: 
-Run the following command to implement the IPv6 loopback rules: 
-# nft add rule inet filter input ip6 saddr ::1 counter drop"
-"3.5.2.8 Ensure nftables outbound and established connections are 
-configured (Manual)","Run the following commands and verify all rules for established incoming connections 
-match site policy: site policy: 
-# nft list ruleset | awk '/hook input/,/}/' | grep -E 'ip protocol 
-(tcp|udp|icmp) ct state' 
-Output should be similar to: 
-ip protocol tcp ct state established accept 
-ip protocol udp ct state established accept 
-ip protocol icmp ct state established accept 
-Run the following command and verify all rules for new and established outbound 
-connections match site policy 
-# nft list ruleset | awk '/hook output/,/}/' | grep -E 'ip protocol 
-(tcp|udp|icmp) ct state' 
-Output should be similar to: 
-ip protocol tcp ct state established,related,new accept 
-ip protocol udp ct state established,related,new accept 
-ip protocol icmp ct state established,related,new accept","Configure nftables in accordance with site policy. The following commands will implement 
-a policy to allow all outbound connections and all established connections: 
-# nft add rule inet filter input ip protocol tcp ct state established accept 
-# nft add rule inet filter input ip protocol udp ct state established accept 
-# nft add rule inet filter input ip protocol icmp ct state established accept 
-# nft add rule inet filter output ip protocol tcp ct state 
-new,related,established accept 
-# nft add rule inet filter output ip protocol udp ct state 
-new,related,established accept 
-# nft add rule inet filter output ip protocol icmp ct state 
-new,related,established accept"
-3.5.2.9 Ensure nftables default deny firewall policy (Automated),"Run the following commands and verify that base chains contain a policy of DROP. 
-# nft list ruleset | grep 'hook input' 
- 
-type filter hook input priority 0; policy drop; 
- 
-# nft list ruleset | grep 'hook forward' 
- 
-type filter hook forward priority 0; policy drop; 
- 
-# nft list ruleset | grep 'hook output' 
- 
-type filter hook output priority 0; policy drop;","Run the following command for the base chains with the input, forward, and output hooks 
-to implement a default DROP policy: 
-# nft chain <table family> <table name> <chain name> { policy drop \; } 
-Example: 
-# nft chain inet filter input { policy drop \; } 
-# nft chain inet filter forward { policy drop \; } 
-# nft chain inet filter output { policy drop \; } 
-Default Value: 
-accept 
-References: 
-1. Manual Page nft"
-3.5.2.10 Ensure nftables service is enabled (Automated),"Run the following command and verify that the nftables service is enabled: 
-# systemctl is-enabled nftables 
- 
-enabled","Run the following command to enable the nftables service: 
-# systemctl enable nftables"
-3.5.2.11 Ensure nftables rules are permanent (Automated),"Run the following commands to verify that input, forward, and output base chains are 
-configured to be applied to a nftables ruleset on boot: 
-Run the following command to verify the input base chain: 
-# awk '/hook input/,/}/' $(awk '$1 ~ /^\s*include/ { gsub("\"","",$2);print 
-$2 }' /etc/sysconfig/nftables.conf) 
-Output should be similar to: 
-                type filter hook input priority 0; policy drop; 
- 
-                # Ensure loopback traffic is configured 
-                iif "lo" accept 
-                ip saddr 127.0.0.0/8 counter packets 0 bytes 0 drop 
-                ip6 saddr ::1 counter packets 0 bytes 0 drop 
- 
-                # Ensure established connections are configured 
-                ip protocol tcp ct state established accept 
-                ip protocol udp ct state established accept 
-                ip protocol icmp ct state established accept 
- 
-                # Accept port 22(SSH) traffic from anywhere 
-                tcp dport ssh accept 
- 
-                # Accept ICMP and IGMP from anywhere 
-                icmpv6 type { destination-unreachable, packet-too-big, time-
-exceeded, parameter-problem, mld-listener-query, mld-listener-report, mld-
-listener-done, nd-router-solicit, nd-router-advert, nd-neighbor-solicit, nd-
-neighbor-advert, ind-neighbor-solicit, ind-neighbor-advert, mld2-listener-
-report } accept 
-Note: Review the input base chain to ensure that it follows local site policy 
-Run the following command to verify the forward base chain: 
-# awk '/hook forward/,/}/' $(awk '$1 ~ /^\s*include/ { gsub("\"","",$2);print 
-$2 }' /etc/sysconfig/nftables.conf) 
-Output should be similar to: 
-        # Base chain for hook forward named forward (Filters forwarded 
-network packets) 
-        chain forward { 
-                type filter hook forward priority 0; policy drop; 
-        } 
-Note: Review the forward base chain to ensure that it follows local site policy. 
-Run the following command to verify the forward base chain:","Edit the /etc/sysconfig/nftables.conf file and un-comment or add a line with include 
-<Absolute path to nftables rules file> for each nftables file you want included in the 
-nftables ruleset on boot: 
-Example: 
-include "/etc/nftables/nftables.rules""
+echo "3.5.2.4 Ensure iptables are flushed with nftables (Manual),"Run the following commands to ensure not iptables rules exist 
+echo "pass-over for firewalld"
+
+3.5.2.5 Ensure an nftables table exists (Automated)"
+echo "pass-over for firewalld"
+
+echo "3.5.2.6 Ensure nftables base chains exist (Automated)"
+echo "pass-over for firewalld"
+
+echo "3.5.2.7 Ensure nftables loopback traffic is configured (Automated)"
+echo "pass-over for firewalld"
+
+echo "3.5.2.8 Ensure nftables outbound and established connections are configured (Manual)"
+echo "pass-over for firewalld"
+
+echo "3.5.2.9 Ensure nftables default deny firewall policy (Automated)"
+echo "pass-over for firewalld"
+
+echo "3.5.2.10 Ensure nftables service is enabled (Automated)"
+echo "pass-over for firewalld"
+
+echo "3.5.2.11 Ensure nftables rules are permanent (Automated)"
+echo "pass-over for firewalld"
+
 3.5.3.1.1 Ensure iptables packages are installed (Automated),"Run the following command to verify that iptables and iptables-services are installed: 
 rpm -q iptables iptables-services 
  
