@@ -40,6 +40,7 @@ sysctl_entry() {
   local entry=$1
 
   echo "$entry" >> /etc/sysctl.d/cis.conf
+  systctl -w $entry
 }
 
 set_conf_value() {
@@ -107,20 +108,20 @@ findmnt /home | grep -Ev '\bnodev\b'
 echo "1.1.19 Ensure removable media partitions include noexec option"
 #!/usr/bin/bash 
  
-for rmpo in $(lsblk -o RM,MOUNTPOINT | awk -F "" "" '/1/ {print $2}'); do  
-   findmnt -n ""$rmpo"" | grep -Ev ""\bnoexec\b"" 
+for rmpo in $(lsblk -o RM,MOUNTPOINT | awk -F " " '/1/ {print $2}'); do  
+   findmnt -n "$rmpo" | grep -Ev "\bnoexec\b" 
 done 
 echo "1.1.20 Ensure nodev option set on removable media partitions"
 #!/usr/bin/bash 
  
-for rmpo in $(lsblk -o RM,MOUNTPOINT | awk -F "" "" '/1/ {print $2}'); do  
-   findmnt -n ""$rmpo"" | grep -Ev ""\bnodev\b"" 
+for rmpo in $(lsblk -o RM,MOUNTPOINT | awk -F " " '/1/ {print $2}'); do  
+   findmnt -n "$rmpo" | grep -Ev "\bnodev\b" 
 done 
 echo "1.1.21 Ensure nosuid option set on removable media partitions "
 #!/usr/bin/bash 
  
-for rmpo in $(lsblk -o RM,MOUNTPOINT | awk -F "" "" '/1/ {print $2}'); do  
-   findmnt -n ""$rmpo"" | grep -Ev ""\bnosuid\b"" 
+for rmpo in $(lsblk -o RM,MOUNTPOINT | awk -F " " '/1/ {print $2}'); do  
+   findmnt -n "$rmpo" | grep -Ev "\bnosuid\b" 
 done 
 
 echo "1.1.22 Ensure sticky bit is set on all world-writable directories "
@@ -191,17 +192,16 @@ echo "1.4.2 Ensure authentication required for single user mode (Automated)"
 grep /sbin/sulogin /usr/lib/systemd/system/rescue.service 
 grep /sbin/sulogin /usr/lib/systemd/system/emergency.service 
  
-ExecStart=-/bin/sh -c ""/sbin/sulogin; /usr/bin/systemctl --fail --no-block 
-default""","Edit /usr/lib/systemd/system/rescue.service and 
+ExecStart=-/bin/sh -c "/sbin/sulogin; /usr/bin/systemctl --fail --no-block 
+default"","Edit /usr/lib/systemd/system/rescue.service and 
 /usr/lib/systemd/system/emergency.service and set ExecStart to use /sbin/sulogin or 
 /usr/sbin/sulogin: 
-ExecStart=-/bin/sh -c ""/sbin/sulogin; /usr/bin/systemctl --fail --no-block 
-default"""
+ExecStart=-/bin/sh -c "/sbin/sulogin; /usr/bin/systemctl --fail --no-block 
+default""
 
 echo "1.5.1 Ensure core dumps are restricted (Automated),"
 echo "* hard core 0" >> /etc/security/cis.conf
-sysctl_entry fs.suid_dumpable = 0 
-sysctl -w fs.suid_dumpable=0
+sysctl_entry "fs.suid_dumpable=0"
 
 echo "1.5.2 Ensure XD/NX support is enabled (Automated),"
 journalctl | grep 'protection: active' 
@@ -209,7 +209,7 @@ journalctl | grep 'protection: active'
 # kernel: NX (Execute Disable) protection: active 
 
 echo "1.5.3 Ensure address space layout randomization (ASLR) is enabled (Automated)"
-sysctl_entry kernel.randomize_va_space 
+sysctl_entry "kernel.randomize_va_space=2"
  
 echo "1.5.4 Ensure prelink is not installed (Automated)"
 rpm -q prelink
@@ -278,614 +278,216 @@ stat /etc/issue.net
 echo "1.8 Ensure updates, patches, and additional security software are installed (Manual)"
 yum update -y
 
-2.1.1.1 Ensure time synchronization is in use (Manual),"Run the following commands to verify that a time synchronization packages is installed: 
-# rpm -q chrony ntp 
+echo "2.1.1.1 Ensure time synchronization is in use (Manual)"
+rpm -q chrony ntp 
  
-chrony-<version> 
- 
-# rpm -q ntp 
- 
-ntp-<version>","Run One of the following commands to install chrony or NTP: 
-To install chrony, run the following command: 
-# yum install chrony 
-OR 
-To install ntp, run the following command: 
-# yum install ntp 
-Note: On systems where host based time synchronization is available consult your 
-virtualization software documentation and setup host based synchronization. 
-Additional Information: 
- 
-On systems where host based time synchronization is not available, verify that 
-chrony or NTP is installed. 
- 
-On systems where host based time synchronization is available consult your 
-documentation and verify that host based synchronization is in use."
-2.1.1.2 Ensure chrony is configured (Automated),"IF chrony is installed on the system: 
-Run the following command and verify remote server is configured properly: 
-# grep -E ""^(server|pool)"" /etc/chrony.conf 
- 
-server <remote-server> 
-Multiple servers may be configured. 
-Run the following command and verify OPTIONS includes '-u chrony': 
-# grep ^OPTIONS /etc/sysconfig/chronyd 
- 
-OPTIONS=""-u chrony"" 
-Additional options may be present.","Add or edit server or pool lines to /etc/chrony.conf as appropriate: 
-server <remote-server> 
-Add or edit the OPTIONS in /etc/sysconfig/chronyd to include '-u chrony': 
-OPTIONS=""-u chrony"""
-2.1.1.3 Ensure ntp is configured (Automated),"IF NTP is installed on the system: 
-Run the following command and verify ntpd is enabled: 
-# systemctl is-enabled ntpd 
- 
-enabled 
-Run the following command and verify output matches: 
-# grep ""^restrict"" /etc/ntp.conf 
- 
-restrict -4 default kod nomodify notrap nopeer noquery 
-restrict -6 default kod nomodify notrap nopeer noquery 
-The -4 in the first line is optional and options after default can appear in any order. 
-Additional restriction lines may exist. 
-Run the following command and verify remote server is configured properly: 
-# grep -E ""^(server|pool)"" /etc/ntp.conf 
- 
-server <remote-server> 
-Multiple servers may be configured 
-Run the following commands and verify that ' -u ntp:ntp ' is included in OPTIONS OR 
-ExecStart as listed: 
-# grep ""^OPTIONS"" /etc/sysconfig/ntpd 
- 
-OPTIONS=""-u ntp:ntp"" 
-OR 
-# grep ""^ExecStart"" /usr/lib/systemd/system/ntpd.service 
- 
-ExecStart=/usr/sbin/ntpd -u ntp:ntp $OPTIONS 
-Additional options may be present.","Add or edit restrict lines in /etc/ntp.conf to match the following: 
-restrict -4 default kod nomodify notrap nopeer noquery 
-restrict -6 default kod nomodify notrap nopeer noquery 
-Add or edit server or pool lines to /etc/ntp.conf as appropriate: 
-server <remote-server> 
-Add or edit the OPTIONS in /etc/sysconfig/ntpd to include '-u ntp:ntp': 
-OPTIONS=""-u ntp:ntp"" 
-Reload the systemd daemon: 
+echo "2.1.1.2 Ensure chrony is configured (Automated)"
+grep -E "^(server|pool)" /etc/chrony.conf 
+sed -i -e "s/OPTIONS=\".*\"/OPTIONS=\"-u chrony\"/" /etc/sysconfig/chronyd
 systemctl daemon-reload 
-Enable and start the ntp service: 
-systemctl --now enable ntpd"
-2.1.2 Ensure X11 Server components are not installed (Automated),"Run the following command to Verify X Windows Server is not installed. 
-# rpm -qa xorg-x11-server*","Run the following command to remove the X Windows Server packages: 
-# yum remove xorg-x11-server*"
-2.1.3 Ensure Avahi Server is not installed (Automated),"Run one of the following command to verify avahi-autoipd and avahi are not installed: 
-# rpm -q avahi-autoipd avahi 
  
-package avahi-autoipd is not installed 
-package avahi is not installed","Run the following commands to stop, mask and remove avahi-autoipd and avahi: 
-# systemctl stop avahi-daemon.socket avahi-daemon.service 
-# yum remove avahi-autoipd avahi"
-2.1.4 Ensure CUPS is not installed (Automated),"Run the following command to verify cups is not installed: 
-# rpm -q cups 
+echo "2.1.1.3 Ensure ntp is configured (Automated)"
+echo "Skipped chrony is used"
+
+echo "2.1.2 Ensure X11 Server components are not installed (Automated)"
+rpm -qa xorg-x11-server*
+
+echo "2.1.3 Ensure Avahi Server is not installed (Automated)"
+rpm -q avahi-autoipd avahi
  
-package cups is not installed","Run the following command to remove cups: 
-# yum remove cups 
-References: 
-1. More detailed documentation on CUPS is available at the project homepage at 
-http://www.cups.org."
-2.1.5 Ensure DHCP Server is not installed (Automated),"Run the following command to verify dhcp is not installed: 
-# rpm -q dhcp 
+echo "2.1.4 Ensure CUPS is not installed (Automated)"
+rpm -q cups
  
-package dhcp is not installed","Run the following command to remove dhcp: 
-# yum remove dhcp 
-References: 
-1. dhcpd(8)"
-2.1.6 Ensure LDAP server is not installed (Automated),"Run the following command to verify openldap-servers is not installed: 
-# rpm -q openldap-servers 
+echo "2.1.5 Ensure DHCP Server is not installed (Automated)"
+rpm -q dhcp
  
-package openldap-servers is not installed","Run the following command to remove openldap-servers: 
-# yum remove openldap-servers 
-References: 
-1. For more detailed documentation on OpenLDAP, go to the project homepage at 
-http://www.openldap.org."
-2.1.7 Ensure DNS Server is not installed (Automated),"Run one of the following commands to verify bind is not installed: 
-# rpm -q bind 
+echo "2.1.6 Ensure LDAP server is not installed (Automated)"
+rpm -q openldap-servers
+
+echo "2.1.7 Ensure DNS Server is not installed (Automated)"
+rpm -q bind
  
-package bind is not installed","Run the following command to remove bind: 
-# yum remove bind"
-2.1.8 Ensure FTP Server is not installed (Automated),"Run the following command to verify vsftpd is not installed: 
-# rpm -q vsftpd 
+echo "2.1.8 Ensure FTP Server is not installed (Automated)"
+rpm -q vsftpd
  
-package vsftpd is not installed","Run the following command to remove vsftpd: 
-# yum remove vsftpd"
-2.1.9 Ensure HTTP server is not installed (Automated),"Run the following command to verify httpd is not installed: 
-# rpm -q httpd 
+echo "2.1.9 Ensure HTTP server is not installed (Automated)"
+rpm -q httpd 
  
-package httpd is not installed","Run the following command to remove httpd: 
-# yum remove httpd"
-2.1.10 Ensure IMAP and POP3 server is not installed (Automated),"Run the following command to verify dovecot is not installed: 
-# rpm -q dovecot 
+echo "2.1.10 Ensure IMAP and POP3 server is not installed (Automated)"
+rpm -q dovecot
  
-package dovecot is not installed","Run the following command to remove dovecot: 
-# yum remove dovecot"
-2.1.11 Ensure Samba is not installed (Automated),"Run the following command to verify samba is not installed: 
-# rpm -q samba 
+echo "2.1.11 Ensure Samba is not installed (Automated)"
+rpm -q samba
  
-package samba is not installed","Run the following command to remove samba: 
-# yum remove samba"
-2.1.12 Ensure HTTP Proxy Server is not installed (Automated),"Run the following command to verify squid is not installed: 
-# rpm -q squid 
+echo "2.1.12 Ensure HTTP Proxy Server is not installed (Automated),"
+rpm -q squid
  
-package squid is not installed","Run the following command to remove the squid package: 
-# yum remove squid"
-2.1.13 Ensure net-snmp is not installed (Automated),"Run the following command to verify net-snmp is not installed: 
-# rpm -q net-snmp 
+echo "2.1.13 Ensure net-snmp is not installed (Automated)"
+rpm -q net-snmp 
  
-package net-snmp is not installed","Run the following command to remove net-snmpd: 
-# yum remove net-snmp"
-2.1.14 Ensure NIS server is not installed (Automated),"Run the following command to verify ypserv is not installed: 
-# rpm -q ypserv 
+echo "2.1.14 Ensure NIS server is not installed (Automated)"
+rpm -q ypserv 
  
-package ypserv is not installed","Run the following command to remove ypserv: 
-# yum remove ypserv"
-2.1.15 Ensure telnet-server is not installed (Automated),"Run the following command to verify the telnet-server package is not installed: 
+echo "2.1.15 Ensure telnet-server is not installed (Automated)"
 rpm -q telnet-server 
  
-package telnet-server is not installed","Run the following command to remove the telnet-server package: 
-# yum remove telnet-server"
-"2.1.16 Ensure mail transfer agent is configured for local-only mode 
-(Automated)","Run the following command to verify that the MTA is not listening on any non-loopback 
-address ( 127.0.0.1 or ::1 ) 
-Nothing should be returned 
-#  ss -lntu | grep -E ':25\s' | grep -E -v '\s(127.0.0.1|\[?::1\]?):25\s'","Edit /etc/postfix/main.cf and add the following line to the RECEIVING MAIL section. If 
-the line already exists, change it to look like the line below: 
-inet_interfaces = loopback-only 
-Run the following command to restart postfix: 
-# systemctl restart postfix"
-"2.1.17 Ensure nfs-utils is not installed or the nfs-server service is masked 
-(Automated)","Run the following command to verify nfs-utils is not installed: 
-# rpm -q nfs-utils 
+echo "2.1.16 Ensure mail transfer agent is configured for local-only mode (Automated)"
+ss -lntu | grep -E ':25\s' | grep -E -v '\s(127.0.0.1|\[?::1\]?):25\s'
  
-package nfs-utils is not installed 
-OR 
-If the nfs-package is required as a dependency, run the following command to verify that 
-the nfs-server service is masked: 
-# systemctl is-enabled nfs-server 
+echo "2.1.17 Ensure nfs-utils is not installed or the nfs-server service is masked (Automated)"
+yum remove nfs-utils 
+
+echo "2.1.18 Ensure rpcbind is not installed or the rpcbind services are masked (Automated)"
+systemctl --now mask rpcbind 
+systemctl --now mask rpcbind.socket 
+
+echo "2.1.19 Ensure rsync is not installed or the rsyncd service is masked (Automated)"
+yum remove rsync 
+
+echo "2.2.1 Ensure NIS Client is not installed (Automated)"
+rpm -q ypbind 
  
-masked","Run the following command to remove nfs-utils: 
-# yum remove nfs-utils 
-OR 
-If the nfs-package is required as a dependency, run the following command to stop and 
-mask the nfs-server service: 
-# systemctl --now mask nfs-server"
-"2.1.18 Ensure rpcbind is not installed or the rpcbind services are masked 
-(Automated)","Run the following command to verify rpcbind is not installed: 
-# rpm -q rpcbind 
+2.2.2 Ensure rsh client is not installed (Automated)"
+rpm -q rsh 
  
-package rpcbind is not installed 
-OR 
-If the rpcbind package is required as a dependency, run the following commands to verify 
-that the rpcbind and rpcbind.socket services are masked: 
-# systemctl is-enabled rpcbind 
+echo "2.2.3 Ensure talk client is not installed (Automated)"
+rpm -q talk
  
-masked 
-# systemctl is-enabled rpcbind.socket 
+echo "2.2.4 Ensure telnet client is not installed (Automated)"
+rpm -q telnet
  
-masked","Run the following command to remove nfs-utils: 
-# yum remove rpcbind 
-OR 
-If the rpcbind package is required as a dependency, run the following commands to stop 
-and mask the rpcbind and rpcbind.socket services: 
-# systemctl --now mask rpcbind 
-# systemctl --now mask rpcbind.socket 
-Additional Information: 
-Many of the libvirt packages used by Enterprise Linux virtualization, and the nfs-utils 
-package used for The Network File System (NFS), are dependent on the rpcbind package. If 
-the rpcbind is required as a dependency, the services rpcbind.service and rpcbind.socket 
-should be stopped and masked to reduce the attack surface of the system."
-"2.1.19 Ensure rsync is not installed or the rsyncd service is masked 
-(Automated)","Run the following command to verify that rsync is not installed: 
-# rpm -q rsync 
+echo "2.2.5 Ensure LDAP client is not installed (Automated)"
+rpm -q openldap-clients 
  
-package rsync is not installed 
-OR 
-Run the following command to verify the rsyncd service is masked: 
-# systemctl is-enabled rsyncd 
+echo "2.3 Ensure nonessential services are removed or masked (Manual)"
+lsof -i -P -n | grep -v "(ESTABLISHED)" 
+
+echo "3.1.1 Disable IPv6 (Manual)"
+sysctl_entry "net.ipv6.conf.all.disable_ipv6=1"
+sysctl_entry "net.ipv6.conf.default.disable_ipv6=1"
+sysctl -w net.ipv6.route.flush=1
+
+echo "3.1.2 Ensure wireless interfaces are disabled (Automated)"
+if command -v nmcli >/dev/null 2>&1 ; then
+   if nmcli radio all | grep -Eq '\s*\S+\s+disabled\s+\S+\s+disabled\b'; then
+      echo "Wireless is not enabled"
+   else
+      nmcli radio all
+   fi
+elif [ -n "$(find /sys/class/net/*/ -type d -name wireless)" ]; then
+   t=0
+   mname=$(for driverdir in $(find /sys/class/net/*/ -type d -name wireless |
+xargs -0 dirname); do basename "$(readlink -f
+"$driverdir"/device/driver/module)";done | sort -u)
+   for dm in $mname; do
+      if grep -Eq "^\s*install\s+$dm\s+/bin/(true|false)"
+/etc/modprobe.d/*.conf; then
+         /bin/true
+      else
+         echo "$dm is not disabled"
+         t=1
+      fi
+   done
+   [ "$t" -eq 0 ] && echo "Wireless is not enabled"
+else
+   echo "Wireless is not enabled"
+fi
+
+echo "3.2.1 Ensure IP forwarding is disabled (Automated),"
+sysctl net.ipv4.ip_forward 
  
-masked","Run the following command to remove the rsync package: 
-# yum remove rsync 
-OR 
-Run the following command to mask the rsyncd service: 
-# systemctl --now mask rsyncd"
-2.2.1 Ensure NIS Client is not installed (Automated),"Run the following command to verify that the ypbind package is not installed: 
-# rpm -q ypbind 
+grep -E -s "^\s*net\.ipv4\.ip_forward\s*=\s*1" /etc/sysctl.conf /etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
  
-package ypbind is not installed","Run the following command to remove the ypbind package: 
-# yum remove ypbind"
-2.2.2 Ensure rsh client is not installed (Automated),"Run the following command to verify that the rsh package is not installed: 
-# rpm -q rsh 
- 
-package rsh is not installed","Run the following command to remove the rsh package: 
-# yum remove rsh"
-2.2.3 Ensure talk client is not installed (Automated),"Run the following command to verify that the talk package is not installed: 
-# rpm -q talk 
- 
-package talk is not installed","Run the following command to remove the talk package: 
-# yum remove talk"
-2.2.4 Ensure telnet client is not installed (Automated),"Run the following command to verify that the telnet package is not installed: 
-# rpm -q telnet 
- 
-package telnet is not installed","Run the following command to remove the telnet package: 
-# yum remove telnet"
-2.2.5 Ensure LDAP client is not installed (Automated),"Run the following command to verify that the openldap-clients package is not installed: 
-# rpm -q openldap-clients 
- 
-package openldap-clients is not installed","Run the following command to remove the openldap-clients package: 
-# yum remove openldap-clients"
-2.3 Ensure nonessential services are removed or masked (Manual),"Run the following command: 
-# lsof -i -P -n | grep -v ""(ESTABLISHED)"" 
-Review the output to ensure that all services listed are required on the system. If a listed 
-service is not required, remove the package containing the service. If the package 
-containing the service is required, stop and mask the service","Run the following command to remove the package containing the service: 
-# yum remove <package_name> 
-OR If required packages have a dependency: 
-Run the following command to stop and mask the service: 
-# systemctl --now mask <service_name>"
-3.1.1 Disable IPv6 (Manual),"Run the following commands to verify that one of the following methods has been used to 
-disable IPv6: 
-IF IPv6 is disabled through the GRUB2 config: 
-Run the following command and verify no lines should be returned. 
-#  grep ""^\s*linux"" /boot/grub2/grub.cfg | grep -v ipv6.disable=1 
-OR 
-IF IPv6 is disabled through sysctl settings: 
-Run the following commands: 
-# sysctl net.ipv6.conf.all.disable_ipv6 
- 
-net.ipv6.conf.all.disable_ipv6 = 1 
-# sysctl net.ipv6.conf.default.disable_ipv6 
- 
-net.ipv6.conf.default.disable_ipv6 = 1 
-# grep -E 
-'^\s*net\.ipv6\.conf\.(all|default)\.disable_ipv6\s*=\s*1\b(\s+#.*)?$' 
-/etc/sysctl.conf /etc/sysctl.d/*.conf | cut -d: -f2 
- 
-net.ipv6.conf.all.disable_ipv6 = 1 
-net.ipv6.conf.default.disable_ipv6 = 1","Use one of the two following methods to disable IPv6 on the system: 
-To disable IPv6 through the GRUB2 config: 
-Edit /etc/default/grub and add ipv6.disable=1 to the GRUB_CMDLINE_LINUX parameters: 
-GRUB_CMDLINE_LINUX=""ipv6.disable=1"" 
-Ru the following command to update the grub2 configuration: 
-# grub2-mkconfig –o /boot/grub2/grub.cfg 
-OR 
-To disable IPv6 through sysctl settings: 
-Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-net.ipv6.conf.all.disable_ipv6 = 1 
-net.ipv6.conf.default.disable_ipv6 = 1 
-Run the following commands to set the active kernel parameters: 
-# sysctl -w net.ipv6.conf.all.disable_ipv6=1 
-# sysctl -w net.ipv6.conf.default.disable_ipv6=1 
-# sysctl -w net.ipv6.route.flush=1"
-3.1.2 Ensure wireless interfaces are disabled (Automated),"Run the following script to verify no wireless interfaces are active on the system: 
-#!/bin/bash 
- 
-if command -v nmcli >/dev/null 2>&1 ; then 
-   if nmcli radio all | grep -Eq '\s*\S+\s+disabled\s+\S+\s+disabled\b'; then 
-      echo ""Wireless is not enabled"" 
-   else  
-      nmcli radio all 
-   fi 
-elif [ -n ""$(find /sys/class/net/*/ -type d -name wireless)"" ]; then 
-   t=0 
-   mname=$(for driverdir in $(find /sys/class/net/*/ -type d -name wireless | 
-xargs -0 dirname); do basename ""$(readlink -f 
-""$driverdir""/device/driver/module)"";done | sort -u) 
-   for dm in $mname; do 
-      if grep -Eq ""^\s*install\s+$dm\s+/bin/(true|false)"" 
-/etc/modprobe.d/*.conf; then 
-         /bin/true 
-      else 
-         echo ""$dm is not disabled"" 
-         t=1 
-      fi 
-   done 
-   [ ""$t"" -eq 0 ] && echo ""Wireless is not enabled"" 
+[ -n "$passing" ] && passing=""
+[ -z "$(grep "^\s*linux" /boot/grub2/grub.cfg | grep -v ipv6.disable=1)" ] && passing="true"
+grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" /etc/sysctl.conf \
+/etc/sysctl.d/*.conf && grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" \
+/etc/sysctl.conf /etc/sysctl.d/*.conf && sysctl net.ipv6.conf.all.disable_ipv6 | \
+grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && \
+sysctl net.ipv6.conf.default.disable_ipv6 | \
+grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && passing="true" 
+if [ "$passing" = true ] ; then 
+echo "IPv6 is disabled on the system" 
 else 
-   echo ""Wireless is not enabled"" 
-fi 
-Output should be: 
-Wireless is not enabled","Run the following script to disable any wireless interfaces: 
-#!/bin/bash 
- 
-if command -v nmcli >/dev/null 2>&1 ; then 
-   nmcli radio all off 
+echo "IPv6 is enabled on the system" 
+fi
+
+echo "3.2.2 Ensure packet redirect sending is disabled (Automated)"
+sysctl_entry "net.ipv4.conf.all.send_redirects=0"
+sysctl_entry "net.ipv4.conf.default.send_redirects=0"
+sysctl -w net.ipv4.route.flush=1
+
+echo "3.3.1 Ensure source routed packets are not accepted (Automated)"Run the following commands and verify output matches: 
+sysctl net.ipv4.conf.all.accept_source_route 
+sysctl net.ipv4.conf.default.accept_source_route 
+grep "net\.ipv4\.conf\.all\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
+
+grep "net\.ipv4\.conf\.default\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
+
+[ -n "$passing" ] && passing=""
+[ -z "$(grep "^\s*linux" /boot/grub2/grub.cfg | grep -v ipv6.disable=1)" ] && passing="true"
+grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" /etc/sysctl.conf \
+/etc/sysctl.d/*.conf && grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" \
+/etc/sysctl.conf /etc/sysctl.d/*.conf && sysctl net.ipv6.conf.all.disable_ipv6 | \
+grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && \
+sysctl net.ipv6.conf.default.disable_ipv6 | \
+grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && passing="true" 
+if [ "$passing" = true ] ; then 
+echo "IPv6 is disabled on the system" 
 else 
-   if [ -n ""$(find /sys/class/net/*/ -type d -name wireless)"" ]; then 
-      mname=$(for driverdir in $(find /sys/class/net/*/ -type d -name 
-wireless | xargs -0 dirname); do basename ""$(readlink -f 
-""$driverdir""/device/driver/module)"";done | sort -u) 
-      for dm in $mname; do 
-         echo ""install $dm /bin/true"" >> 
-/etc/modprobe.d/disable_wireless.conf 
-      done 
-   fi 
-fi"
-3.2.1 Ensure IP forwarding is disabled (Automated),"Run the following commands and verify output matches: 
-# sysctl net.ipv4.ip_forward 
- 
-net.ipv4.ip_forward = 0 
-# grep -E -s ""^\s*net\.ipv4\.ip_forward\s*=\s*1"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-No value should be returned 
-IFIPv6 is enabled: 
-Run the following commands and verify output matches: 
-# sysctl net.ipv6.conf.all.forwarding 
- 
-net.ipv6.conf.all.forwarding = 0 
-# grep -E -s ""^\s*net\.ipv6\.conf\.all\.forwarding\s*=\s*1"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-No value should be returned 
-OR 
-Verify that IPv6 is disabled: 
-Run the following script. Output will confirm if IPv6 is disabled on the system. 
-#!/bin/bash 
- 
-[ -n ""$passing"" ] && passing="""" 
-[ -z ""$(grep ""^\s*linux"" /boot/grub2/grub.cfg | grep -v ipv6.disable=1)"" ] && 
-passing=""true"" 
-grep -Eq ""^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$"" 
-/etc/sysctl.conf \ 
-/etc/sysctl.d/*.conf && grep -Eq 
-""^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$"" \ 
-/etc/sysctl.conf /etc/sysctl.d/*.conf && sysctl 
-net.ipv6.conf.all.disable_ipv6 | \ 
-grep -Eq ""^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$"" && \ 
-sysctl net.ipv6.conf.default.disable_ipv6 | \ 
-grep -Eq ""^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$"" && 
-passing=""true"" 
-if [ ""$passing"" = true ] ; then 
- 
-echo ""IPv6 is disabled on the system"" 
-else 
- 
-echo ""IPv6 is enabled on the system"" 
-fi","Run the following commands to restore the default parameters and set the active kernel 
-parameters: 
-# grep -Els ""^\s*net\.ipv4\.ip_forward\s*=\s*1"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf | while 
-read filename; do sed -ri ""s/^\s*(net\.ipv4\.ip_forward\s*)(=)(\s*\S+\b).*$/# 
-*REMOVED* \1/"" $filename; done; sysctl -w net.ipv4.ip_forward=0; sysctl -w 
-net.ipv4.route.flush=1 
-# grep -Els ""^\s*net\.ipv6\.conf\.all\.forwarding\s*=\s*1"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf | while 
-read filename; do sed -ri 
-""s/^\s*(net\.ipv6\.conf\.all\.forwarding\s*)(=)(\s*\S+\b).*$/# *REMOVED* \1/"" 
-$filename; done; sysctl -w net.ipv6.conf.all.forwarding=0; sysctl -w 
-net.ipv6.route.flush=1"
-3.2.2 Ensure packet redirect sending is disabled (Automated),"Run the following commands and verify output matches: 
-# sysctl net.ipv4.conf.all.send_redirects 
- 
-net.ipv4.conf.all.send_redirects = 0 
-# sysctl net.ipv4.conf.default.send_redirects 
- 
-net.ipv4.conf.default.send_redirects = 0 
-# grep ""net\.ipv4\.conf\.all\.send_redirects"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.conf.all.send_redirects = 0 
-# grep ""net\.ipv4\.conf\.default\.send_redirects"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.conf.default.send_redirects= 0","Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-net.ipv4.conf.all.send_redirects = 0 
-net.ipv4.conf.default.send_redirects = 0 
-Run the following commands to set the active kernel parameters: 
-# sysctl -w net.ipv4.conf.all.send_redirects=0 
-# sysctl -w net.ipv4.conf.default.send_redirects=0 
-# sysctl -w net.ipv4.route.flush=1"
-3.3.1 Ensure source routed packets are not accepted (Automated),"Run the following commands and verify output matches: 
-# sysctl net.ipv4.conf.all.accept_source_route 
- 
-net.ipv4.conf.all.accept_source_route = 0 
-# sysctl net.ipv4.conf.default.accept_source_route 
- 
-net.ipv4.conf.default.accept_source_route = 0 
-# grep ""net\.ipv4\.conf\.all\.accept_source_route"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.conf.all.accept_source_route= 0 
-# grep ""net\.ipv4\.conf\.default\.accept_source_route"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.conf.default.accept_source_route= 0 
-IF IPv6 is enabled: 
-Run the following commands and verify output matches: 
-# sysctl net.ipv6.conf.all.accept_source_route 
- 
-net.ipv6.conf.all.accept_source_route = 0 
-# sysctl net.ipv6.conf.default.accept_source_route 
- 
-net.ipv6.conf.default.accept_source_route = 0 
-# grep ""net\.ipv6\.conf\.all\.accept_source_route"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.conf.all.accept_source_route= 0 
-# grep ""net\.ipv6\.conf\.default\.accept_source_route"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv6.conf.default.accept_source_route= 0 
-OR 
-Verify that IPv6 is disabled: 
-Run the following script. Output will confirm if IPv6 is disabled on the system.","Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-net.ipv4.conf.all.accept_source_route = 0 
-net.ipv4.conf.default.accept_source_route = 0 
-Run the following commands to set the active kernel parameters: 
-# sysctl -w net.ipv4.conf.all.accept_source_route=0 
-# sysctl -w net.ipv4.conf.default.accept_source_route=0 
-# sysctl -w net.ipv4.route.flush=1 
-IF IPv6 is not disabled: 
-Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-net.ipv6.conf.all.accept_source_route = 0 
-net.ipv6.conf.default.accept_source_route = 0 
-Run the following commands to set the active kernel parameters: 
-# sysctl -w net.ipv6.conf.all.accept_source_route=0 
-# sysctl -w net.ipv6.conf.default.accept_source_route=0 
-# sysctl -w net.ipv6.route.flush=1"
-3.3.2 Ensure ICMP redirects are not accepted (Automated),"Run the following commands and verify output matches: 
-# sysctl net.ipv4.conf.all.accept_redirects 
- 
-net.ipv4.conf.all.accept_redirects = 0 
-# sysctl net.ipv4.conf.default.accept_redirects 
- 
-net.ipv4.conf.default.accept_redirects = 0 
-# grep ""net\.ipv4\.conf\.all\.accept_redirects"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.conf.all.accept_redirects= 0 
-# grep ""net\.ipv4\.conf\.default\.accept_redirects"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.conf.default.accept_redirects= 0 
-IF IPv6 is not disabled: 
-Run the following commands and verify output matches:","Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-net.ipv4.conf.all.accept_redirects = 0 
-net.ipv4.conf.default.accept_redirects = 0 
-Run the following commands to set the active kernel parameters: 
-# sysctl -w net.ipv4.conf.all.accept_redirects=0 
-# sysctl -w net.ipv4.conf.default.accept_redirects=0 
-# sysctl -w net.ipv4.route.flush=1 
-IF IPv6 is not disabled 
-Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-net.ipv6.conf.all.accept_redirects = 0 
-net.ipv6.conf.default.accept_redirects = 0 
-Run the following commands to set the active kernel parameters: 
-# sysctl -w net.ipv6.conf.all.accept_redirects=0 
-# sysctl -w net.ipv6.conf.default.accept_redirects=0 
-# sysctl -w net.ipv6.route.flush=1"
-3.3.3 Ensure secure ICMP redirects are not accepted (Automated),"Run the following commands and verify output matches: 
-# sysctl net.ipv4.conf.all.secure_redirects 
- 
-net.ipv4.conf.all.secure_redirects = 0 
-# sysctl net.ipv4.conf.default.secure_redirects 
- 
-net.ipv4.conf.default.secure_redirects = 0 
-# grep ""net\.ipv4\.conf\.all\.secure_redirects"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.conf.all.secure_redirects= 0 
-# grep ""net\.ipv4\.conf\.default\.secure_redirects"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.conf.default.secure_redirects= 0","Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-net.ipv4.conf.all.secure_redirects = 0 
-net.ipv4.conf.default.secure_redirects = 0 
-Run the following commands to set the active kernel parameters: 
-# sysctl -w net.ipv4.conf.all.secure_redirects=0 
-# sysctl -w net.ipv4.conf.default.secure_redirects=0 
-# sysctl -w net.ipv4.route.flush=1"
-3.3.4 Ensure suspicious packets are logged (Automated),"Run the following commands and verify output matches: 
-# sysctl net.ipv4.conf.all.log_martians 
- 
-net.ipv4.conf.all.log_martians = 1 
-# sysctl net.ipv4.conf.default.log_martians 
- 
-net.ipv4.conf.default.log_martians = 1 
-# grep ""net\.ipv4\.conf\.all\.log_martians"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.conf.all.log_martians = 1 
-# grep ""net\.ipv4\.conf\.default\.log_martians"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.conf.default.log_martians = 1","Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-net.ipv4.conf.all.log_martians = 1 
-net.ipv4.conf.default.log_martians = 1 
-Run the following commands to set the active kernel parameters: 
-# sysctl -w net.ipv4.conf.all.log_martians=1 
-# sysctl -w net.ipv4.conf.default.log_martians=1 
-# sysctl -w net.ipv4.route.flush=1"
-3.3.5 Ensure broadcast ICMP requests are ignored (Automated),"Run the following commands and verify output matches: 
-# sysctl net.ipv4.icmp_echo_ignore_broadcasts 
- 
-net.ipv4.icmp_echo_ignore_broadcasts = 1 
- 
-# grep ""net\.ipv4\.icmp_echo_ignore_broadcasts"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.icmp_echo_ignore_broadcasts = 1","Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-net.ipv4.icmp_echo_ignore_broadcasts = 1 
-Run the following commands to set the active kernel parameters: 
-# sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1 
-# sysctl -w net.ipv4.route.flush=1"
-3.3.6 Ensure bogus ICMP responses are ignored (Automated),"Run the following commands and verify output matches: 
-# sysctl net.ipv4.icmp_ignore_bogus_error_responses 
- 
-net.ipv4.icmp_ignore_bogus_error_responses = 1 
- 
-# grep ""net.ipv4.icmp_ignore_bogus_error_responses"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.icmp_ignore_bogus_error_responses = 1","Set the following parameter in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-net.ipv4.icmp_ignore_bogus_error_responses = 1 
-Run the following commands to set the active kernel parameters: 
-# sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1 
-# sysctl -w net.ipv4.route.flush=1"
-3.3.7 Ensure Reverse Path Filtering is enabled (Automated),"Run the following commands and verify output matches: 
-# sysctl net.ipv4.conf.all.rp_filter 
- 
-net.ipv4.conf.all.rp_filter = 1 
-# sysctl net.ipv4.conf.default.rp_filter 
- 
-net.ipv4.conf.default.rp_filter = 1 
-# grep ""net\.ipv4\.conf\.all\.rp_filter"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.conf.all.rp_filter = 1 
-# grep ""net\.ipv4\.conf\.default\.rp_filter"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.conf.default.rp_filter = 1","Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-net.ipv4.conf.all.rp_filter = 1 
-net.ipv4.conf.default.rp_filter = 1 
-Run the following commands to set the active kernel parameters: 
-# sysctl -w net.ipv4.conf.all.rp_filter=1 
-# sysctl -w net.ipv4.conf.default.rp_filter=1 
-# sysctl -w net.ipv4.route.flush=1"
-3.3.8 Ensure TCP SYN Cookies is enabled (Automated),"Run the following commands and verify output matches: 
-# sysctl net.ipv4.tcp_syncookies 
- 
-net.ipv4.tcp_syncookies = 1 
- 
-# grep ""net\.ipv4\.tcp_syncookies"" /etc/sysctl.conf /etc/sysctl.d/*.conf 
-/usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv4.tcp_syncookies = 1","Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-net.ipv4.tcp_syncookies = 1 
-Run the following commands to set the active kernel parameters: 
-# sysctl -w net.ipv4.tcp_syncookies=1 
- 
-# sysctl -w net.ipv4.route.flush=1"
+echo "IPv6 is enabled on the system" 
+fi
+
+echo "3.3.2 Ensure ICMP redirects are not accepted (Automated)"
+
+sysctl_entry "net.ipv4.conf.all.accept_redirects=0"
+sysctl_entry "net.ipv4.conf.default.accept_redirects=0"
+sysctl -w net.ipv4.route.flush=1"
+
+echo "3.3.3 Ensure secure ICMP redirects are not accepted (Automated),"
+sysctl_entry "net.ipv4.conf.all.secure_redirects=0"
+sysctl_entry "net.ipv4.conf.default.secure_redirects=0"
+sysctl -w net.ipv4.route.flush=1
+
+echo "3.3.4 Ensure suspicious packets are logged (Automated)
+
+
+sysctl_entry "net.ipv4.conf.all.log_martians=1"
+sysctl_entry "net.ipv4.conf.default.log_martians=1"
+sysctl -w net.ipv4.route.flush=1
+
+echo "3.3.5 Ensure broadcast ICMP requests are ignored (Automated)"
+sysctl_entry "net.ipv4.icmp_echo_ignore_broadcasts=1"
+sysctl -w net.ipv4.route.flush=1
+
+echo "3.3.6 Ensure bogus ICMP responses are ignored (Automated)"
+sysctl_entry "net.ipv4.icmp_ignore_bogus_error_responses=1"
+sysctl -w net.ipv4.route.flush=1
+
+echo "3.3.7 Ensure Reverse Path Filtering is enabled (Automated)"Run the following commands and verify output matches: 
+sysctl_entry "net.ipv4.conf.all.rp_filter=1"
+sysctl_entry "net.ipv4.conf.default.rp_filter=1"
+sysctl -w net.ipv4.route.flush=1
+
+echo "3.3.8 Ensure TCP SYN Cookies is enabled (Automated),"Run the following commands and verify output matches: 
+sysctl_entry "net.ipv4.tcp_syncookies=1"
+sysctl -w net.ipv4.route.flush=1
+
 3.3.9 Ensure IPv6 router advertisements are not accepted (Automated),"Run the following commands and verify output matches: 
-# sysctl net.ipv6.conf.all.accept_ra 
- 
-net.ipv6.conf.all.accept_ra = 0 
-# sysctl net.ipv6.conf.default.accept_ra 
- 
-net.ipv6.conf.default.accept_ra = 0 
-# grep ""net\.ipv6\.conf\.all\.accept_ra"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv6.conf.all.accept_ra = 0 
-# grep ""net\.ipv6\.conf\.default\.accept_ra"" /etc/sysctl.conf 
-/etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
- 
-net.ipv6.conf.default.accept_ra = 0 
-OR Verify IPv6 is disabled: 
-Run the following script. Output will confirm if IPv6 is disabled on the system.","IF IPv6 is enabled: 
-Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: 
-net.ipv6.conf.all.accept_ra = 0 
-net.ipv6.conf.default.accept_ra = 0 
-Run the following commands to set the active kernel parameters: 
-# sysctl -w net.ipv6.conf.all.accept_ra=0 
-# sysctl -w net.ipv6.conf.default.accept_ra=0 
-# sysctl -w net.ipv6.route.flush=1"
+[ -n "$passing" ] && passing=""
+[ -z "$(grep "^\s*linux" /boot/grub2/grub.cfg | grep -v ipv6.disable=1)" ] && passing="true"
+grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" /etc/sysctl.conf \
+/etc/sysctl.d/*.conf && grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" \
+/etc/sysctl.conf /etc/sysctl.d/*.conf && sysctl net.ipv6.conf.all.disable_ipv6 | \
+grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && \
+sysctl net.ipv6.conf.default.disable_ipv6 | \
+grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && passing="true" 
+if [ "$passing" = true ] ; then 
+echo "IPv6 is disabled on the system" 
+else 
+echo "IPv6 is enabled on the system" 
+fi
+
 3.4.1 Ensure DCCP is disabled (Automated),"Run the following commands and verify the output is as indicated: 
 # modprobe -n -v dccp 
 install /bin/true 
@@ -925,8 +527,8 @@ package and remove the iptables-services package
 package nftables is not installed 
 OR 
 Run the following commands to verify that nftables is stopped: 
-# systemctl status nftables | grep ""Active: "" | grep -E  "" active 
-\((running|exited)\) "" 
+# systemctl status nftables | grep "Active: " | grep -E  " active 
+\((running|exited)\) " 
  
 No output should be returned 
 Run the following command to verify nftables.service is masked: 
@@ -935,7 +537,7 @@ Run the following command to verify nftables.service is masked:
 masked","Run the following command to remove nftables: 
 # yum remove nftables 
 OR 
-Run the following command to stop and mask nftables"" 
+Run the following command to stop and mask nftables" 
 systemctl --now mask nftables"
 3.5.1.4 Ensure firewalld service enabled and running (Automated),"Run the following command to verify that firewalld is enabled: 
 # systemctl is-enabled firewalld 
@@ -958,8 +560,8 @@ References:
 2. https://firewalld.org/documentation/man-pages/firewalld.zone"
 "3.5.1.6 Ensure network interfaces are assigned to appropriate zone 
 (Manual)","Run the following and verify that the interface(s) follow site policy for zone assignment 
-# find /sys/class/net/* -maxdepth 1 | awk -F""/"" '{print $NF}' | while read -r 
-netint; do [ ""$netint"" != ""lo"" ] && firewall-cmd --get-active-zones | grep -
+# find /sys/class/net/* -maxdepth 1 | awk -F"/" '{print $NF}' | while read -r 
+netint; do [ "$netint" != "lo" ] && firewall-cmd --get-active-zones | grep -
 B1 $netint; done 
 Example output: 
 <custom zone> 
@@ -1060,9 +662,9 @@ Example:
 # nft create chain inet filter output { type filter hook output priority 0 \; 
 }"
 3.5.2.7 Ensure nftables loopback traffic is configured (Automated),"Run the following commands to verify that the loopback interface is configured: 
-# nft list ruleset | awk '/hook input/,/}/' | grep 'iif ""lo"" accept' 
+# nft list ruleset | awk '/hook input/,/}/' | grep 'iif "lo" accept' 
  
-iif ""lo"" accept 
+iif "lo" accept 
  
 # nft list ruleset | awk '/hook input/,/}/' | grep 'ip saddr' 
  
@@ -1137,13 +739,13 @@ enabled","Run the following command to enable the nftables service:
 3.5.2.11 Ensure nftables rules are permanent (Automated),"Run the following commands to verify that input, forward, and output base chains are 
 configured to be applied to a nftables ruleset on boot: 
 Run the following command to verify the input base chain: 
-# awk '/hook input/,/}/' $(awk '$1 ~ /^\s*include/ { gsub(""\"""","""",$2);print 
+# awk '/hook input/,/}/' $(awk '$1 ~ /^\s*include/ { gsub("\"","",$2);print 
 $2 }' /etc/sysconfig/nftables.conf) 
 Output should be similar to: 
                 type filter hook input priority 0; policy drop; 
  
                 # Ensure loopback traffic is configured 
-                iif ""lo"" accept 
+                iif "lo" accept 
                 ip saddr 127.0.0.0/8 counter packets 0 bytes 0 drop 
                 ip6 saddr ::1 counter packets 0 bytes 0 drop 
  
@@ -1163,7 +765,7 @@ neighbor-advert, ind-neighbor-solicit, ind-neighbor-advert, mld2-listener-
 report } accept 
 Note: Review the input base chain to ensure that it follows local site policy 
 Run the following command to verify the forward base chain: 
-# awk '/hook forward/,/}/' $(awk '$1 ~ /^\s*include/ { gsub(""\"""","""",$2);print 
+# awk '/hook forward/,/}/' $(awk '$1 ~ /^\s*include/ { gsub("\"","",$2);print 
 $2 }' /etc/sysconfig/nftables.conf) 
 Output should be similar to: 
         # Base chain for hook forward named forward (Filters forwarded 
@@ -1176,7 +778,7 @@ Run the following command to verify the forward base chain:","Edit the /etc/sysc
 <Absolute path to nftables rules file> for each nftables file you want included in the 
 nftables ruleset on boot: 
 Example: 
-include ""/etc/nftables/nftables.rules"""
+include "/etc/nftables/nftables.rules""
 3.5.3.1.1 Ensure iptables packages are installed (Automated),"Run the following command to verify that iptables and iptables-services are installed: 
 rpm -q iptables iptables-services 
  
@@ -1195,7 +797,7 @@ package nftables is not installed","Run the following command to remove nftables
 package firewalld is not installed 
 OR 
 Run the following commands to verify that firewalld is stopped and masked 
-# systemctl status firewalld | grep ""Active: "" | grep -v  ""active (running) "" 
+# systemctl status firewalld | grep "Active: " | grep -v  "active (running) " 
  
 No output should be returned 
 # systemctl is-enabled firewalld 
@@ -1254,7 +856,7 @@ destination
     0     0 ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            
 tcp dpt:22 state NEW 
 Verify all open ports listening on non-localhost addresses have at least one firewall rule. 
-Note: The last line identified by the ""tcp dpt:22 state NEW"" identifies it as a firewall rule for 
+Note: The last line identified by the "tcp dpt:22 state NEW" identifies it as a firewall rule for 
 new connections on tcp port 22.","For each port identified in the audit which does not have a firewall rule establish a proper 
 rule for accepting inbound connections: 
 # iptables -A INPUT -p <protocol> --dport <port> -m state --state NEW -j 
@@ -1329,7 +931,7 @@ iptables: Saving firewall rules to /etc/sysconfig/iptables:[  OK  ]"
  
 enabled 
 Run the following command to verify iptables.service is active and running or exited 
-# systemctl status iptables | grep -E "" Active: active \((running|exited)\) "" 
+# systemctl status iptables | grep -E " Active: active \((running|exited)\) " 
  
    Active: active (exited) since <day date and time>","Run the following command to enable and start iptables: 
 # systemctl --now enable iptables"
@@ -1423,25 +1025,25 @@ Verify IPv6 is disabled:
 Run the following script. Output will confirm if IPv6 is disabled on the system. 
 #!/bin/bash 
  
-[ -n ""$passing"" ] && passing="""" 
-[ -z ""$(grep ""^\s*linux"" /boot/grub2/grub.cfg | grep -v ipv6.disable=1)"" ] && 
-passing=""true"" 
-grep -Eq ""^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$"" 
+[ -n "$passing" ] && passing="" 
+[ -z "$(grep "^\s*linux" /boot/grub2/grub.cfg | grep -v ipv6.disable=1)" ] && 
+passing="true" 
+grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" 
 /etc/sysctl.conf \ 
 /etc/sysctl.d/*.conf && grep -Eq 
-""^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$"" \ 
+"^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" \ 
 /etc/sysctl.conf /etc/sysctl.d/*.conf && sysctl 
 net.ipv6.conf.all.disable_ipv6 | \ 
-grep -Eq ""^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$"" && \ 
+grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && \ 
 sysctl net.ipv6.conf.default.disable_ipv6 | \ 
-grep -Eq ""^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$"" && 
-passing=""true"" 
-if [ ""$passing"" = true ] ; then 
+grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && 
+passing="true" 
+if [ "$passing" = true ] ; then 
  
-echo ""IPv6 is disabled on the system"" 
+echo "IPv6 is disabled on the system" 
 else 
  
-echo ""IPv6 is enabled on the system"" 
+echo "IPv6 is enabled on the system" 
 fi","Run the following commands to create or update the /etc/sysconfig/ip6tables file: 
 Run the following command to review the current running iptables configuration: 
 # ip6tables -L 
@@ -1481,8 +1083,8 @@ ip6tables: Saving firewall rules to /etc/sysconfig/ip6table[  OK  ]"
  
 enabled 
 Run the following command to verify ip6tables.service is active and running or exited 
-# systemctl status ip6tables | grep -E "" Active: active \((running|exited)\) 
-"" 
+# systemctl status ip6tables | grep -E " Active: active \((running|exited)\) 
+" 
  
    Active: active (exited) since <day date and time> 
 OR verify IPv6 is disabled: 
@@ -1510,16 +1112,16 @@ enabled (Automated)","Run the following script to verify that each linux line ha
 # IF check passes return PASSED 
 efidir=$(find /boot/efi/EFI/* -type d -not -name 'BOOT') 
 gbdir=$(find /boot -maxdepth 1 -type d -name 'grub*') 
-if [ -f ""$efidir""/grub.cfg ]; then 
-   grep ""^\s*linux"" ""$efidir""/grub.cfg | grep -Evq ""audit=1\b"" && echo 
-""FAILED"" || echo ""PASSED"" 
-elif [ -f ""$gbdir""/grub.cfg ]; then 
-   grep ""^\s*linux"" ""$gbdir""/grub.cfg | grep -Evq ""audit=1\b"" && echo 
-""FAILED"" || echo ""PASSED"" 
+if [ -f "$efidir"/grub.cfg ]; then 
+   grep "^\s*linux" "$efidir"/grub.cfg | grep -Evq "audit=1\b" && echo 
+"FAILED" || echo "PASSED" 
+elif [ -f "$gbdir"/grub.cfg ]; then 
+   grep "^\s*linux" "$gbdir"/grub.cfg | grep -Evq "audit=1\b" && echo 
+"FAILED" || echo "PASSED" 
 else 
-   echo ""FAILED"" 
+   echo "FAILED" 
 fi","Edit /etc/default/grub and add audit=1 to GRUB_CMDLINE_LINUX: 
-GRUB_CMDLINE_LINUX=""audit=1"" 
+GRUB_CMDLINE_LINUX="audit=1" 
 Run the following command to update the grub2 configuration: 
 # grub2-mkconfig -o /boot/grub2/grub.cfg"
 4.1.2.1 Ensure audit log storage size is configured (Automated),"Run the following command and ensure output is in compliance with site policy: 
@@ -1552,22 +1154,22 @@ appropriate size for your organization
 # IF check passes return PASSED 
 efidir=$(find /boot/efi/EFI/* -type d -not -name 'BOOT') 
 gbdir=$(find /boot -maxdepth 1 -type d -name 'grub*') 
-if [ -f ""$efidir""/grub.cfg ]; then 
-   grep ""^\s*linux"" ""$efidir""/grub.cfg | grep -Evq 
-""audit_backlog_limit=\S+\b"" && echo -e ""\n\nFAILED"" || echo -e ""\n\nPASSED:\n 
-\""$(grep ""audit_backlog_limit="" ""$gbdir""/grub.cfg)\"""" 
-elif [ -f ""$gbdir""/grub.cfg ]; then 
-   grep ""^\s*linux"" ""$gbdir""/grub.cfg | grep -Evq ""audit_backlog_limit=\S+\b"" 
-&& echo -e ""\n\nFAILED"" || echo -e ""\n\nPASSED:\n \""$(grep 
-""audit_backlog_limit="" ""$gbdir""/grub.cfg)\"""" 
+if [ -f "$efidir"/grub.cfg ]; then 
+   grep "^\s*linux" "$efidir"/grub.cfg | grep -Evq 
+"audit_backlog_limit=\S+\b" && echo -e "\n\nFAILED" || echo -e "\n\nPASSED:\n 
+\"$(grep "audit_backlog_limit=" "$gbdir"/grub.cfg)\"" 
+elif [ -f "$gbdir"/grub.cfg ]; then 
+   grep "^\s*linux" "$gbdir"/grub.cfg | grep -Evq "audit_backlog_limit=\S+\b" 
+&& echo -e "\n\nFAILED" || echo -e "\n\nPASSED:\n \"$(grep 
+"audit_backlog_limit=" "$gbdir"/grub.cfg)\"" 
 else 
-   echo ""FAILED"" 
+   echo "FAILED" 
 fi 
 Ensure the returned value complies with local site policy. It's recommended that this value be 
 8192 or larger.","Edit /etc/default/grub and add audit_backlog_limit=<BACKLOG SIZE> to 
 GRUB_CMDLINE_LINUX: 
 Example: 
-GRUB_CMDLINE_LINUX=""audit_backlog_limit=8192"" 
+GRUB_CMDLINE_LINUX="audit_backlog_limit=8192" 
 Run the following command to update the grub2 configuration: 
 # grub2-mkconfig -o /boot/grub2/grub.cfg"
 "4.1.3 Ensure events that modify date and time information are collected 
@@ -1778,16 +1380,16 @@ ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access"
 4.1.11 Ensure use of privileged commands is collected (Automated),"Run the following command replacing <partition> with a list of partitions where 
 programs can be executed from on your system: 
 # find <partition> -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk 
-'{print ""-a always,exit -F path="" $1 "" -F perm=x -F auid>='""$(awk 
-'/^\s*UID_MIN/{print $2}' /etc/login.defs)""' -F auid!=4294967295 -k 
-privileged"" }' 
+'{print "-a always,exit -F path=" $1 " -F perm=x -F auid>='"$(awk 
+'/^\s*UID_MIN/{print $2}' /etc/login.defs)"' -F auid!=4294967295 -k 
+privileged" }' 
 Verify all resulting lines are a .rules file in /etc/audit/rules.d/ and the output of 
 auditctl -l. 
 Note: The .rules file output will be auid!=-1 not auid!=4294967295","To remediate this issue, the system administrator will have to execute a find command to 
 locate all the privileged programs and then add an audit line for each one of them. 
 The audit parameters associated with this are as follows: 
  
--F path="" $1 "" - will populate each file name found through the find command and 
+-F path=" $1 " - will populate each file name found through the find command and 
 processed by awk. 
  
 -F perm=x - will write an audit record if the file is executed. 
@@ -1796,19 +1398,19 @@ processed by awk.
 privileged user. 
  
 -F auid!= 4294967295 - will ignore Daemon events 
-All audit records should be tagged with the identifier ""privileged"". 
+All audit records should be tagged with the identifier "privileged". 
 Run the following command replacing with a list of partitions where programs can be 
 executed from on your system: 
 # find <partition> -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk 
-'{print ""-a always,exit -F path="" $1 "" -F perm=x -F auid>='""$(awk 
-'/^\s*UID_MIN/{print $2}' /etc/login.defs)""' -F auid!=4294967295 -k 
-privileged"" }' 
+'{print "-a always,exit -F path=" $1 " -F perm=x -F auid>='"$(awk 
+'/^\s*UID_MIN/{print $2}' /etc/login.defs)"' -F auid!=4294967295 -k 
+privileged" }' 
 Edit or create a file in the /etc/audit/rules.d/ directory ending in .rules and add all 
 resulting lines to the file. 
 Example: 
-# find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print ""-a 
-always,exit -F path="" $1 "" -F perm=x -F auid>='""$(awk '/^\s*UID_MIN/{print 
-$2}' /etc/login.defs)""' -F auid!=4294967295 -k privileged"" }' >> 
+# find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print "-a 
+always,exit -F path=" $1 " -F perm=x -F auid>='"$(awk '/^\s*UID_MIN/{print 
+$2}' /etc/login.defs)"' -F auid!=4294967295 -k privileged" }' >> 
 /etc/audit/rules.d/50-privileged.rules"
 4.1.12 Ensure successful file system mounts are collected (Automated),"On a 32 bit system run the following commands: 
 Run the following command to check the auditd .rules files: 
@@ -1996,7 +1598,7 @@ Add the following lines:
 -w /sbin/modprobe -p x -k modules 
 -a always,exit -F arch=b64 -S init_module -S delete_module -k modules"
 4.1.17 Ensure the audit configuration is immutable (Automated),"Run the following command and verify output matches: 
-# grep ""^\s*[^#]"" /etc/audit/rules.d/*.rules | tail -1 
+# grep "^\s*[^#]" /etc/audit/rules.d/*.rules | tail -1 
  
 -e 2","Edit or create the file /etc/audit/rules.d/99-finalize.rules and add the following line 
 at the end of the file: 
@@ -2052,7 +1654,7 @@ References:
 "4.2.1.5 Ensure rsyslog is configured to send logs to a remote log host 
 (Automated)","Review the /etc/rsyslog.conf and /etc/rsyslog.d/*.conf files and verify that logs are 
 sent to a central host. 
-# grep -E '^\s*([^#]+\s+)?action\(([^#]+\s+)?\btarget=\""?[^#""]+\""?\b' 
+# grep -E '^\s*([^#]+\s+)?action\(([^#]+\s+)?\btarget=\"?[^#"]+\"?\b' 
 /etc/rsyslog.conf /etc/rsyslog.d/*.conf 
 Output should include target=<FQDN or IP of remote loghost> 
 OR 
@@ -2060,18 +1662,18 @@ OR
 Output should include either the FQDN or the IP of the remote loghost","Edit the /etc/rsyslog.conf and /etc/rsyslog.d/*.conf files and add one of the following 
 lines: 
 Newer syntax: 
-<files to sent to the remote log server> action(type=""omfwd"" target=""<FQDN or 
-ip of loghost>"" port=""<port number>"" protocol=""tcp"" 
+<files to sent to the remote log server> action(type="omfwd" target="<FQDN or 
+ip of loghost>" port="<port number>" protocol="tcp" 
  
                                         
-action.resumeRetryCount=""<number of re-tries>"" 
+action.resumeRetryCount="<number of re-tries>" 
  
-                                        queue.type=""LinkedList"" 
-queue.size=<number of messages to queue>"") 
+                                        queue.type="LinkedList" 
+queue.size=<number of messages to queue>") 
 Example: 
-*.* action(type=""omfwd"" target=""192.168.2.100"" port=""514"" protocol=""tcp"" 
-           action.resumeRetryCount=""100"" 
-           queue.type=""LinkedList"" queue.size=""1000"") 
+*.* action(type="omfwd" target="192.168.2.100" port="514" protocol="tcp" 
+           action.resumeRetryCount="100" 
+           queue.type="LinkedList" queue.size="1000") 
 Older syntax: 
 *.* @@<FQDN or ip of loghost> 
 Example: 
@@ -2081,9 +1683,9 @@ Run the following command to reload the rsyslog configuration:
 References: 
 1. See the rsyslog.conf(5) man page for more information. 
 Additional Information: 
-The double ""at"" sign (@@) directs rsyslog to use TCP to send log messages to the server, 
+The double "at" sign (@@) directs rsyslog to use TCP to send log messages to the server, 
 which is a more reliable transport mechanism than the default UDP protocol 
-The *.* is a ""wildcard"" to send all logs to the remote loghost"
+The *.* is a "wildcard" to send all logs to the remote loghost"
 "4.2.1.6 Ensure remote rsyslog messages are only accepted on 
 designated log hosts. (Manual)","Run the following commands and verify the resulting lines are uncommented on 
 designated log hosts and commented or removed on all others: 
@@ -2142,7 +1744,7 @@ group does not have write or execute permissions on any files:
 # find /var/log -type f -perm /g+wx,o+rwx  -exec ls -l {} \; 
  
 Nothing should be returned","Run the following commands to set permissions on all existing log files: 
-# find /var/log -type f -exec chmod g-wx,o-rwx ""{}"" + 
+# find /var/log -type f -exec chmod g-wx,o-rwx "{}" + 
 Note: The configuration for your logging software or services may need to also be modified for 
 any logs that had incorrect permissions, otherwise, the permissions may be reverted to the 
 incorrect permissions"
@@ -2297,14 +1899,14 @@ References:
 1. SUDO(8)"
 5.2.3 Ensure sudo log file exists (Automated),"Verify that sudo has a custom log file configured 
 Run the following command: 
-# grep -Ei '^\s*Defaults\s+([^#;]+,\s*)?logfile\s*=\s*("")?[^#;]+("")?' 
+# grep -Ei '^\s*Defaults\s+([^#;]+,\s*)?logfile\s*=\s*(")?[^#;]+(")?' 
 /etc/sudoers /etc/sudoers.d/* 
  
-Defaults logfile=""/var/log/sudo.log""","edit the file /etc/sudoers or a file in /etc/sudoers.d/ with visudo or visudo -f <PATH 
+Defaults logfile="/var/log/sudo.log"","edit the file /etc/sudoers or a file in /etc/sudoers.d/ with visudo or visudo -f <PATH 
 TO FILE> and add the following line: 
-Defaults  logfile=""<PATH TO CUSTOM LOG FILE>"" 
+Defaults  logfile="<PATH TO CUSTOM LOG FILE>" 
 Example: 
-Defaults  logfile=""/var/log/sudo.log"""
+Defaults  logfile="/var/log/sudo.log""
 "5.3.1 Ensure permissions on /etc/ssh/sshd_config are configured 
 (Automated)","Run the following command and verify Uid and Gid are both 0/root and Access does not 
 grant permissions to group or other: 
@@ -2395,8 +1997,8 @@ root:root {} \;
 Default Value: 
 Access: (0644/-rw-r--r--) Uid: ( 0/ root) Gid: ( 0/ root)"
 5.3.4 Ensure SSH access is limited (Automated),"Run the following commands and verify the output: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep -Pi 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep -Pi 
 '^\h*(allow|deny)(users|groups)\h+\H+(\h+.*)?$' 
  
 # grep -Pi '^\h*(allow|deny)(users|groups)\h+\H+(\h+.*)?$' 
@@ -2419,8 +2021,8 @@ References:
 1. SSHD_CONFIG(5)"
 5.3.5 Ensure SSH LogLevel is appropriate (Automated),"Run the following command and verify that output matches loglevel VERBOSE or loglevel 
 INFO: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep loglevel 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep loglevel 
  
 loglevel VERBOSE or loglevel INFO 
 Run the following command and verify the output matches: 
@@ -2435,8 +2037,8 @@ LogLevel INFO
 References: 
 1. https://www.ssh.com/ssh/sshd_config/"
 5.3.6 Ensure SSH X11 forwarding is disabled (Automated),"Run the following command and verify that output matches: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep -i x11forwarding 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep -i x11forwarding 
  
 x11forwarding no 
 Run the following command and verify that the output matches: 
@@ -2447,8 +2049,8 @@ X11Forwarding no
 Default Value: 
 X11Forwarding yes"
 5.3.7 Ensure SSH MaxAuthTries is set to 4 or less (Automated),"Run the following command and verify that output MaxAuthTries is 4 or less: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep maxauthtries 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep maxauthtries 
  
 maxauthtries 4 
 Run the following command and verify that the output: 
@@ -2461,8 +2063,8 @@ MaxAuthTries 6
 References: 
 1. SSHD_CONFIG(5)"
 5.3.8 Ensure SSH IgnoreRhosts is enabled (Automated),"Run the following command and verify that output matches: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep ignorerhosts 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep ignorerhosts 
  
 ignorerhosts yes 
 Run the following command and verify the output: 
@@ -2475,8 +2077,8 @@ IgnoreRhosts yes
 References: 
 1. SSHD_CONFIG(5)"
 5.3.9 Ensure SSH HostbasedAuthentication is disabled (Automated),"Run the following command and verify that output matches: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep hostbasedauthentication 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep hostbasedauthentication 
  
 hostbasedauthentication no 
 Run the following command and verify the output matches: 
@@ -2489,8 +2091,8 @@ HostbasedAuthentication no
 References: 
 1. SSHD_CONFIG(5)"
 5.3.10 Ensure SSH root login is disabled (Automated),"Run the following command and verify that output matches: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep permitrootlogin 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep permitrootlogin 
  
 permitrootlogin no 
 Run the following command and verify the output: 
@@ -2503,8 +2105,8 @@ PermitRootLogin without-password
 References: 
 1. SSHD_CONFIG(5)"
 5.3.11 Ensure SSH PermitEmptyPasswords is disabled (Automated),"Run the following command and verify that output matches: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep permitemptypasswords 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep permitemptypasswords 
  
 permitemptypasswords no 
 Run the following command and verify the output: 
@@ -2517,8 +2119,8 @@ PermitEmptyPasswords no
 References: 
 1. SSHD_CONFIG(5)"
 5.3.12 Ensure SSH PermitUserEnvironment is disabled (Automated),"Run the following command and verify that output matches: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep permituserenvironment 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep permituserenvironment 
  
 permituserenvironment no 
 Run the following command and verify the output: 
@@ -2531,8 +2133,8 @@ PermitUserEnvironment no
 References: 
 1. SSHD_CONFIG(5)"
 5.3.13 Ensure only strong Ciphers are used (Automated),"Run the following command and verify the output: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep -Ei '^\s*ciphers\s+([^#]+,)?(3des-
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep -Ei '^\s*ciphers\s+([^#]+,)?(3des-
 cbc|aes128-cbc|aes192-cbc|aes256-cbc|arcfour|arcfour128|arcfour256|blowfish-
 cbc|cast128-cbc|rijndael-cbc@lysator.liu.se)\b' 
  
@@ -2562,8 +2164,8 @@ References:
 8. https://www.openssh.com/txt/cbc.adv 
 9. SSHD_CONFIG(5)"
 5.3.14 Ensure only strong MAC algorithms are used (Automated),"Run the following command and verify the output: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep -Ei '^\s*macs\s+([^#]+,)?(hmac-
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep -Ei '^\s*macs\s+([^#]+,)?(hmac-
 md5|hmac-md5-96|hmac-ripemd160|hmac-sha1|hmac-sha1-96|umac-
 64@openssh\.com|hmac-md5-etm@openssh\.com|hmac-md5-96-etm@openssh\.com|hmac-
 ripemd160-etm@openssh\.com|hmac-sha1-etm@openssh\.com|hmac-sha1-96-
@@ -2593,8 +2195,8 @@ http://www.mitls.org/pages/attacks/SLOTH
 2. SSHD_CONFIG(5)"
 "5.3.15 Ensure only strong Key Exchange algorithms are used 
 (Automated)","Run the following command and verify the output: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep -Ei 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep -Ei 
 '^\s*kexalgorithms\s+([^#]+,)?(diffie-hellman-group1-sha1|diffie-hellman-
 group14-sha1|diffie-hellman-group-exchange-sha1)\b' 
  
@@ -2639,13 +2241,13 @@ diffie-hellman-group16-sha512
 diffie-hellman-group18-sha512 
 diffie-hellman-group14-sha256"
 5.3.16 Ensure SSH Idle Timeout Interval is configured (Automated),"Run the following commands and verify ClientAliveInterval is between 1 and 900: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep clientaliveinterval 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep clientaliveinterval 
  
 clientaliveinterval 900 
 Run the following command and verify ClientAliveCountMax is 0: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep clientalivecountmax 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep clientalivecountmax 
  
 clientalivecountmax 3 
 Run the following commands and verify the output: 
@@ -2670,8 +2272,8 @@ References:
 "5.3.17 Ensure SSH LoginGraceTime is set to one minute or less 
 (Automated)","Run the following command and verify that output LoginGraceTime is between 1 and 60 
 seconds or 1m: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep logingracetime 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep logingracetime 
  
 logingracetime 60 
 Run the following command and verify the output: 
@@ -2681,16 +2283,16 @@ Run the following command and verify the output:
 Nothing should be returned","Edit the /etc/ssh/sshd_config file to set the parameter as follows: 
 LoginGraceTime 60"
 5.3.18 Ensure SSH warning banner is configured (Automated),"Run the following command and verify that output matches: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep banner 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep banner 
  
 banner /etc/issue.net","Edit the /etc/ssh/sshd_config file to set the parameter as follows: 
 Banner /etc/issue.net 
 References: 
 1. SSHD_CONFIG(5)"
 5.3.19 Ensure SSH PAM is enabled (Automated),"Run the following command and verify that output matches: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep -i usepam 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep -i usepam 
  
 usepam yes 
 Run the following command and verify the output: 
@@ -2699,8 +2301,8 @@ Run the following command and verify the output:
 Nothing should be returned","Edit the /etc/ssh/sshd_config file to set the parameter as follows: 
 UsePAM yes"
 5.3.20 Ensure SSH AllowTcpForwarding is disabled (Automated),"Run the following command and verify that output matches: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep -i allowtcpforwarding 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep -i allowtcpforwarding 
  
 allowtcpforwarding no 
 Run the following command and verify the output: 
@@ -2715,8 +2317,8 @@ References:
 2. SSHD_CONFIG(5)"
 5.3.21 Ensure SSH MaxStartups is configured (Automated),"Run the following command and verify that output MaxStartups is 10:30:60 or more 
 restrictive: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep -i maxstartups 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep -i maxstartups 
  
 maxstartups 10:30:60 
 Run the following command and verify the output: 
@@ -2729,8 +2331,8 @@ maxstartups 10:30:60
 Default Value: 
 MaxStartups 10:30:100"
 5.3.22 Ensure SSH MaxSessions is limited (Automated),"Run the following command and verify that output MaxSessions is 10 or less: 
-# sshd -T -C user=root -C host=""$(hostname)"" -C addr=""$(grep $(hostname) 
-/etc/hosts | awk '{print $1}')"" | grep -i maxsessions 
+# sshd -T -C user=root -C host="$(hostname)" -C addr="$(grep $(hostname) 
+/etc/hosts | awk '{print $1}')" | grep -i maxsessions 
  
 maxsessions 10 
 Run the following command and verify the output: 
@@ -2836,11 +2438,11 @@ order can cause you to be locked out of the system
 Example: 
 auth        required      pam_env.so 
 auth        required      pam_faillock.so preauth silent audit deny=5 
-unlock_time=900 # <- Under ""auth required pam_env.so"" 
+unlock_time=900 # <- Under "auth required pam_env.so" 
 auth        sufficient    pam_unix.so nullok try_first_pass 
 auth        [default=die] pam_faillock.so authfail audit deny=5 
-unlock_time=900 # <- Last auth line before ""auth requisite  
-pam_succeed_if.so"" 
+unlock_time=900 # <- Last auth line before "auth requisite  
+pam_succeed_if.so" 
 auth        requisite     pam_succeed_if.so uid >= 1000 quiet_success 
 auth        required      pam_deny.so 
 Add the following line to the account section:"
@@ -2867,8 +2469,8 @@ change their passwords on next login, In accordance with local site policies.
 To accomplish this, the following command can be used. 
 o This command intentionally does not affect the root account. The root 
 account's password will also need to be changed. 
-# awk -F: '( $3<'""$(awk '/^\s*UID_MIN/{print $2}' /etc/login.defs)""' && $1 !~ 
-/^(nfs)?nobody$/ && $1 != ""root"" ) { print $1 }' /etc/passwd | xargs -n 1 
+# awk -F: '( $3<'"$(awk '/^\s*UID_MIN/{print $2}' /etc/login.defs)"' && $1 !~ 
+/^(nfs)?nobody$/ && $1 != "root" ) { print $1 }' /etc/passwd | xargs -n 1 
 chage -d 0"
 5.4.4 Ensure password reuse is limited (Automated),"Verify remembered password history follows local site policy, not to be less than 5. 
 If pam_pwhistory.so is used: 
@@ -2975,34 +2577,34 @@ Modify user parameters for all users with a password set to match:
 "5.5.1.5 Ensure all users last password change date is in the past 
 (Automated)","Run the following command and verify nothing is returned 
 # for usr in $(cut -d: -f1 /etc/shadow); do [[ $(chage --list $usr | grep 
-'^Last password change' | cut -d: -f2) > $(date) ]] && echo ""$usr :$(chage --
-list $usr | grep '^Last password change' | cut -d: -f2)""; done","Investigate any users with a password change date in the future and correct them. Locking 
+'^Last password change' | cut -d: -f2) > $(date) ]] && echo "$usr :$(chage --
+list $usr | grep '^Last password change' | cut -d: -f2)"; done","Investigate any users with a password change date in the future and correct them. Locking 
 the account, expiring the password, or resetting the password manually may be 
 appropriate."
 5.5.2 Ensure system accounts are secured (Automated),"Run the following commands and verify no results are returned: 
-awk -F: '($1!=""root"" && $1!=""sync"" && $1!=""shutdown"" && $1!=""halt"" && 
-$1!~/^\+/ && $3<'""$(awk '/^\s*UID_MIN/{print $2}' /etc/login.defs)""' && 
-$7!=""'""$(which nologin)""'"" && $7!=""/bin/false"") {print}' /etc/passwd 
-awk -F: '($1!=""root"" && $1!~/^\+/ && $3<'""$(awk '/^\s*UID_MIN/{print $2}' 
-/etc/login.defs)""') {print $1}' /etc/passwd | xargs -I '{}' passwd -S '{}' | 
-awk '($2!=""L"" && $2!=""LK"") {print $1}'","Run the commands appropriate for your distribution: 
+awk -F: '($1!="root" && $1!="sync" && $1!="shutdown" && $1!="halt" && 
+$1!~/^\+/ && $3<'"$(awk '/^\s*UID_MIN/{print $2}' /etc/login.defs)"' && 
+$7!="'"$(which nologin)"'" && $7!="/bin/false") {print}' /etc/passwd 
+awk -F: '($1!="root" && $1!~/^\+/ && $3<'"$(awk '/^\s*UID_MIN/{print $2}' 
+/etc/login.defs)"') {print $1}' /etc/passwd | xargs -I '{}' passwd -S '{}' | 
+awk '($2!="L" && $2!="LK") {print $1}'","Run the commands appropriate for your distribution: 
 Set the shell for any accounts returned by the audit to nologin: 
 # usermod -s $(which nologin) <user> 
 Lock any non root accounts returned by the audit: 
 # usermod -L <user> 
 The following command will set all system accounts to a non login shell: 
-awk -F: '($1!=""root"" && $1!=""sync"" && $1!=""shutdown"" && $1!=""halt"" && 
-$1!~/^\+/ && $3<'""$(awk '/^\s*UID_MIN/{print $2}' /etc/login.defs)""' && 
-$7!=""'""$(which nologin)""'"" && $7!=""/bin/false"" && $7!=""/usr/bin/false"") 
-{print $1}' /etc/passwd | while read -r user; do usermod -s ""$(which 
-nologin)"" ""$user""; done 
+awk -F: '($1!="root" && $1!="sync" && $1!="shutdown" && $1!="halt" && 
+$1!~/^\+/ && $3<'"$(awk '/^\s*UID_MIN/{print $2}' /etc/login.defs)"' && 
+$7!="'"$(which nologin)"'" && $7!="/bin/false" && $7!="/usr/bin/false") 
+{print $1}' /etc/passwd | while read -r user; do usermod -s "$(which 
+nologin)" "$user"; done 
 The following command will automatically lock not root system accounts: 
-awk -F: '($1!=""root"" && $1!~/^\+/ && $3<'""$(awk '/^\s*UID_MIN/{print $2}' 
-/etc/login.defs)""') {print $1}' /etc/passwd | xargs -I '{}' passwd -S '{}' | 
-awk '($2!=""L"" && $2!=""LK"") {print $1}' | while read -r user; do usermod -L 
-""$user""; done"
+awk -F: '($1!="root" && $1!~/^\+/ && $3<'"$(awk '/^\s*UID_MIN/{print $2}' 
+/etc/login.defs)"') {print $1}' /etc/passwd | xargs -I '{}' passwd -S '{}' | 
+awk '($2!="L" && $2!="LK") {print $1}' | while read -r user; do usermod -L 
+"$user"; done"
 5.5.3 Ensure default group for the root account is GID 0 (Automated),"Run the following command and verify the result is 0 : 
-# grep ""^root:"" /etc/passwd | cut -f4 -d: 
+# grep "^root:" /etc/passwd | cut -f4 -d: 
  
 0","Run the following command to set the root user default group to GID 0 : 
 # usermod -g 0 root"
@@ -3011,25 +2613,25 @@ than 900 seconds, to be readonly, to be exported, and is not being changed to a 
 timeout. 
 #!/bin/bash 
  
-output1="""" output2="""" 
-[ -f /etc/bashrc ] && BRC=""/etc/bashrc"" 
-for f in ""$BRC"" /etc/profile /etc/profile.d/*.sh ; do 
+output1="" output2="" 
+[ -f /etc/bashrc ] && BRC="/etc/bashrc" 
+for f in "$BRC" /etc/profile /etc/profile.d/*.sh ; do 
    grep -Pq '^\s*([^#]+\s+)?TMOUT=(900|[1-8][0-9][0-9]|[1-9][0-9]|[1-9])\b' 
-""$f"" && grep -Pq '^\s*([^#]+;\s*)?readonly\s+TMOUT(\s+|\s*;|\s*$|=(900|[1-
-8][0-9][0-9]|[1-9][0-9]|[1-9]))\b' ""$f"" && grep -Pq 
+"$f" && grep -Pq '^\s*([^#]+;\s*)?readonly\s+TMOUT(\s+|\s*;|\s*$|=(900|[1-
+8][0-9][0-9]|[1-9][0-9]|[1-9]))\b' "$f" && grep -Pq 
 '^\s*([^#]+;\s*)?export\s+TMOUT(\s+|\s*;|\s*$|=(900|[1-8][0-9][0-9]|[1-9][0-
-9]|[1-9]))\b' ""$f"" && output1=""$f"" 
+9]|[1-9]))\b' "$f" && output1="$f" 
 done 
 grep -Pq '^\s*([^#]+\s+)?TMOUT=(9[0-9][1-9]|9[1-9][0-9]|0+|[1-9]\d{3,})\b' 
-/etc/profile /etc/profile.d/*.sh ""$BRC"" && output2=$(grep -Ps 
+/etc/profile /etc/profile.d/*.sh "$BRC" && output2=$(grep -Ps 
 '^\s*([^#]+\s+)?TMOUT=(9[0-9][1-9]|9[1-9][0-9]|0+|[1-9]\d{3,})\b' 
 /etc/profile /etc/profile.d/*.sh $BRC) 
-if [ -n ""$output1"" ] && [ -z ""$output2"" ]; then 
-   echo -e ""\nPASSED\n\nTMOUT is configured in: \""$output1\""\n"" 
+if [ -n "$output1" ] && [ -z "$output2" ]; then 
+   echo -e "\nPASSED\n\nTMOUT is configured in: \"$output1\"\n" 
 else 
-   [ -z ""$output1"" ] && echo -e ""\nFAILED\n\nTMOUT is not configured\n"" 
-   [ -n ""$output2"" ] && echo -e ""\nFAILED\n\nTMOUT is incorrectly configured 
-in: \""$output2\""\n"" 
+   [ -z "$output1" ] && echo -e "\nFAILED\n\nTMOUT is not configured\n" 
+   [ -n "$output2" ] && echo -e "\nFAILED\n\nTMOUT is incorrectly configured 
+in: \"$output2\"\n" 
 fi","Review /etc/bashrc, /etc/profile, and all files ending in *.sh in the /etc/profile.d/ 
 directory and remove or edit all TMOUT=_n_ entries to follow local site policy. TMOUT should 
 not exceed 900 or be equal to 0. 
@@ -3061,16 +2663,16 @@ directories's permissions to be 750 (drwxr-x---), and a newly created file's per
 640 (rw-r-----), or more restrictive: 
 #!/bin/bash 
  
-passing="""" 
+passing="" 
 grep -Eiq '^\s*UMASK\s+(0[0-7][2-7]7|[0-7][2-7]7)\b' /etc/login.defs && grep 
--Eqi '^\s*USERGROUPS_ENAB\s*""?no""?\b' /etc/login.defs && grep -Eq 
+-Eqi '^\s*USERGROUPS_ENAB\s*"?no"?\b' /etc/login.defs && grep -Eq 
 '^\s*session\s+(optional|requisite|required)\s+pam_umask\.so\b' 
 /etc/pam.d/common-session && passing=true 
 grep -REiq '^\s*UMASK\s+\s*(0[0-7][2-7]7|[0-7][2-
 7]7|u=(r?|w?|x?)(r?|w?|x?)(r?|w?|x?),g=(r?x?|x?r?),o=)\b' /etc/profile* 
 /etc/bashrc* && passing=true 
-[ ""$passing"" = true ] && echo ""Default user umask is set"" 
-Verify output is: ""Default user umask is set"" 
+[ "$passing" = true ] && echo "Default user umask is set" 
+Verify output is: "Default user umask is set" 
 Run the following to verify that no less restrictive system wide umask is set: 
 # grep -RPi '(^|^[^#]*)\s*umask\s+([0-7][0-7][01][0-7]\b|[0-7][0-7][0-7][0-
 6]\b|[0-7][01][0-7]\b|[0-7][0-7][0-
@@ -3209,7 +2811,7 @@ The command above only searches local filesystems, there may still be compromise
 on network mounted partitions. Additionally the --local option to df is not universal to all 
 versions, it can be omitted to search all filesystems on a system including network mounted 
 filesystems or the following command can be run manually for each partition: 
-# find <partition> -xdev -type f -perm -0002","Removing write access for the ""other"" category ( chmod o-w <filename> ) is advisable, but 
+# find <partition> -xdev -type f -perm -0002","Removing write access for the "other" category ( chmod o-w <filename> ) is advisable, but 
 always consult relevant vendor documentation to avoid breaking any application 
 dependencies on a given file."
 6.1.11 Ensure no unowned files or directories exist (Automated),"Run the following command and verify no files are returned: 
@@ -3250,14 +2852,14 @@ filesystems or the following command can be run manually for each partition:
 files returned by the action in the Audit section and confirm the integrity of these binaries."
 "6.2.1 Ensure accounts in /etc/passwd use shadowed passwords 
 (Automated)","Run the following command and verify that no output is returned: 
-# awk -F: '($2 != ""x"" ) { print $1 "" is not set to shadowed passwords ""}' 
+# awk -F: '($2 != "x" ) { print $1 " is not set to shadowed passwords "}' 
 /etc/passwd","If any accounts in the /etc/passwd file do not have a single x in the password field, run the 
 following command to set these accounts to use shadowed passwords: 
 # sed -e 's/^\([a-zA-Z0-9_]*\):[^:]*:/\1:x:/' -i /etc/passwd 
 Investigate to determine if the account is logged in and what it is being used for, to 
 determine if it needs to be forced off."
 6.2.2 Ensure /etc/shadow password fields are not empty (Automated),"Run the following command and verify that no output is returned: 
-# awk -F: '($2 == """" ) { print $1 "" does not have a password ""}' /etc/shadow","If any accounts in the /etc/shadow file do not have a password, run the following command 
+# awk -F: '($2 == "" ) { print $1 " does not have a password "}' /etc/shadow","If any accounts in the /etc/shadow file do not have a password, run the following command 
 to lock the account until it can be determined why it does not have a password: 
 # passwd -l <username> 
 Also, check to see if the account is logged in and investigate what it is being used for to 
@@ -3266,16 +2868,16 @@ determine if it needs to be forced off."
 #!/bin/bash 
  
 for i in $(cut -s -d: -f4 /etc/passwd | sort -u ); do 
-  grep -q -P ""^.*?:[^:]*:$i:"" /etc/group 
+  grep -q -P "^.*?:[^:]*:$i:" /etc/group 
   if [ $? -ne 0 ]; then 
-    echo ""Group $i is referenced by /etc/passwd but does not exist in 
-/etc/group"" 
+    echo "Group $i is referenced by /etc/passwd but does not exist in 
+/etc/group" 
   fi 
 done","Analyze the output of the Audit step above and perform the appropriate action to correct 
 any discrepancies found."
 6.2.4 Ensure shadow group is empty (Automated),"Run the following commands and verify no results are returned: 
-# awk -F: '($1==""shadow"") {print $NF}' /etc/group 
-# awk -F: -v GID=""$(awk -F: '($1==""shadow"") {print $3}' /etc/group)"" 
+# awk -F: '($1=="shadow") {print $NF}' /etc/group 
+# awk -F: -v GID="$(awk -F: '($1=="shadow") {print $3}' /etc/group)" 
 '($4==GID) {print $1}' /etc/passwd","Run the following command to remove all users from the shadow group 
 # sed -ri 's/(^shadow:[^:]*:[^:]*:)([^:]+$)/\1/' /etc/group 
 Change the primary group of any users with shadow as their primary group. 
@@ -3284,26 +2886,26 @@ Change the primary group of any users with shadow as their primary group.
 #!/bin/bash 
  
 cut -d: -f1 /etc/passwd | sort | uniq -d | while read x; do 
-   echo ""Duplicate login name ${x} in /etc/passwd"" 
+   echo "Duplicate login name ${x} in /etc/passwd" 
 done","Based on the results of the audit script, establish unique user names for the users. File 
 ownerships will automatically reflect the change as long as the users have unique UIDs."
 6.2.6 Ensure no duplicate group names exist (Automated),"Run the following script and verify no results are returned: 
 #!/bin/bash 
  
 cut -d: -f1 /etc/group | sort | uniq -d | while read -r x; do 
-   echo ""Duplicate group name ${x} in /etc/group"" 
+   echo "Duplicate group name ${x} in /etc/group" 
 done","Based on the results of the audit script, establish unique names for the user groups. File 
 group ownerships will automatically reflect the change as long as the groups have unique 
 GIDs."
 6.2.7 Ensure no duplicate UIDs exist (Automated),"Run the following script and verify no results are returned: 
 #!/bin/bash 
  
-cut -f3 -d"":"" /etc/passwd | sort -n | uniq -c | while read -r x; do 
-   [ -z ""$x"" ] && break 
-   set - ""$x"" 
-   if [ ""$1"" -gt 1 ]; then 
-      users=$(awk -F: '($3 == n) { print $1 }' n=""$2"" /etc/passwd | xargs) 
-      echo ""Duplicate UID ($2): $users"" 
+cut -f3 -d":" /etc/passwd | sort -n | uniq -c | while read -r x; do 
+   [ -z "$x" ] && break 
+   set - "$x" 
+   if [ "$1" -gt 1 ]; then 
+      users=$(awk -F: '($3 == n) { print $1 }' n="$2" /etc/passwd | xargs) 
+      echo "Duplicate UID ($2): $users" 
    fi 
 done","Based on the results of the audit script, establish unique UIDs and review all files owned by 
 the shared UIDs to determine which UID they are supposed to belong to."
@@ -3311,32 +2913,32 @@ the shared UIDs to determine which UID they are supposed to belong to."
 #!/bin/bash  
  
 cut -d: -f3 /etc/group | sort | uniq -d | while read -r x; do 
-   echo ""Duplicate GID ($x) in /etc/group"" 
+   echo "Duplicate GID ($x) in /etc/group" 
 done","Based on the results of the audit script, establish unique GIDs and review all files owned by 
 the shared GID to determine which group they are supposed to belong to. 
 Additional Information: 
 You can also use the grpck command to check for other inconsistencies in the /etc/group 
 file."
-6.2.9 Ensure root is the only UID 0 account (Automated),"Run the following command and verify that only ""root"" is returned: 
+6.2.9 Ensure root is the only UID 0 account (Automated),"Run the following command and verify that only "root" is returned: 
 # awk -F: '($3 == 0) { print $1 }' /etc/passwd 
  
 root",Remove any users other than root with UID 0 or assign them a new UID if appropriate.
 6.2.10 Ensure root PATH Integrity (Automated),"Run the following script and verify no results are returned: 
 #!/bin/bash 
  
-RPCV=""$(sudo -Hiu root env | grep '^PATH' | cut -d= -f2)"" 
-echo ""$RPCV"" | grep -q ""::"" && echo ""root's path contains a empty directory 
-(::)"" 
-echo ""$RPCV"" | grep -q "":$"" && echo ""root's path contains a trailing (:)"" 
-for x in $(echo ""$RPCV"" | tr "":"" "" ""); do 
-   if [ -d ""$x"" ]; then 
-      ls -ldH ""$x"" | awk '$9 == ""."" {print ""PATH contains current working 
-directory (.)""} 
-      $3 != ""root"" {print $9, ""is not owned by root""} 
-      substr($1,6,1) != ""-"" {print $9, ""is group writable""} 
-      substr($1,9,1) != ""-"" {print $9, ""is world writable""}' 
+RPCV="$(sudo -Hiu root env | grep '^PATH' | cut -d= -f2)" 
+echo "$RPCV" | grep -q "::" && echo "root's path contains a empty directory 
+(::)" 
+echo "$RPCV" | grep -q ":$" && echo "root's path contains a trailing (:)" 
+for x in $(echo "$RPCV" | tr ":" " "); do 
+   if [ -d "$x" ]; then 
+      ls -ldH "$x" | awk '$9 == "." {print "PATH contains current working 
+directory (.)"} 
+      $3 != "root" {print $9, "is not owned by root"} 
+      substr($1,6,1) != "-" {print $9, "is group writable"} 
+      substr($1,9,1) != "-" {print $9, "is world writable"}' 
    else 
-      echo ""$x is not a directory"" 
+      echo "$x is not a directory" 
    fi 
 done",Correct or justify any items discovered in the Audit step.
 6.2.11 Ensure all users' home directories exist (Automated),"Run the following script and verify no results are returned: 
@@ -3344,9 +2946,9 @@ done",Correct or justify any items discovered in the Audit step.
  
 awk -F: '($1!~/(halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { 
-print $1 "" "" $6 }' /etc/passwd | while read -r user dir; do 
-   if [ ! -d ""$dir"" ]; then 
-      echo ""User: \""$user\"" home directory: \""$dir\"" does not exist."" 
+print $1 " " $6 }' /etc/passwd | while read -r user dir; do 
+   if [ ! -d "$dir" ]; then 
+      echo "User: \"$user\" home directory: \"$dir\" does not exist." 
    fi 
 done 
 Note: The audit script checks all users with interactive shells except halt, sync, shutdown, and 
@@ -3359,11 +2961,11 @@ home directory doesn't exist:
  
 awk -F: '($1!~/(halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { 
-print $1 "" "" $6 }' /etc/passwd | while read -r user dir; do 
-   if [ ! -d ""$dir"" ]; then 
-      mkdir ""$dir"" 
-      chmod g-w,o-wrx ""$dir"" 
-      chown ""$user"" ""$dir"" 
+print $1 " " $6 }' /etc/passwd | while read -r user dir; do 
+   if [ ! -d "$dir" ]; then 
+      mkdir "$dir" 
+      chmod g-w,o-wrx "$dir" 
+      chown "$user" "$dir" 
    fi 
 done"
 6.2.12 Ensure users own their home directories (Automated),"Run the following script and verify no results are returned: 
@@ -3371,14 +2973,14 @@ done"
  
 awk -F: '($1!~/(halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { 
-print $1 "" "" $6 }' /etc/passwd | while read -r user dir; do 
-   if [ ! -d ""$dir"" ]; then 
-      echo ""User: \""$user\"" home directory: \""$dir\"" does not exist."" 
+print $1 " " $6 }' /etc/passwd | while read -r user dir; do 
+   if [ ! -d "$dir" ]; then 
+      echo "User: \"$user\" home directory: \"$dir\" does not exist." 
    else 
-      owner=$(stat -L -c ""%U"" ""$dir"") 
-      if [ ""$owner"" != ""$user"" ]; then 
-         echo ""User: \""$user\"" home directory: \""$dir\"" is owned by 
-\""$owner\"""" 
+      owner=$(stat -L -c "%U" "$dir") 
+      if [ "$owner" != "$user" ]; then 
+         echo "User: \"$user\" home directory: \"$dir\" is owned by 
+\"$owner\"" 
       fi 
    fi 
 done","Change the ownership of any home directories that are not owned by the defined user to 
@@ -3389,18 +2991,18 @@ permissions for interactive users' home directories:
  
 awk -F: '($1!~/(halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { 
-print $1 "" "" $6 }' /etc/passwd | while read -r user dir; do 
-   if [ ! -d ""$dir"" ]; then 
-      echo ""User: \""$user\"" home directory: \""$dir\"" does not exist, creating 
-home directory"" 
-      mkdir ""$dir"" 
-      chmod g-w,o-rwx ""$dir"" 
-      chown ""$user"" ""$dir"" 
+print $1 " " $6 }' /etc/passwd | while read -r user dir; do 
+   if [ ! -d "$dir" ]; then 
+      echo "User: \"$user\" home directory: \"$dir\" does not exist, creating 
+home directory" 
+      mkdir "$dir" 
+      chmod g-w,o-rwx "$dir" 
+      chown "$user" "$dir" 
    else 
-      owner=$(stat -L -c ""%U"" ""$dir"") 
-      if [ ""$owner"" != ""$user"" ]; then 
-         chmod g-w,o-rwx ""$dir"" 
-         chown ""$user"" ""$dir"" 
+      owner=$(stat -L -c "%U" "$dir") 
+      if [ "$owner" != "$user" ]; then 
+         chmod g-w,o-rwx "$dir" 
+         chown "$user" "$dir" 
       fi 
    fi 
 done"
@@ -3410,16 +3012,16 @@ restrictive (Automated)","Run the following script and verify no results are ret
  
 awk -F: '($1!~/(halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) 
-{print $1 "" "" $6}' /etc/passwd | while read -r user dir; do 
-   if [ ! -d ""$dir"" ]; then 
-      echo ""User: \""$user\"" home directory: \""$dir\"" doesn't exist"" 
+{print $1 " " $6}' /etc/passwd | while read -r user dir; do 
+   if [ ! -d "$dir" ]; then 
+      echo "User: \"$user\" home directory: \"$dir\" doesn't exist" 
    else 
-      dirperm=$(stat -L -c ""%A"" ""$dir"") 
-      if [ ""$(echo ""$dirperm"" | cut -c6)"" != ""-"" ] || [ ""$(echo ""$dirperm"" | 
-cut -c8)"" != ""-"" ] || [ ""$(echo ""$dirperm"" | cut -c9)"" != ""-"" ] || [ ""$(echo 
-""$dirperm"" | cut -c10)"" != ""-"" ]; then 
-         echo ""User: \""$user\"" home directory: \""$dir\"" has permissions: 
-\""$(stat -L -c ""%a"" ""$dir"")\"""" 
+      dirperm=$(stat -L -c "%A" "$dir") 
+      if [ "$(echo "$dirperm" | cut -c6)" != "-" ] || [ "$(echo "$dirperm" | 
+cut -c8)" != "-" ] || [ "$(echo "$dirperm" | cut -c9)" != "-" ] || [ "$(echo 
+"$dirperm" | cut -c10)" != "-" ]; then 
+         echo "User: \"$user\" home directory: \"$dir\" has permissions: 
+\"$(stat -L -c "%a" "$dir")\"" 
       fi 
    fi 
 done","Making global modifications to user home directories without alerting the user community 
@@ -3433,12 +3035,12 @@ directories:
 awk -F: '($1!~/(halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) 
 {print $6}' /etc/passwd | while read -r dir; do 
-   if [ -d ""$dir"" ]; then 
-      dirperm=$(stat -L -c ""%A"" ""$dir"") 
-      if [ ""$(echo ""$dirperm"" | cut -c6)"" != ""-"" ] || [ ""$(echo ""$dirperm"" | 
-cut -c8)"" != ""-"" ] || [ ""$(echo ""$dirperm"" | cut -c9)"" != ""-"" ] || [ ""$(echo 
-""$dirperm"" | cut -c10)"" != ""-"" ]; then 
-         chmod g-w,o-rwx ""$dir"" 
+   if [ -d "$dir" ]; then 
+      dirperm=$(stat -L -c "%A" "$dir") 
+      if [ "$(echo "$dirperm" | cut -c6)" != "-" ] || [ "$(echo "$dirperm" | 
+cut -c8)" != "-" ] || [ "$(echo "$dirperm" | cut -c9)" != "-" ] || [ "$(echo 
+"$dirperm" | cut -c10)" != "-" ]; then 
+         chmod g-w,o-rwx "$dir" 
       fi 
    fi 
 done"
@@ -3448,15 +3050,15 @@ done"
  
 awk -F: '($1!~/(halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { 
-print $1 "" "" $6 }' /etc/passwd | while read -r user dir; do 
-   if [ -d ""$dir"" ]; then 
-      for file in ""$dir""/.*; do 
-         if [ ! -h ""$file"" ] && [ -f ""$file"" ]; then 
-            fileperm=$(stat -L -c ""%A"" ""$file"") 
-            if [ ""$(echo ""$fileperm"" | cut -c6)"" != ""-"" ] || [ ""$(echo 
-""$fileperm"" | cut -c9)"" != ""-"" ]; then 
-               echo ""User: \""$user\"" file: \""$file\"" has permissions: 
-\""$fileperm\"""" 
+print $1 " " $6 }' /etc/passwd | while read -r user dir; do 
+   if [ -d "$dir" ]; then 
+      for file in "$dir"/.*; do 
+         if [ ! -h "$file" ] && [ -f "$file" ]; then 
+            fileperm=$(stat -L -c "%A" "$file") 
+            if [ "$(echo "$fileperm" | cut -c6)" != "-" ] || [ "$(echo 
+"$fileperm" | cut -c9)" != "-" ]; then 
+               echo "User: \"$user\" file: \"$file\" has permissions: 
+\"$fileperm\"" 
             fi 
          fi 
       done 
@@ -3472,13 +3074,13 @@ users' home directories.
 awk -F: '($1!~/(halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { 
 print $6 }' /etc/passwd | while read -r dir; do 
-   if [ -d ""$dir"" ]; then 
-      for file in ""$dir""/.*; do 
-         if [ ! -h ""$file"" ] && [ -f ""$file"" ]; then 
-            fileperm=$(stat -L -c ""%A"" ""$file"") 
-            if [ ""$(echo ""$fileperm"" | cut -c6)"" != ""-"" ] || [ ""$(echo 
-""$fileperm"" | cut -c9)"" != ""-"" ]; then 
-               chmod go-w ""$file"" 
+   if [ -d "$dir" ]; then 
+      for file in "$dir"/.*; do 
+         if [ ! -h "$file" ] && [ -f "$file" ]; then 
+            fileperm=$(stat -L -c "%A" "$file") 
+            if [ "$(echo "$fileperm" | cut -c6)" != "-" ] || [ "$(echo 
+"$fileperm" | cut -c9)" != "-" ]; then 
+               chmod go-w "$file" 
             fi 
          fi 
       done 
@@ -3489,11 +3091,11 @@ done"
  
 awk -F: '($1!~/(root|halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { 
-print $1 "" "" $6 }' /etc/passwd | while read -r user dir; do 
-   if [ -d ""$dir"" ]; then 
-      file=""$dir/.forward"" 
-      if [ ! -h ""$file"" ] && [ -f ""$file"" ]; then  
-         echo ""User: \""$user\"" file: \""$file\"" exists"" 
+print $1 " " $6 }' /etc/passwd | while read -r user dir; do 
+   if [ -d "$dir" ]; then 
+      file="$dir/.forward" 
+      if [ ! -h "$file" ] && [ -f "$file" ]; then  
+         echo "User: \"$user\" file: \"$file\" exists" 
       fi 
    fi 
 done","Making global modifications to users' files without alerting the user community can result 
@@ -3506,9 +3108,9 @@ The following script will remove .forward files from interactive users' home dir
 awk -F: '($1!~/(root|halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { 
 print $6 }' /etc/passwd | while read -r dir; do 
-   if [ -d ""$dir"" ]; then 
-      file=""$dir/.forward"" 
-      [ ! -h ""$file"" ] && [ -f ""$file"" ] && rm -r ""$file"" 
+   if [ -d "$dir" ]; then 
+      file="$dir/.forward" 
+      [ ! -h "$file" ] && [ -f "$file" ] && rm -r "$file" 
    fi 
 done"
 6.2.16 Ensure no users have .netrc files (Automated),"Run the following script. This script will return: 
@@ -3520,17 +3122,17 @@ WARNING: for any .netrc files that exist in interactive users' home directories.
  
 awk -F: '($1!~/(halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { 
-print $1 "" "" $6 }' /etc/passwd | while read -r user dir; do 
-   if [ -d ""$dir"" ]; then 
-      file=""$dir/.netrc"" 
-      if [ ! -h ""$file"" ] && [ -f ""$file"" ]; then 
-         if stat -L -c ""%A"" ""$file"" | cut -c4-10 |  grep -Eq '[^-]+'; then 
-            echo ""FAILED: User: \""$user\"" file: \""$file\"" exists with 
-permissions: \""$(stat -L -c ""%a"" ""$file"")\"", remove file or excessive 
-permissions"" 
+print $1 " " $6 }' /etc/passwd | while read -r user dir; do 
+   if [ -d "$dir" ]; then 
+      file="$dir/.netrc" 
+      if [ ! -h "$file" ] && [ -f "$file" ]; then 
+         if stat -L -c "%A" "$file" | cut -c4-10 |  grep -Eq '[^-]+'; then 
+            echo "FAILED: User: \"$user\" file: \"$file\" exists with 
+permissions: \"$(stat -L -c "%a" "$file")\", remove file or excessive 
+permissions" 
          else 
-            echo ""WARNING: User: \""$user\"" file: \""$file\"" exists with 
-permissions: \""$(stat -L -c ""%a"" ""$file"")\"", remove file unless required"" 
+            echo "WARNING: User: \"$user\" file: \"$file\" exists with 
+permissions: \"$(stat -L -c "%a" "$file")\", remove file unless required" 
          fi 
       fi 
    fi 
@@ -3552,9 +3154,9 @@ The following script will remove .netrc files from interactive users' home direc
 awk -F: '($1!~/(halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { 
 print $6 }'  /etc/passwd | while read -r dir; do 
-   if [ -d ""$dir"" ]; then 
-      file=""$dir/.netrc"" 
-      [ ! -h ""$file"" ] && [ -f ""$file"" ] && rm -f ""$file"" 
+   if [ -d "$dir" ]; then 
+      file="$dir/.netrc" 
+      [ ! -h "$file" ] && [ -f "$file" ] && rm -f "$file" 
    fi 
 done 
 Additional Information: 
@@ -3565,11 +3167,11 @@ system secure permissions must be applied."
  
 awk -F: '($1!~/(root|halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { 
-print $1 "" "" $6 }' /etc/passwd | while read -r user dir; do 
-   if [ -d ""$dir"" ]; then 
-      file=""$dir/.rhosts"" 
-      if [ ! -h ""$file"" ] && [ -f ""$file"" ]; then  
-         echo ""User: \""$user\"" file: \""$file\"" exists"" 
+print $1 " " $6 }' /etc/passwd | while read -r user dir; do 
+   if [ -d "$dir" ]; then 
+      file="$dir/.rhosts" 
+      if [ ! -h "$file" ] && [ -f "$file" ]; then  
+         echo "User: \"$user\" file: \"$file\" exists" 
       fi 
    fi 
 done","Making global modifications to users' files without alerting the user community can result 
@@ -3582,8 +3184,8 @@ The following script will remove .rhosts files from interactive users' home dire
 awk -F: '($1!~/(root|halt|sync|shutdown|nfsnobody)/ && 
 $7!~/^(\/usr)?\/sbin\/nologin(\/)?$/ && $7!~/(\/usr)?\/bin\/false(\/)?$/) { 
 print $6 }' /etc/passwd | while read -r dir; do 
-   if [ -d ""$dir"" ]; then 
-      file=""$dir/.rhosts"" 
-      [ ! -h ""$file"" ] && [ -f ""$file"" ] && rm -r ""$file"" 
+   if [ -d "$dir" ]; then 
+      file="$dir/.rhosts" 
+      [ ! -h "$file" ] && [ -f "$file" ] && rm -r "$file" 
    fi 
 done"
