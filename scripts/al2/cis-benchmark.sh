@@ -50,6 +50,22 @@ set_conf_value() {
 
   sed -i "s/^\(${key}\s*=\s*\).*$/\1${value}/" $file
 }
+
+check_ipv6() {
+    [ -n "$passing" ] && passing=""
+    [ -z "$(grep "^\s*linux" /boot/grub2/grub.cfg | grep -v ipv6.disable=1)" ] && passing="true"
+    grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" /etc/sysctl.conf \
+    /etc/sysctl.d/*.conf && grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" \
+    /etc/sysctl.conf /etc/sysctl.d/*.conf && sysctl net.ipv6.conf.all.disable_ipv6 | \
+    grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && \
+    sysctl net.ipv6.conf.default.disable_ipv6 | \
+    grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && passing="true" 
+    if [ "$passing" = true ] ; then 
+        echo "IPv6 is disabled on the system" 
+    else 
+        echo "IPv6 is enabled on the system" 
+    fi
+}
 ####### Version 2.0.0 CIS Amazon Linux 2 Benchmark
 
 echo "1.1.1.1 - ensure mounting of cramfs filesystems is disabled"
@@ -398,19 +414,7 @@ sysctl net.ipv4.ip_forward
  
 grep -E -s "^\s*net\.ipv4\.ip_forward\s*=\s*1" /etc/sysctl.conf /etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
  
-[ -n "$passing" ] && passing=""
-[ -z "$(grep "^\s*linux" /boot/grub2/grub.cfg | grep -v ipv6.disable=1)" ] && passing="true"
-grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" /etc/sysctl.conf \
-/etc/sysctl.d/*.conf && grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" \
-/etc/sysctl.conf /etc/sysctl.d/*.conf && sysctl net.ipv6.conf.all.disable_ipv6 | \
-grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && \
-sysctl net.ipv6.conf.default.disable_ipv6 | \
-grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && passing="true" 
-if [ "$passing" = true ] ; then 
-echo "IPv6 is disabled on the system" 
-else 
-echo "IPv6 is enabled on the system" 
-fi
+check_ipv6
 
 echo "3.2.2 Ensure packet redirect sending is disabled (Automated)"
 sysctl_entry "net.ipv4.conf.all.send_redirects=0"
@@ -424,19 +428,7 @@ grep "net\.ipv4\.conf\.all\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/
 
 grep "net\.ipv4\.conf\.default\.accept_source_route" /etc/sysctl.conf /etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf 
 
-[ -n "$passing" ] && passing=""
-[ -z "$(grep "^\s*linux" /boot/grub2/grub.cfg | grep -v ipv6.disable=1)" ] && passing="true"
-grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" /etc/sysctl.conf \
-/etc/sysctl.d/*.conf && grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" \
-/etc/sysctl.conf /etc/sysctl.d/*.conf && sysctl net.ipv6.conf.all.disable_ipv6 | \
-grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && \
-sysctl net.ipv6.conf.default.disable_ipv6 | \
-grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && passing="true" 
-if [ "$passing" = true ] ; then 
-echo "IPv6 is disabled on the system" 
-else 
-echo "IPv6 is enabled on the system" 
-fi
+check_ipv6
 
 echo "3.3.2 Ensure ICMP redirects are not accepted (Automated)"
 
@@ -474,19 +466,7 @@ sysctl_entry "net.ipv4.tcp_syncookies=1"
 sysctl -w net.ipv4.route.flush=1
 
 echo "3.3.9 Ensure IPv6 router advertisements are not accepted (Automated)"
-[ -n "$passing" ] && passing=""
-[ -z "$(grep "^\s*linux" /boot/grub2/grub.cfg | grep -v ipv6.disable=1)" ] && passing="true"
-grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" /etc/sysctl.conf \
-/etc/sysctl.d/*.conf && grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" \
-/etc/sysctl.conf /etc/sysctl.d/*.conf && sysctl net.ipv6.conf.all.disable_ipv6 | \
-grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && \
-sysctl net.ipv6.conf.default.disable_ipv6 | \
-grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && passing="true" 
-if [ "$passing" = true ] ; then 
-echo "IPv6 is disabled on the system" 
-else 
-echo "IPv6 is enabled on the system" 
-fi
+check_ipv6
 
 echo "3.4.1 Ensure DCCP is disabled (Automated)"
 unload_module dccp
@@ -511,7 +491,7 @@ echo "3.5.1.5 Ensure firewalld default zone is set (Automated)"
 firewall-cmd --get-default-zone
 
 echo "3.5.1.6 Ensure network interfaces are assigned to appropriate zone (Manual)"
-firewall-cmd --zone=public --change-interface=eth0 # VERIFY
+firewall-cmd --zone=public --change-interface=eth0 # CHECK
 
 echo "3.5.1.7 Ensure firewalld drops unnecessary services and ports (Manual)"
 firewall-cmd --get-active-zones | awk '!/:/ {print $1}' | while read ZN; do firewall-cmd --list-all --zone=$ZN; done
@@ -525,10 +505,10 @@ echo "pass-over for firewalld"
 echo "3.5.2.3 Ensure iptables-services not installed with nftables (Automated)"
 echo "pass-over for firewalld"
  
-echo "3.5.2.4 Ensure iptables are flushed with nftables (Manual),"Run the following commands to ensure not iptables rules exist 
+echo "3.5.2.4 Ensure iptables are flushed with nftables (Manual),"
 echo "pass-over for firewalld"
 
-3.5.2.5 Ensure an nftables table exists (Automated)"
+echo "3.5.2.5 Ensure an nftables table exists (Automated)"
 echo "pass-over for firewalld"
 
 echo "3.5.2.6 Ensure nftables base chains exist (Automated)"
@@ -549,975 +529,221 @@ echo "pass-over for firewalld"
 echo "3.5.2.11 Ensure nftables rules are permanent (Automated)"
 echo "pass-over for firewalld"
 
-3.5.3.1.1 Ensure iptables packages are installed (Automated),"Run the following command to verify that iptables and iptables-services are installed: 
-rpm -q iptables iptables-services 
+echo "3.5.3.1.1 Ensure iptables packages are installed (Automated),"
+echo "skip for firewalld"
+
+echo "3.5.3.1.2 Ensure nftables is not installed with iptables (Automated)"
+echo "skip for firewalld"
+
+echo "3.5.3.1.3 Ensure firewalld is either not installed or masked with iptables"
+echo "skip for firewalld"
+
+echo "3.5.3.2.1 Ensure iptables loopback traffic is configured (Automated)"
+echo "skip for firewalld"
+
+echo "3.5.3.2.3 Ensure iptables rules exist for all open ports (Automated),"
+echo "skip for firewalld"
+
+echo "3.5.3.2.4 Ensure iptables default deny firewall policy (Automated),"
+echo "skip for firewalld"
+
+echo "3.5.3.2.5 Ensure iptables rules are saved (Automated),"
+echo "skip for firewalld"
+
+echo "3.5.3.2.6 Ensure iptables is enabled and running (Automated),"
+echo "skip for firewalld"
+
+echo "3.5.3.3.1 Ensure ip6tables loopback traffic is configured (Automated),"
+check_ipv6
+
+echo "3.5.3.3.2 Ensure ip6tables outbound and established connections are configured (Manual)"
+check_ipv6
+
+echo "3.5.3.3.3 Ensure ip6tables firewall rules exist for all open ports (Automated)"
+check_ipv6
+
+echo "3.5.3.3.4 Ensure ip6tables default deny firewall policy (Automated)"
+check_ipv6
+
+echo "3.5.3.3.5 Ensure ip6tables rules are saved (Automated)"
+check_ipv6
+
+echo "3.5.3.3.6 Ensure ip6tables is enabled and running (Automated)"
+check_ipv6
+
+echo "4.1.1.1 Ensure auditd is installed (Automated)"
+rpm -q audit audit-libs 
+
+echo "4.1.1.2 Ensure auditd service is enabled and running (Automated)"
+systemctl is-enabled auditd 
  
-iptables-<version> 
-iptables-services-<version>","Run the following command to install iptables and iptables-services 
-# yum install iptables iptables-services"
-3.5.3.1.2 Ensure nftables is not installed with iptables (Automated),"Run the following commend to verify that nftables is not installed: 
-# rpm -q nftables 
- 
-package nftables is not installed","Run the following command to remove nftables: 
-# yum remove nftables"
-"3.5.3.1.3 Ensure firewalld is either not installed or masked with iptables 
-(Automated)","Run the following command to verify that firewalld is not installed: 
-# rpm -q firewalld 
- 
-package firewalld is not installed 
-OR 
-Run the following commands to verify that firewalld is stopped and masked 
-# systemctl status firewalld | grep "Active: " | grep -v  "active (running) " 
- 
-No output should be returned 
-# systemctl is-enabled firewalld 
- 
-masked","Run the following command to remove firewalld 
-# yum remove firewalld 
-OR 
-Run the following command to stop and mask firewalld 
-# systemctl --now mask firewalld"
-3.5.3.2.1 Ensure iptables loopback traffic is configured (Automated),"Run the following commands and verify output includes the listed rules in order (packet 
-and byte counts may differ): 
-# iptables -L INPUT -v -n 
-Chain INPUT (policy DROP 0 packets, 0 bytes) 
- pkts bytes target     prot opt in     out     source               
-destination 
-    0     0 ACCEPT     all  --  lo     *       0.0.0.0/0            0.0.0.0/0 
-    0     0 DROP       all  --  *      *       127.0.0.0/8          0.0.0.0/0 
- 
- # iptables -L OUTPUT -v -n 
-Chain OUTPUT (policy DROP 0 packets, 0 bytes) 
- pkts bytes target     prot opt in     out     source               
-destination 
-    0     0 ACCEPT     all  --  *      lo      0.0.0.0/0            0.0.0.0/0","Run the following commands to implement the loopback rules: 
-# iptables -A INPUT -i lo -j ACCEPT 
-# iptables -A OUTPUT -o lo -j ACCEPT 
-# iptables -A INPUT -s 127.0.0.0/8 -j DROP"
-"3.5.3.2.2 Ensure iptables outbound and established connections are 
-configured (Manual)","Run the following command and verify all rules for new outbound, and established 
-connections match site policy: 
-# iptables -L -v -n","Configure iptables in accordance with site policy. The following commands will implement 
-a policy to allow all outbound connections and all established connections: 
-# iptables -A OUTPUT -p tcp -m state --state NEW,ESTABLISHED -j ACCEPT 
-# iptables -A OUTPUT -p udp -m state --state NEW,ESTABLISHED -j ACCEPT 
-# iptables -A OUTPUT -p icmp -m state --state NEW,ESTABLISHED -j ACCEPT 
-# iptables -A INPUT -p tcp -m state --state ESTABLISHED -j ACCEPT 
-# iptables -A INPUT -p udp -m state --state ESTABLISHED -j ACCEPT 
-# iptables -A INPUT -p icmp -m state --state ESTABLISHED -j ACCEPT"
-3.5.3.2.3 Ensure iptables rules exist for all open ports (Automated),"Run the following command to determine open ports: 
-# ss -4tuln 
- 
-Netid  State      Recv-Q Send-Q    Local Address:Port                   Peer 
-Address:Port 
-udp    UNCONN     0      0                     *:68                                
-*:* 
-udp    UNCONN     0      0                     *:123                               
-*:* 
-tcp    LISTEN     0      128                   *:22                                
-*:* 
-Run the following command to determine firewall rules: 
-# iptables -L INPUT -v -n 
-Chain INPUT (policy DROP 0 packets, 0 bytes) 
- pkts bytes target     prot opt in     out     source               
-destination 
-    0     0 ACCEPT     all  --  lo     *       0.0.0.0/0            0.0.0.0/0 
-    0     0 DROP       all  --  *      *       127.0.0.0/8          0.0.0.0/0 
-    0     0 ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0            
-tcp dpt:22 state NEW 
-Verify all open ports listening on non-localhost addresses have at least one firewall rule. 
-Note: The last line identified by the "tcp dpt:22 state NEW" identifies it as a firewall rule for 
-new connections on tcp port 22.","For each port identified in the audit which does not have a firewall rule establish a proper 
-rule for accepting inbound connections: 
-# iptables -A INPUT -p <protocol> --dport <port> -m state --state NEW -j 
-ACCEPT"
-3.5.3.2.4 Ensure iptables default deny firewall policy (Automated),"Run the following command and verify that the policy for the INPUT , OUTPUT , and FORWARD 
-chains is DROP or REJECT : 
-# iptables -L 
- 
-Chain INPUT (policy DROP) 
-Chain FORWARD (policy DROP) 
-Chain OUTPUT (policy DROP)","Run the following commands to implement a default DROP policy: 
-# iptables -P INPUT DROP 
-# iptables -P OUTPUT DROP 
-# iptables -P FORWARD DROP"
-3.5.3.2.5 Ensure iptables rules are saved (Automated),"Review the file /etc/sysconfig/iptables and ensure it contains the complete correct 
-rule-set. 
-Example: /etc/sysconfig/iptables 
-# sample configuration for iptables service 
-# you can edit this manually or use system-config-firewall 
-# Generated by iptables-save v1.4.21 on Wed Mar 25 14:23:37 2020 
-*filter 
-:INPUT DROP [4:463] 
-:FORWARD DROP [0:0] 
-:OUTPUT DROP [0:0] 
--A INPUT -i lo -j ACCEPT 
--A INPUT -s 127.0.0.0/8 -j DROP 
--A INPUT -p tcp -m state --state ESTABLISHED -j ACCEPT 
--A INPUT -p udp -m state --state ESTABLISHED -j ACCEPT 
--A INPUT -p icmp -m state --state ESTABLISHED -j ACCEPT 
--A INPUT -p tcp -m tcp --dport 22 -m state --state NEW -j ACCEPT 
--A OUTPUT -o lo -j ACCEPT 
--A OUTPUT -p tcp -m state --state NEW,ESTABLISHED -j ACCEPT 
--A OUTPUT -p udp -m state --state NEW,ESTABLISHED -j ACCEPT 
--A OUTPUT -p icmp -m state --state NEW,ESTABLISHED -j ACCEPT 
-COMMIT 
-# Completed on Wed Mar 25 14:23:37 2020","Run the following commands to create or update the /etc/sysconfig/iptables file: 
-Run the following command to review the current running iptables configuration: 
-# iptables -L 
-Output should include: 
-Chain INPUT (policy DROP) 
-target     prot opt source               destination 
-ACCEPT     all  --  anywhere             anywhere 
-DROP       all  --  loopback/8           anywhere 
-ACCEPT     tcp  --  anywhere             anywhere             state 
-ESTABLISHED 
-ACCEPT     udp  --  anywhere             anywhere             state 
-ESTABLISHED 
-ACCEPT     icmp --  anywhere             anywhere             state 
-ESTABLISHED 
-ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:ssh 
-state NEW 
- 
-Chain FORWARD (policy DROP) 
-target     prot opt source               destination 
- 
-Chain OUTPUT (policy DROP) 
-target     prot opt source               destination 
-ACCEPT     all  --  anywhere             anywhere 
-ACCEPT     tcp  --  anywhere             anywhere             state 
-NEW,ESTABLISHED 
-ACCEPT     udp  --  anywhere             anywhere             state 
-NEW,ESTABLISHED 
-ACCEPT     icmp --  anywhere             anywhere             state 
-NEW,ESTABLISHED 
-Run the following command to save the verified running configuration to the file 
-/etc/sysconfig/iptables: 
-# service iptables save 
- 
-iptables: Saving firewall rules to /etc/sysconfig/iptables:[  OK  ]"
-3.5.3.2.6 Ensure iptables is enabled and running (Automated),"Run the following commands to verify iptables is enabled: 
-# systemctl is-enabled iptables 
- 
-enabled 
-Run the following command to verify iptables.service is active and running or exited 
-# systemctl status iptables | grep -E " Active: active \((running|exited)\) " 
- 
-   Active: active (exited) since <day date and time>","Run the following command to enable and start iptables: 
-# systemctl --now enable iptables"
-3.5.3.3.1 Ensure ip6tables loopback traffic is configured (Automated),"Run the following commands and verify output includes the listed rules in order (packet 
-and byte counts may differ): 
-# ip6tables -L INPUT -v -n 
-Chain INPUT (policy DROP 0 packets, 0 bytes) 
-pkts bytes target     prot opt in     out     source               
-destination 
-    0     0 ACCEPT     all      lo     *       ::/0                 ::/0         
-    0     0 DROP       all      *      *       ::1                  ::/0         
- 
- 
-# ip6tables -L OUTPUT -v -n 
-Chain OUTPUT (policy DROP 0 packets, 0 bytes) 
-pkts bytes target     prot opt in     out     source               
-destination 
-    0     0 ACCEPT     all      *      lo      ::/0                 ::/0         
-OR verify IPv6 is disabled: 
-Run the following script. Output will confirm if IPv6 is disabled on the system.","Run the following commands to implement the loopback rules: 
-# ip6tables -A INPUT -i lo -j ACCEPT 
-# ip6tables -A OUTPUT -o lo -j ACCEPT 
-# ip6tables -A INPUT -s ::1 -j DROP"
-"3.5.3.3.2 Ensure ip6tables outbound and established connections are 
-configured (Manual)","Run the following command and verify all rules for new outbound, and established 
-connections match site policy: 
-# ip6tables -L -v -n 
-OR verify IPv6 is disabled: 
-Run the following script. Output will confirm if IPv6 is disabled on the system.","Configure iptables in accordance with site policy. The following commands will implement 
-a policy to allow all outbound connections and all established connections: 
-# ip6tables -A OUTPUT -p tcp -m state --state NEW,ESTABLISHED -j ACCEPT 
-# ip6tables -A OUTPUT -p udp -m state --state NEW,ESTABLISHED -j ACCEPT 
-# ip6tables -A OUTPUT -p icmp -m state --state NEW,ESTABLISHED -j ACCEPT 
-# ip6tables -A INPUT -p tcp -m state --state ESTABLISHED -j ACCEPT 
-# ip6tables -A INPUT -p udp -m state --state ESTABLISHED -j ACCEPT 
-# ip6tables -A INPUT -p icmp -m state --state ESTABLISHED -j ACCEPT"
-"3.5.3.3.3 Ensure ip6tables firewall rules exist for all open ports 
-(Automated)","Run the following command to determine open ports: 
-# ss -6tuln 
- 
-Netid  State      Recv-Q Send-Q    Local Address:Port                   Peer 
-Address:Port   
-udp    UNCONN     0      0                   ::1:123                              
-:::* 
-udp    UNCONN     0      0                    :::123                              
-:::* 
-tcp    LISTEN     0      128                  :::22                               
-:::* 
-tcp    LISTEN     0      20                  ::1:25                               
-:::* 
-Run the following command to determine firewall rules:","For each port identified in the audit which does not have a firewall rule establish a proper 
-rule for accepting inbound connections: 
-# ip6tables -A INPUT -p <protocol> --dport <port> -m state --state NEW -j 
-ACCEPT"
-3.5.3.3.4 Ensure ip6tables default deny firewall policy (Automated),"Run the following command and verify that the policy for the INPUT, OUTPUT, and 
-FORWARD chains is DROP or REJECT: 
-# ip6tables -L 
-Chain INPUT (policy DROP) 
-Chain FORWARD (policy DROP) 
-Chain OUTPUT (policy DROP) 
-OR 
-Verify IPv6 is disabled: 
-Run the following script. Output will confirm if IPv6 is disabled on the system.","Run the following commands to implement a default DROP policy: 
-# ip6tables -P INPUT DROP 
-# ip6tables -P OUTPUT DROP 
-# ip6tables -P FORWARD DROP"
-3.5.3.3.5 Ensure ip6tables rules are saved (Automated),"Review the file /etc/sysconfig/ip6tables and ensure it contains the complete correct 
-rule-set. 
-Example: /etc/sysconfig/ip6tables 
-# sample configuration for iptables service 
-# you can edit this manually or use system-config-firewall 
-# Generated by iptables-save v1.4.21 on Wed Mar 25 14:23:37 2020 
-*filter 
-:INPUT DROP [0:0] 
-:FORWARD DROP [0:0] 
-:OUTPUT DROP [0:0] 
--A INPUT -i lo -j ACCEPT 
--A INPUT -s ::1/128 -j DROP 
--A INPUT -p tcp -m state --state ESTABLISHED -j ACCEPT 
--A INPUT -p udp -m state --state ESTABLISHED -j ACCEPT 
--A INPUT -p icmp -m state --state ESTABLISHED -j ACCEPT 
--A INPUT -p tcp -m tcp --dport 22 -m state --state NEW -j ACCEPT 
--A OUTPUT -o lo -j ACCEPT 
--A OUTPUT -p tcp -m state --state NEW,ESTABLISHED -j ACCEPT 
--A OUTPUT -p udp -m state --state NEW,ESTABLISHED -j ACCEPT 
--A OUTPUT -p icmp -m state --state NEW,ESTABLISHED -j ACCEPT 
-COMMIT 
-# Completed on Wed Mar 25 14:58:32 2020 
-OR 
-Verify IPv6 is disabled: 
-Run the following script. Output will confirm if IPv6 is disabled on the system. 
-#!/bin/bash 
- 
-[ -n "$passing" ] && passing="" 
-[ -z "$(grep "^\s*linux" /boot/grub2/grub.cfg | grep -v ipv6.disable=1)" ] && 
-passing="true" 
-grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" 
-/etc/sysctl.conf \ 
-/etc/sysctl.d/*.conf && grep -Eq 
-"^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" \ 
-/etc/sysctl.conf /etc/sysctl.d/*.conf && sysctl 
-net.ipv6.conf.all.disable_ipv6 | \ 
-grep -Eq "^\s*net\.ipv6\.conf\.all\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && \ 
-sysctl net.ipv6.conf.default.disable_ipv6 | \ 
-grep -Eq "^\s*net\.ipv6\.conf\.default\.disable_ipv6\s*=\s*1\b(\s+#.*)?$" && 
-passing="true" 
-if [ "$passing" = true ] ; then 
- 
-echo "IPv6 is disabled on the system" 
-else 
- 
-echo "IPv6 is enabled on the system" 
-fi","Run the following commands to create or update the /etc/sysconfig/ip6tables file: 
-Run the following command to review the current running iptables configuration: 
-# ip6tables -L 
-Output should include: 
-Chain INPUT (policy DROP) 
-target     prot opt source               destination 
-ACCEPT     all      anywhere             anywhere 
-DROP       all      localhost            anywhere 
-ACCEPT     tcp      anywhere             anywhere             state 
-ESTABLISHED 
-ACCEPT     udp      anywhere             anywhere             state 
-ESTABLISHED 
-ACCEPT     icmp     anywhere             anywhere             state 
-ESTABLISHED 
-ACCEPT     tcp      anywhere             anywhere             tcp dpt:ssh 
-state NEW 
- 
-Chain FORWARD (policy DROP) 
-target     prot opt source               destination 
- 
-Chain OUTPUT (policy DROP) 
-target     prot opt source               destination 
-ACCEPT     all      anywhere             anywhere 
-ACCEPT     tcp      anywhere             anywhere             state 
-NEW,ESTABLISHED 
-ACCEPT     udp      anywhere             anywhere             state 
-NEW,ESTABLISHED 
-ACCEPT     icmp     anywhere             anywhere             state 
-NEW,ESTABLISHED 
-Run the following command to save the verified running configuration to the file 
-/etc/sysconfig/ip6tables: 
-# service ip6tables save 
- 
-ip6tables: Saving firewall rules to /etc/sysconfig/ip6table[  OK  ]"
-3.5.3.3.6 Ensure ip6tables is enabled and running (Automated),"Run the following commands to verify ip6tables is enabled: 
-# systemctl is-enabled ip6tables 
- 
-enabled 
-Run the following command to verify ip6tables.service is active and running or exited 
-# systemctl status ip6tables | grep -E " Active: active \((running|exited)\) 
-" 
- 
-   Active: active (exited) since <day date and time> 
-OR verify IPv6 is disabled: 
-Run the following script. Output will confirm if IPv6 is disabled on the system.","Run the following command to enable and start ip6tables: 
-# systemctl --now start ip6tables"
-4.1.1.1 Ensure auditd is installed (Automated),"Run the following command and verify auditd is installed: 
-# rpm -q audit audit-libs 
- 
-audit-<version> 
-audit-libs-<version>","Run the following command to Install auditd 
-# yum install audit audit-libs"
-4.1.1.2 Ensure auditd service is enabled and running (Automated),"Run the following command to verify auditd is enabled: 
-# systemctl is-enabled auditd 
- 
-enabled 
-Run the following command to verify that auditd is running: 
-# systemctl status auditd | grep 'Active: active (running) ' 
- 
-   Active: active (running) since <time and date>","Run the following command to enable and start auditd : 
-# systemctl --now enable auditd"
-"4.1.1.3 Ensure auditing for processes that start prior to auditd is 
-enabled (Automated)","Run the following script to verify that each linux line has the audit=1 parameter set: 
-#!/bin/bash 
- 
+echo "4.1.1.3 Ensure auditing for processes that start prior to auditd is enabled (Automated)"
+# CHECK, this script doesn't sound right
 # IF check passes return PASSED 
 efidir=$(find /boot/efi/EFI/* -type d -not -name 'BOOT') 
 gbdir=$(find /boot -maxdepth 1 -type d -name 'grub*') 
 if [ -f "$efidir"/grub.cfg ]; then 
-   grep "^\s*linux" "$efidir"/grub.cfg | grep -Evq "audit=1\b" && echo 
-"FAILED" || echo "PASSED" 
+   grep "^\s*linux" "$efidir"/grub.cfg | grep -Evq "audit=1\b" && echo "FAILED" || echo "PASSED" 
 elif [ -f "$gbdir"/grub.cfg ]; then 
-   grep "^\s*linux" "$gbdir"/grub.cfg | grep -Evq "audit=1\b" && echo 
-"FAILED" || echo "PASSED" 
+   grep "^\s*linux" "$gbdir"/grub.cfg | grep -Evq "audit=1\b" && echo "FAILED" || echo "PASSED" 
 else 
    echo "FAILED" 
-fi","Edit /etc/default/grub and add audit=1 to GRUB_CMDLINE_LINUX: 
-GRUB_CMDLINE_LINUX="audit=1" 
-Run the following command to update the grub2 configuration: 
-# grub2-mkconfig -o /boot/grub2/grub.cfg"
-4.1.2.1 Ensure audit log storage size is configured (Automated),"Run the following command and ensure output is in compliance with site policy: 
-# grep max_log_file /etc/audit/auditd.conf 
+fi
+
+echo "4.1.2.1 Ensure audit log storage size is configured (Automated)"
+grep max_log_file /etc/audit/auditd.conf 
  
-max_log_file = <MB>","Set the following parameter in /etc/audit/auditd.conf in accordance with site policy: 
-max_log_file = <MB>"
-4.1.2.2 Ensure audit logs are not automatically deleted (Automated),"Run the following command and verify output matches: 
-# grep max_log_file_action /etc/audit/auditd.conf 
- 
-max_log_file_action = keep_logs","Set the following parameter in /etc/audit/auditd.conf: 
-max_log_file_action = keep_logs"
-4.1.2.3 Ensure system is disabled when audit logs are full (Automated),"Run the following commands and verify output matches: 
-# grep space_left_action /etc/audit/auditd.conf 
- 
-space_left_action = email 
-# grep action_mail_acct /etc/audit/auditd.conf 
- 
-action_mail_acct = root 
-# grep admin_space_left_action /etc/audit/auditd.conf 
- 
-admin_space_left_action = halt","Set the following parameters in /etc/audit/auditd.conf: 
-space_left_action = email 
-action_mail_acct = root 
-admin_space_left_action = halt"
-4.1.2.4 Ensure audit_backlog_limit is sufficient (Automated),"Run the following script to verify the audit_backlog_limit= parameter is set to an 
-appropriate size for your organization 
-#!/bin/bash 
- 
-# IF check passes return PASSED 
-efidir=$(find /boot/efi/EFI/* -type d -not -name 'BOOT') 
-gbdir=$(find /boot -maxdepth 1 -type d -name 'grub*') 
-if [ -f "$efidir"/grub.cfg ]; then 
-   grep "^\s*linux" "$efidir"/grub.cfg | grep -Evq 
-"audit_backlog_limit=\S+\b" && echo -e "\n\nFAILED" || echo -e "\n\nPASSED:\n 
-\"$(grep "audit_backlog_limit=" "$gbdir"/grub.cfg)\"" 
-elif [ -f "$gbdir"/grub.cfg ]; then 
-   grep "^\s*linux" "$gbdir"/grub.cfg | grep -Evq "audit_backlog_limit=\S+\b" 
-&& echo -e "\n\nFAILED" || echo -e "\n\nPASSED:\n \"$(grep 
-"audit_backlog_limit=" "$gbdir"/grub.cfg)\"" 
-else 
-   echo "FAILED" 
-fi 
-Ensure the returned value complies with local site policy. It's recommended that this value be 
-8192 or larger.","Edit /etc/default/grub and add audit_backlog_limit=<BACKLOG SIZE> to 
-GRUB_CMDLINE_LINUX: 
-Example: 
-GRUB_CMDLINE_LINUX="audit_backlog_limit=8192" 
-Run the following command to update the grub2 configuration: 
-# grub2-mkconfig -o /boot/grub2/grub.cfg"
-"4.1.3 Ensure events that modify date and time information are collected 
-(Automated)","On a 32 bit system run the following commands: 
-# grep time-change /etc/audit/rules.d/*.rules 
-# auditctl -l | grep time-change 
-Verify output of both matches: 
--a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-
-change 
--a always,exit -F arch=b32 -S clock_settime -k time-change 
--w /etc/localtime -p wa -k time-change 
-On a 64 bit system run the following commands: 
-# grep time-change /etc/audit/rules.d/*.rules 
-# auditctl -l | grep time-change 
-Verify output of both matches:","For 32 bit systems Edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-time_change.rules 
-Add the following lines: 
--a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-
-change 
--a always,exit -F arch=b32 -S clock_settime -k time-change 
--w /etc/localtime -p wa -k time-change 
-For 64 bit systems Edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-time_change.rules 
-Add the following lines: 
+echo "4.1.2.2 Ensure audit logs are not automatically deleted (Automated),"
+sed -i -e "s/max_log_file_action = .*/max_log_file_action = keep_logs/" /etc/audit/auditd.conf
+
+echo "4.1.2.3 Ensure system is disabled when audit logs are full (Automated)"
+sed -i -e "s/space_left_action = .*/space_left_action = email/" /etc/audit/auditd.conf
+sed -i -e "s/action_mail_acct = .*/action_mail_acct = root/" /etc/audit/auditd.conf
+sed -i -e "s/admin_space_left_action = .*/admin_space_left_action = halt/" /etc/audit/auditd.conf
+
+echo "4.1.2.4 Ensure audit_backlog_limit is sufficient (Automated)"
+echo "GRUB_CMDLINE_LINUX=\"audit_backlog_limit=8192\"" >> /etc/default/grub
+grub2-mkconfig -o /boot/grub2/grub.cfg
+
+echo "4.1.3 Ensure events that modify date and time information are collected (Automated)"
+
+cat > /etc/audit/rules.d/50-time_change.rules<<EOF
 -a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change 
--a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-
-change 
--a always,exit -F arch=b64 -S clock_settime -k time-change 
--a always,exit -F arch=b32 -S clock_settime -k time-change 
--w /etc/localtime -p wa -k time-change"
-"4.1.4 Ensure events that modify user/group information are collected 
-(Automated)","Run the following command to check the auditd .rules files: 
-# grep identity /etc/audit/rules.d/*.rules 
-Verify the output matches: 
+-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change 
+-a always,exit -F arch=b64 -S clock_settime -k time-change
+-a always,exit -F arch=b32 -S clock_settime -k time-change
+-w /etc/localtime -p wa -k time-change
+EOF
+
+echo "4.1.4 Ensure events that modify user/group information are collected (Automated)"
+cat > /etc/audit/rules.d/50-identity.rules <<EOF
 -w /etc/group -p wa -k identity 
 -w /etc/passwd -p wa -k identity 
 -w /etc/gshadow -p wa -k identity 
 -w /etc/shadow -p wa -k identity 
--w /etc/security/opasswd -p wa -k identity 
-Run the following command to check loaded auditd rules: 
-# auditctl -l | grep identity 
-Verify the output matches:","Edit or create a file in the /etc/audit/rules.d/ directory ending in .rules 
-Example: vi /etc/audit/rules.d/50-identity.rules 
-Add the following lines: 
--w /etc/group -p wa -k identity 
--w /etc/passwd -p wa -k identity 
--w /etc/gshadow -p wa -k identity 
--w /etc/shadow -p wa -k identity 
--w /etc/security/opasswd -p wa -k identity"
-"4.1.5 Ensure events that modify the system's network environment are 
-collected (Automated)","On a 32 bit system run the following commands: 
-# grep system-locale /etc/audit/rules.d/*.rules 
-# auditctl -l | grep system-locale 
-Verify output of both matches: 
--a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale 
--w /etc/issue -p wa -k system-locale 
--w /etc/issue.net -p wa -k system-locale 
--w /etc/hosts -p wa -k system-locale 
--w /etc/sysconfig/network -p wa -k system-locale 
-On a 64 bit system run the following commands: 
-# grep system-locale /etc/audit/rules.d/*.rules 
-# auditctl -l | grep system-locale 
-Verify output of both matches: 
+-w /etc/security/opasswd -p wa -k identity
+EOF
+
+echo "4.1.5 Ensure events that modify the system's network environment are collected (Automated)"
+cat > /etc/audit/rules.d/50-system_local.rules <<EOF
 -a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale 
 -a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale 
 -w /etc/issue -p wa -k system-locale 
 -w /etc/issue.net -p wa -k system-locale 
 -w /etc/hosts -p wa -k system-locale 
--w /etc/sysconfig/network -p wa -k system-locale","For 32 bit systems Edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-system_local.rules 
-Add the following lines: 
--a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale 
--w /etc/issue -p wa -k system-locale 
--w /etc/issue.net -p wa -k system-locale 
--w /etc/hosts -p wa -k system-locale 
--w /etc/sysconfig/network -p wa -k system-locale 
-For 64 bit systems Edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-system_local.rules 
-Add the following lines: 
--a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale 
--a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale 
--w /etc/issue -p wa -k system-locale 
--w /etc/issue.net -p wa -k system-locale 
--w /etc/hosts -p wa -k system-locale 
--w /etc/sysconfig/network -p wa -k system-locale"
-"4.1.6 Ensure events that modify the system's Mandatory Access 
-Controls are collected (Automated)","Run the following commands: 
-# grep MAC-policy /etc/audit/rules.d/*.rules 
-# auditctl -l | grep MAC-policy 
-Verify output of both matches: 
+-w /etc/sysconfig/network -p wa -k system-locale
+EOF
+
+echo "4.1.6 Ensure events that modify the system's Mandatory Access Controls are collected (Automated)"
+cat > /etc/audit/rules.d/50-MAC_policy.rules <<EOF
 -w /etc/selinux/ -p wa -k MAC-policy 
--w /usr/share/selinux/ -p wa -k MAC-policy","Edit or create a file in the /etc/audit/rules.d/ directory ending in .rules 
-Example: vi /etc/audit/rules.d/50-MAC_policy.rules 
-Add the following lines: 
--w /etc/selinux/ -p wa -k MAC-policy 
--w /usr/share/selinux/ -p wa -k MAC-policy"
-4.1.7 Ensure login and logout events are collected (Automated),"Run the following commands: 
-# grep logins /etc/audit/rules.d/*.rules 
-# auditctl -l | grep logins 
-Verify output of both includes: 
+-w /usr/share/selinux/ -p wa -k MAC-policy
+EOF
+
+echo "4.1.7 Ensure login and logout events are collected (Automated)"
+cat > /etc/audit/rules.d/50-logins.rules <<EOF
 -w /var/log/lastlog -p wa -k logins 
--w /var/run/faillock/ -p wa -k logins","Edit or create a file in the /etc/audit/rules.d/ directory ending in .rules 
-Example: vi /etc/audit/rules.d/50-logins.rules 
-Add the following lines: 
--w /var/log/lastlog -p wa -k logins 
--w /var/run/faillock/ -p wa -k logins"
-4.1.8 Ensure session initiation information is collected (Automated),"Run the following command to check the auditd .rules files: 
-# grep -E '(session|logins)' /etc/audit/rules.d/*.rules 
-Verify output includes: 
+-w /var/run/faillock/ -p wa -k logins
+EOF
+
+echo "4.1.8 Ensure session initiation information is collected (Automated)"
+cat > /etc/audit/rules.d/50-session.rules <<EOF
 -w /var/run/utmp -p wa -k session 
 -w /var/log/wtmp -p wa -k logins 
--w /var/log/btmp -p wa -k logins 
-Run the following command to check loaded auditd rules: 
-# auditctl -l | grep -E '(session|logins)' 
-Verify output includes:","Edit or create a file in the /etc/audit/rules.d/ directory ending in .rules 
-Example: vi /etc/audit/rules.d/50-session.rules 
-Add the following lines: 
--w /var/run/utmp -p wa -k session 
--w /var/log/wtmp -p wa -k logins 
--w /var/log/btmp -p wa -k logins"
-"4.1.9 Ensure discretionary access control permission modification events 
-are collected (Automated)","On a 32 bit system run the following commands: 
-Run the following command to check the auditd .rules files: 
-# grep perm_mod /etc/audit/rules.d/*.rules 
-Verify output matches:","For 32 bit systems edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-perm_mod.rules 
-Add the following lines: 
--a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F 
-auid!=4294967295 -k perm_mod 
--a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F 
-auid>=1000 -F auid!=4294967295 -k perm_mod 
--a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S 
-removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 
--k perm_mod 
-For 64 bit systems Edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-perm_mod.rules 
-Add the following lines: 
--a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F 
-auid!=4294967295 -k perm_mod 
--a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F 
-auid!=4294967295 -k perm_mod 
--a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F 
-auid>=1000 -F auid!=4294967295 -k perm_mod 
--a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F 
-auid>=1000 -F auid!=4294967295 -k perm_mod 
--a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S 
-removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 
--k perm_mod 
--a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S 
-removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 
--k perm_mod"
-"4.1.10 Ensure unsuccessful unauthorized file access attempts are 
-collected (Automated)","On a 32 bit system run the following commands: 
-Run the following command to check the auditd .rules files: 
-# grep access /etc/audit/rules.d/*.rules 
-Verify output matches: 
--a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access 
--a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access 
-Run the following command to check loaded auditd rules: 
-# auditctl -l | grep access 
-Verify output matches: 
--a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=-1 -k access 
--a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=-1 -k access 
-On a 64 bit system run the following commands: 
-Run the following command to check the auditd .rules files: 
-# grep access /etc/audit/rules.d/*.rules 
-Verify output matches: 
--a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access 
--a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access 
--a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access 
--a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access 
-Run the following command to check loaded auditd rules: 
-# auditctl -l | grep access 
-Verify output matches:","For 32 bit systems Edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-access.rules 
-Add the following lines: 
--a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access 
--a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access 
-For 64 bit systems Edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-access.rules 
-Add the following lines: 
--a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access 
--a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access 
--a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access 
--a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S 
-ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access"
-4.1.11 Ensure use of privileged commands is collected (Automated),"Run the following command replacing <partition> with a list of partitions where 
-programs can be executed from on your system: 
-# find <partition> -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk 
-'{print "-a always,exit -F path=" $1 " -F perm=x -F auid>='"$(awk 
-'/^\s*UID_MIN/{print $2}' /etc/login.defs)"' -F auid!=4294967295 -k 
-privileged" }' 
-Verify all resulting lines are a .rules file in /etc/audit/rules.d/ and the output of 
-auditctl -l. 
-Note: The .rules file output will be auid!=-1 not auid!=4294967295","To remediate this issue, the system administrator will have to execute a find command to 
-locate all the privileged programs and then add an audit line for each one of them. 
-The audit parameters associated with this are as follows: 
- 
--F path=" $1 " - will populate each file name found through the find command and 
-processed by awk. 
- 
--F perm=x - will write an audit record if the file is executed. 
- 
--F audit>=1000 - will write a record if the user executing the command is not a 
-privileged user. 
- 
--F auid!= 4294967295 - will ignore Daemon events 
-All audit records should be tagged with the identifier "privileged". 
-Run the following command replacing with a list of partitions where programs can be 
-executed from on your system: 
-# find <partition> -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk 
-'{print "-a always,exit -F path=" $1 " -F perm=x -F auid>='"$(awk 
-'/^\s*UID_MIN/{print $2}' /etc/login.defs)"' -F auid!=4294967295 -k 
-privileged" }' 
-Edit or create a file in the /etc/audit/rules.d/ directory ending in .rules and add all 
-resulting lines to the file. 
-Example: 
-# find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print "-a 
-always,exit -F path=" $1 " -F perm=x -F auid>='"$(awk '/^\s*UID_MIN/{print 
-$2}' /etc/login.defs)"' -F auid!=4294967295 -k privileged" }' >> 
-/etc/audit/rules.d/50-privileged.rules"
-4.1.12 Ensure successful file system mounts are collected (Automated),"On a 32 bit system run the following commands: 
-Run the following command to check the auditd .rules files: 
-# grep mounts /etc/audit/rules.d/*.rules 
-Verify output matches: 
--a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k 
-mounts 
-Run the following command to check loaded auditd rules: 
-# auditctl -l | grep mounts 
-Verify output matches: 
--a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=-1 -k mounts 
-On a 64 bit system run the following commands: 
-Run the following command to check the auditd .rules files: 
-# grep mounts /etc/audit/rules.d/*.rules 
-Verify output matches: 
--a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k 
-mounts 
--a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k 
-mounts 
-Run the following command to check loaded auditd rules: 
-# auditctl -l | grep mounts 
-Verify output matches: 
--a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=-1 -k mounts 
--a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=-1 -k mounts","For 32 bit systems Edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-mounts.rules 
-Add the following lines: 
--a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k 
-mounts 
-For 64 bit systems Edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-mounts.rules 
-Add the following lines: 
--a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k 
-mounts 
--a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k 
-mounts 
-Additional Information: 
-This tracks successful and unsuccessful mount commands. 
-File system mounts do not have to come from external media and this action still does not 
-verify write (e.g. CD ROMS)."
-4.1.13 Ensure file deletion events by users are collected (Automated),"On a 32 bit system run the following commands: 
-Run the following command to check the auditd .rules files: 
-# grep delete /etc/audit/rules.d/*.rules 
-Verify output matches: 
--a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F 
-auid>=1000 -F auid!=4294967295 -k delete 
-Run the following command to check loaded auditd rules: 
-# auditctl -l | grep delete 
-Verify output matches: 
--a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F 
-auid>=1000 -F auid!=4294967295 -k delete 
-On a 64 bit system run the following commands: 
-Run the following command to check the auditd .rules files: 
-# grep delete /etc/audit/rules.d/*.rules 
-Verify output matches: 
--a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F 
-auid>=1000 -F auid!=4294967295 -k delete 
--a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F 
-auid>=1000 -F auid!=4294967295 -k delete 
-Run the following command to check loaded auditd rules: 
-# auditctl -l | grep delete 
-Verify output matches: 
--a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F 
-auid>=1000 -F auid!=-1 -k delete 
--a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F 
-auid>=1000 -F auid!=-1 -k delete","For 32 bit systems edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-deletion.rules 
-Add the following lines: 
--a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F 
-auid>=1000 -F auid!=4294967295 -k delete 
-For 64 bit systems edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-deletion.rules 
-Add the following lines: 
--a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F 
-auid>=1000 -F auid!=4294967295 -k delete 
--a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F 
-auid>=1000 -F auid!=4294967295 -k delete 
-Additional Information: 
-At a minimum, configure the audit system to collect file deletion events for all users and 
-root."
-"4.1.14 Ensure changes to system administration scope (sudoers) is 
-collected (Automated)","Run the following command to check the auditd .rules files: 
-# grep scope /etc/audit/rules.d/*.rules 
-Verify output of matches: 
--w /etc/sudoers -p wa -k scope 
--w /etc/sudoers.d/ -p wa -k scope 
-Run the following command to check loaded auditd rules: 
-# auditctl -l | grep scope 
-Verify output matches: 
--w /etc/sudoers -p wa -k scope 
--w /etc/sudoers.d -p wa -k scope","Edit or create a file in the /etc/audit/rules.d/ directory ending in .rules 
-_Example: vi /etc/audit/rules.d/50-scope.rules 
-Add the following lines: 
--w /etc/sudoers -p wa -k scope 
--w /etc/sudoers.d/ -p wa -k scope"
-"4.1.15 Ensure system administrator command executions (sudo) are 
-collected (Automated)","On a 32 bit system run the following commands: 
-Run the following command to verify the rules are contained in a .rules file in the 
-/etc/audit/rules.d/ directory: 
-# grep actions /etc/audit/rules.d/*.rules 
-Verify the output includes: 
-/etc/audit/rules.d/cis.rules:-a exit,always -F arch=b32 -C euid!=uid -F 
-euid=0 -Fauid>=1000 -F auid!=4294967295 -S execve -k actions 
-Run the following command to verify that rules are in the running auditd config: 
-# auditctl -l | grep actions 
-Verify the output includes: 
--a always,exit -F arch=b32 -S execve -C uid!=euid -F euid=0 -F auid>=1000 -F 
-auid!=-1 -F key=actions 
-On a 64 bit system run the following commands: 
-Run the following command to verify the rules are contained in a .rules file in the 
-/etc/audit/rules.d/ directory: 
-# grep actions /etc/audit/rules.d/*.rules 
-Verify the output includes: 
--a exit,always -F arch=b64 -C euid!=uid -F euid=0 -Fauid>=1000 -F 
-auid!=4294967295 -S execve -k actions 
--a exit,always -F arch=b32 -C euid!=uid -F euid=0 -Fauid>=1000 -F 
-auid!=4294967295 -S execve -k actions 
-Run the following command to verify that rules are in the running auditd config: 
-# auditctl -l | grep actions 
-Verify the output includes: 
--a always,exit -F arch=b64 -S execve -C uid!=euid -F euid=0 -F auid>=1000 -F 
-auid!=-1 -F key=actions 
--a always,exit -F arch=b32 -S execve -C uid!=euid -F euid=0 -F auid>=1000 -F 
-auid!=-1 -F key=actions","For 32 bit systems Edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules: 
-Example: vi /etc/audit/rules.d/50-actions.rules 
-Add the following line: 
--a exit,always -F arch=b32 -C euid!=uid -F euid=0 -F auid>=1000 -F 
-auid!=4294967295 -S execve -k actions 
-For 64 bit systems Edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules: 
-Example: vi /etc/audit/rules.d/50-actions.rules 
-Add the following lines: 
--a always,exit -F arch=b64 -C euid!=uid -F euid=0 -F auid>=1000 -F 
-auid!=4294967295 -S execve -k actions  
--a always,exit -F arch=b32 -C euid!=uid -F euid=0 -F auid>=1000 -F 
-auid!=4294967295 -S execve -k actions"
-"4.1.16 Ensure kernel module loading and unloading is collected 
-(Automated)","On a 32 bit system run the following commands: 
-Run the following command to check the auditd .rules files: 
-# grep modules /etc/audit/rules.d/*.rules 
-Verify output matches: 
+-w /var/log/btmp -p wa -k logins
+EOF
+
+echo "4.1.9 Ensure discretionary access control permission modification events are collected (Automated)"
+cat > /etc/audit/rules.d/50-perm_mod.rules <<EOF
+-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod 
+-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod 
+-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod 
+-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod 
+-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod 
+-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
+EOF
+
+echo "4.1.10 Ensure unsuccessful unauthorized file access attempts are collected (Automated)"
+cat > /etc/audit/rules.d/50-access.rules <<EOF
+-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access 
+-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access 
+-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access 
+-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
+EOF
+
+echo "4.1.11 Ensure use of privileged commands is collected (Automated)"
+find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print "-a always,exit -F path=" $1 " -F perm=x -F auid>='"$(awk '/^\s*UID_MIN/{print $2}' /etc/login.defs)"' -F auid!=4294967295 -k privileged" }' >> /etc/audit/rules.d/50-privileged.rules
+#TODO Other partitions?
+
+echo "4.1.12 Ensure successful file system mounts are collected (Automated)"
+
+cat > /etc/audit/rules.d/50-mounts.rules <<EOF
+-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts 
+-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts 
+EOF
+
+echo "4.1.13 Ensure file deletion events by users are collected (Automated)"
+cat > /etc/audit/rules.d/50-deletion.rules <<EOF
+-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete
+-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete 
+EOF
+
+echo "4.1.14 Ensure changes to system administration scope (sudoers) is collected (Automated)"
+cat > /etc/audit/rules.d/50-scope.rules <<EOF
+-w /etc/sudoers -p wa -k scope
+-w /etc/sudoers.d/ -p wa -k scope
+EOF
+
+echo "4.1.15 Ensure system administrator command executions (sudo) are collected (Automated)"
+cat > /etc/audit/rules.d/50-modules.rules <<EOF
 -w /sbin/insmod -p x -k modules 
 -w /sbin/rmmod -p x -k modules 
 -w /sbin/modprobe -p x -k modules 
--a always,exit -F arch=b32 -S init_module -S delete_module -k modules 
-Run the following command to check loaded auditd rules: 
-# auditctl -l | grep modules 
-Verify output matches: 
--w /sbin/insmod -p x -k modules 
--w /sbin/rmmod -p x -k modules 
--w /sbin/modprobe -p x -k modules 
--a always,exit -F arch=b32 -S init_module,delete_module -F key=modules 
-On a 64 bit system run the following commands: 
-Run the following command to check the auditd .rules files: 
-# grep modules /etc/audit/rules.d/*.rules 
-Verify output matches: 
--w /sbin/insmod -p x -k modules 
--w /sbin/rmmod -p x -k modules 
--w /sbin/modprobe -p x -k modules 
--a always,exit -F arch=b64 -S init_module -S delete_module -k modules 
-Run the following command to check loaded auditd rules: 
-# auditctl -l | grep modules 
-Verify output matches: 
--w /sbin/insmod -p x -k modules 
--w /sbin/rmmod -p x -k modules 
--w /sbin/modprobe -p x -k modules 
--a always,exit -F arch=b64 -S init_module,delete_module -F key=modules","For 32 bit systems Edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-modules.rules 
-Add the following lines: 
--w /sbin/insmod -p x -k modules 
--w /sbin/rmmod -p x -k modules 
--w /sbin/modprobe -p x -k modules 
--a always,exit -F arch=b32 -S init_module -S delete_module -k modules 
-For 64 bit systems Edit or create a file in the /etc/audit/rules.d/ directory ending in 
-.rules 
-Example: vi /etc/audit/rules.d/50-modules.rules 
-Add the following lines: 
--w /sbin/insmod -p x -k modules 
--w /sbin/rmmod -p x -k modules 
--w /sbin/modprobe -p x -k modules 
--a always,exit -F arch=b64 -S init_module -S delete_module -k modules"
-4.1.17 Ensure the audit configuration is immutable (Automated),"Run the following command and verify output matches: 
-# grep "^\s*[^#]" /etc/audit/rules.d/*.rules | tail -1 
+-a always,exit -F arch=b64 -S init_module -S delete_module -k modules
+EOF
+
+echo "4.1.17 Ensure the audit configuration is immutable (Automated)"
+cat > /etc/audit/rules.d/99-finalize.rules <<EOF
+-e 2
+EOF
+
+echo "4.2.1.1 Ensure rsyslog is installed (Automated),"
+rpm -q rsyslog 
  
--e 2","Edit or create the file /etc/audit/rules.d/99-finalize.rules and add the following line 
-at the end of the file: 
--e 2"
-4.2.1.1 Ensure rsyslog is installed (Automated),"Run the following command to Verify rsyslog is installed: 
-# rpm -q rsyslog 
+echo "4.2.1.2 Ensure rsyslog Service is enabled and running (Automated),"
+systemctl is-enabled rsyslog 
  
-rsyslog-<version>","Run the following command to install rsyslog: 
-# yum install rsyslog"
-4.2.1.2 Ensure rsyslog Service is enabled and running (Automated),"Run one of the following commands to verify rsyslog is enabled: 
-# systemctl is-enabled rsyslog 
- 
-enabled 
-Run the following command to verify that rsyslog is running: 
-# systemctl status rsyslog | grep 'active (running) ' 
- 
- Active: active (running) since <Day date time>","Run the following command to enable and start rsyslog: 
-# systemctl --now enable rsyslog"
-4.2.1.3 Ensure rsyslog default file permissions configured (Automated),"Run the following command and verify that $FileCreateMode is 0640 or more restrictive: 
-# grep ^\$FileCreateMode /etc/rsyslog.conf /etc/rsyslog.d/*.conf 
- 
-$FileCreateMode 0640 
-Verify that no results return with a less restrictive file mode","Edit the /etc/rsyslog.conf and /etc/rsyslog.d/*.conf files and set $FileCreateMode to 
-0640 or more restrictive: 
-$FileCreateMode 0640 
-References: 
-1. See the rsyslog.conf(5) man page for more information."
-4.2.1.4 Ensure logging is configured (Manual),"Review the contents of the /etc/rsyslog.conf and /etc/rsyslog.d/*.conf files to ensure 
-appropriate logging is set. In addition, run the following command and verify that the log 
-files are logging information: 
-# ls -l /var/log/","Edit the following lines in the /etc/rsyslog.conf and /etc/rsyslog.d/*.conf files as 
-appropriate for your environment: 
-*.emerg                                  :omusrmsg:* 
-auth,authpriv.*                          /var/log/secure 
-mail.*                                  -/var/log/mail 
-mail.info                               -/var/log/mail.info 
-mail.warning                            -/var/log/mail.warn 
-mail.err                                 /var/log/mail.err 
-news.crit                               -/var/log/news/news.crit 
-news.err                                -/var/log/news/news.err 
-news.notice                             -/var/log/news/news.notice 
-*.=warning;*.=err                       -/var/log/warn 
-*.crit                                   /var/log/warn 
-*.*;mail.none;news.none                 -/var/log/messages 
-local0,local1.*                         -/var/log/localmessages 
-local2,local3.*                         -/var/log/localmessages 
-local4,local5.*                         -/var/log/localmessages 
-local6,local7.*                         -/var/log/localmessages 
-Run the following command to reload the rsyslogd configuration: 
-# systemctl restart rsyslog 
-References: 
-1. See the rsyslog.conf(5) man page for more information."
-"4.2.1.5 Ensure rsyslog is configured to send logs to a remote log host 
-(Automated)","Review the /etc/rsyslog.conf and /etc/rsyslog.d/*.conf files and verify that logs are 
-sent to a central host. 
-# grep -E '^\s*([^#]+\s+)?action\(([^#]+\s+)?\btarget=\"?[^#"]+\"?\b' 
-/etc/rsyslog.conf /etc/rsyslog.d/*.conf 
-Output should include target=<FQDN or IP of remote loghost> 
-OR 
-# grep -E '^[^#]\s*\S+\.\*\s+@' /etc/rsyslog.conf /etc/rsyslog.d/*.conf 
-Output should include either the FQDN or the IP of the remote loghost","Edit the /etc/rsyslog.conf and /etc/rsyslog.d/*.conf files and add one of the following 
-lines: 
-Newer syntax: 
-<files to sent to the remote log server> action(type="omfwd" target="<FQDN or 
-ip of loghost>" port="<port number>" protocol="tcp" 
- 
-                                        
-action.resumeRetryCount="<number of re-tries>" 
- 
-                                        queue.type="LinkedList" 
-queue.size=<number of messages to queue>") 
-Example: 
-*.* action(type="omfwd" target="192.168.2.100" port="514" protocol="tcp" 
-           action.resumeRetryCount="100" 
-           queue.type="LinkedList" queue.size="1000") 
-Older syntax: 
-*.* @@<FQDN or ip of loghost> 
-Example: 
-*.* @@192.168.2.100 
-Run the following command to reload the rsyslog configuration: 
-# systemctl restart rsyslog 
-References: 
-1. See the rsyslog.conf(5) man page for more information. 
-Additional Information: 
-The double "at" sign (@@) directs rsyslog to use TCP to send log messages to the server, 
-which is a more reliable transport mechanism than the default UDP protocol 
-The *.* is a "wildcard" to send all logs to the remote loghost"
-"4.2.1.6 Ensure remote rsyslog messages are only accepted on 
-designated log hosts. (Manual)","Run the following commands and verify the resulting lines are uncommented on 
-designated log hosts and commented or removed on all others: 
-# grep '$ModLoad imtcp' /etc/rsyslog.conf /etc/rsyslog.d/*.conf 
- 
-$ModLoad imtcp 
- 
-# grep '$InputTCPServerRun' /etc/rsyslog.conf /etc/rsyslog.d/*.conf 
- 
-$InputTCPServerRun 514","For hosts that are designated as log hosts, edit the /etc/rsyslog.conf file and un-
-comment or add the following lines: 
-$ModLoad imtcp 
- 
-$InputTCPServerRun 514 
-For hosts that are not designated as log hosts, edit the /etc/rsyslog.conf file and 
-comment or remove the following lines: 
-# $ModLoad imtcp 
- 
-# $InputTCPServerRun 514 
-Run the following command to reload the rsyslogd configuration: 
-# systemctl restart rsyslog 
-References: 
-1. See the rsyslog(8) man page for more information."
-"4.2.2.1 Ensure journald is configured to send logs to rsyslog 
-(Automated)","Review /etc/systemd/journald.conf and verify that logs are forwarded to syslog 
-# grep -E ^\s*ForwardToSyslog /etc/systemd/journald.conf 
- 
-ForwardToSyslog=yes","Edit the /etc/systemd/journald.conf file and add the following line: 
-ForwardToSyslog=yes 
-References: 
-1. https://github.com/konstruktoid/hardening/blob/master/systemd.adoc#etcsyste
-mdjournaldconf"
-"4.2.2.2 Ensure journald is configured to compress large log files 
-(Automated)","Review /etc/systemd/journald.conf and verify that large files will be compressed: 
-# grep -E ^\s*Compress /etc/systemd/journald.conf 
- 
-Compress=yes","Edit the /etc/systemd/journald.conf file and add the following line: 
-Compress=yes 
-References: 
-1. https://github.com/konstruktoid/hardening/blob/master/systemd.adoc#etcsyste
-mdjournaldconf"
-"4.2.2.3 Ensure journald is configured to write logfiles to persistent disk 
-(Automated)","Review /etc/systemd/journald.conf and verify that logs are persisted to disk: 
-# grep -E ^\s*Storage /etc/systemd/journald.conf 
- 
-Storage=persistent","Edit the /etc/systemd/journald.conf file and add the following line: 
-Storage=persistent 
-References: 
-1. https://github.com/konstruktoid/hardening/blob/master/systemd.adoc#etcsyste
-mdjournaldconf"
-4.2.3 Ensure logrotate is configured (Manual),"Review /etc/logrotate.conf and /etc/logrotate.d/* and verify logs are rotated 
-according to site policy.","Edit /etc/logrotate.conf and /etc/logrotate.d/* to ensure logs are rotated according 
-to site policy."
-4.2.4 Ensure permissions on all logfiles are configured (Manual),"Run the following command and verify that other has no permissions on any files and 
-group does not have write or execute permissions on any files: 
-# find /var/log -type f -perm /g+wx,o+rwx  -exec ls -l {} \; 
- 
-Nothing should be returned","Run the following commands to set permissions on all existing log files: 
-# find /var/log -type f -exec chmod g-wx,o-rwx "{}" + 
-Note: The configuration for your logging software or services may need to also be modified for 
-any logs that had incorrect permissions, otherwise, the permissions may be reverted to the 
-incorrect permissions"
+echo "4.2.1.3 Ensure rsyslog default file permissions configured (Automated)"
+echo "\$FileCreateMode 0640" >> /etc/rsyslog.d/cis.conf
+
+echo "4.2.1.4 Ensure logging is configured (Manual),"
+ls -l /var/log/,
+systemctl restart rsyslog 
+
+echo "4.2.1.5 Ensure rsyslog is configured to send logs to a remote log host (Automated)"
+grep -E '^\s*([^#]+\s+)?action\(([^#]+\s+)?\btarget=\"?[^#"]+\"?\b' /etc/rsyslog.conf /etc/rsyslog.d/*.conf 
+#CHECK
+
+echo "4.2.1.6 Ensure remote rsyslog messages are only accepted on designated log hosts. (Manual)"
+grep '$ModLoad imtcp' /etc/rsyslog.conf /etc/rsyslog.d/*.conf 
+grep '$InputTCPServerRun' /etc/rsyslog.conf /etc/rsyslog.d/*.conf 
+
+echo "4.2.2.1 Ensure journald is configured to send logs to rsyslog (Automated)"
+echo "ForwardToSyslog=yes" >> /etc/systemd/journald.conf
+
+echo "4.2.2.2 Ensure journald is configured to compress large log files (Automated)"
+echo "Compress=yes" >> /etc/systemd/journald.conf
+
+echo "4.2.2.3 Ensure journald is configured to write logfiles to persistent disk (Automated)"
+echo "Storage=persistent" >> /etc/systemd/journald.conf
+
+echo "4.2.3 Ensure logrotate is configured (Manual)"
+echo "Review /etc/logrotate.conf and /etc/logrotate.d/* and verify logs are rotated according to site policy."
+
+echo "4.2.4 Ensure permissions on all logfiles are configured (Manual)"
+find /var/log -type f -perm /g+wx,o+rwx  -exec ls -l {} \; 
+find /var/log -type f -exec chmod g-wx,o-rwx "{}" + 
+
 5.1.1 Ensure cron daemon is enabled and running (Automated),"If cron is installed: 
 Run the following commands to verify cron is enabled and running: 
 # systemctl is-enabled crond 
