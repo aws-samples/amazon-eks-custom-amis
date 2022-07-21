@@ -3,7 +3,7 @@
 ################################################################
 # Wait for the cloud-init process to finish before moving
 # to the next step.
-# 
+#
 # Globals:
 #   None
 # Arguments:
@@ -30,7 +30,7 @@ get_arch() {
 
 ################################################################
 # Install the AWS CLI based on the CPU architecture.
-# 
+#
 # Globals:
 #   None
 # Arguments:
@@ -56,7 +56,7 @@ install_awscliv2() {
 
 ################################################################
 # Test if it is Amazon Linux 2
-# 
+#
 # Globals:
 #   None
 # Arguments:
@@ -70,143 +70,8 @@ is_amazonlinux2() {
 }
 
 ################################################################
-# Test if it is Ubuntu based released
-# 
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 - true
-#   1 - false
-################################################################
-is_ubuntu() {
-    [[ $(lsb_release -sd) == "Ubuntu"* ]]
-}
-
-################################################################
-# Test if it is Ubuntu 18.04
-# 
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 - true
-#   1 - false
-################################################################
-is_ubuntu_18() {
-    [[ $(lsb_release -sd) == "Ubuntu 18.04"* ]]
-}
-
-################################################################
-# Test if it is Ubuntu 20.04
-# 
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 - true
-#   1 - false
-################################################################
-is_ubuntu_20() {
-    [[ $(lsb_release -sd) = "Ubuntu 20.04"* ]]
-}
-
-################################################################
-# Test if it is Red Hat Enterprise Linux
-# 
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 - true
-#   1 - false
-################################################################
-is_rhel() {
-    [[ $(lsb_release -sd) == "\"Red Hat"* ]]
-}
-
-################################################################
-# Test if it is Red Hat Enterprise Linux 7
-# 
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 - true
-#   1 - false
-################################################################
-is_rhel_7() {
-    [[ $(lsb_release -sd) == "\"Red Hat Enterprise Linux Server release 7"* ]]
-}
-
-################################################################
-# Test if it is Red Hat Enterprise Linux 8
-# 
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 - true
-#   1 - false
-################################################################
-is_rhel_8() {
-    [[ $(lsb_release -sd) == "\"Red Hat Enterprise Linux release 8"* ]]
-}
-
-################################################################
-# Test if it is CentOS based release
-# 
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 - true
-#   1 - false
-################################################################
-is_centos() {
-    [[ $(lsb_release -sd) == "\"CentOS"* ]]
-}
-
-################################################################
-# Test if it is CentOS 7 release
-# 
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 - true
-#   1 - false
-################################################################
-is_centos_7() {
-    [[ $(lsb_release -sd) == "\"CentOS Linux release 7"* ]]
-}
-
-################################################################
-# Test if it is CentOS 8 release
-# 
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 - true
-#   1 - false
-################################################################
-is_centos_8() {
-    [[ $(lsb_release -sd) == "\"CentOS Linux release 8"* ]]
-}
-
-################################################################
 # Install the AWS SSM agent based on the operating system
-# 
+#
 # Globals:
 #   None
 # Arguments:
@@ -215,20 +80,13 @@ is_centos_8() {
 #   0 after a successful installation
 ################################################################
 install_ssmagent() {
-    if is_ubuntu; then
-        snap install amazon-ssm-agent --classic
-        systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
-        systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
-    else
-        yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-        systemctl enable amazon-ssm-agent && systemctl start amazon-ssm-agent
-    fi
-
+    yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+    systemctl enable amazon-ssm-agent && systemctl start amazon-ssm-agent
 }
 
 ################################################################
 # Install the OpenSCAP based on the operating system
-# 
+#
 # Globals:
 #   None
 # Arguments:
@@ -237,21 +95,12 @@ install_ssmagent() {
 #   0 after a successful installation
 ################################################################
 install_openscap() {
-    if is_rhel || is_centos; then
-        yum install -y openscap openscap-scanner scap-security-guide
-    elif is_amazonlinux2; then
-        yum install -y openscap openscap-scanner scap-security-guide
-    elif is_ubuntu; then
-        apt-get install -y libopenscap8 ssg-debian ssg-debderived
-    else
-        echo "failed to install the openscap libraries"
-        exit 1
-    fi
+    yum install -y openscap openscap-scanner scap-security-guide
 }
 
 ################################################################
 # Install jq based on the operating system
-# 
+#
 # Globals:
 #   None
 # Arguments:
@@ -266,7 +115,7 @@ install_jq() {
 
 ################################################################
 # Install iptables-restore service
-# 
+#
 # Globals:
 #   None
 # Arguments:
@@ -284,7 +133,7 @@ install_iptables_restore() {
 ################################################################
 # Generate the OpenSCAP fix shell script to harden to the
 # operating system
-# 
+#
 # Globals:
 #   None
 # Arguments:
@@ -322,7 +171,7 @@ oscap_generate_fix() {
 
 ################################################################
 # Migrate existing folder to a new partition
-# 
+#
 # Globals:
 #   None
 # Arguments:
@@ -367,7 +216,7 @@ migrate_and_mount_disk() {
 ################################################################
 # Partition the disks based on the standard layout for common
 # hardening frameworks
-# 
+#
 # Globals:
 #   None
 # Arguments:
@@ -401,7 +250,7 @@ partition_disks() {
 ################################################################
 # Configure the host with HTTP_PROXY, HTTPS_PROXY, and NO_PROXY
 # by setting values in /etc/environment
-# 
+#
 # Globals:
 #   None
 # Arguments:
@@ -444,42 +293,4 @@ configure_kubelet_environment() {
     mkdir -p "${kubelet_dir}"
     echo "[Service]" >> "${kubelet_env_file}"
     echo "EnvironmentFile=/etc/environment" >> "${kubelet_env_file}"
-}
-
-################################################################
-# Enable FIPS 140-2 mode on the operating system
-# 
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   None
-################################################################
-enable_fips() {
-    if is_rhel_7; then
-
-        # install dependencies
-        yum install -y dracut-fips-aesni dracut-fips
-
-        # we will configure FIPS ourselves as the generated STIG locks the OS
-        # configure dracut-fips
-        dracut -f
-
-        # udpate the kernel settings
-        grubby --update-kernel=ALL --args="fips=1"
-
-        # configure this to meet the stig checker
-        sed -i "/^GRUB_CMDLINE_LINUX/ s/\"$/ fips=1\"/" /etc/default/grub
-
-        # set the ssh ciphers
-        sed -i 's/^Cipher.*/Ciphers aes128-ctr,aes192-ctr,aes256-ctr/' /etc/ssh/sshd_config
-        sed -i 's/^MACs.*/MACs hmac-sha2-256,hmac-sha2-512/' /etc/ssh/sshd_config
-
-    elif is_rhel_8; then
-        fips-mode-setup --enable
-    else
-        echo "FIPS 140-2 is not supported on this operating system."
-        exit 1
-    fi
 }
