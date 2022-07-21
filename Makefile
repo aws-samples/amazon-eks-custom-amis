@@ -3,7 +3,7 @@ PACKER_VARIABLES := binary_bucket_name binary_bucket_region eks_version eks_buil
 VPC_ID := vpc-0e8cf1ce122b1b059
 SUBNET_ID := subnet-0eddf1d7d0f9f9772
 AWS_REGION := us-east-2
-PACKER_FILE := 
+PACKER_FILE :=
 
 EKS_BUILD_DATE := 2020-11-02
 EKS_115_VERSION := 1.15.12
@@ -138,46 +138,3 @@ build-centos8-1.18:
 
 build-centos8-1.19:
 	$(MAKE) build PACKER_FILE=amazon-eks-node-centos8.json eks_version=$(EKS_119_VERSION) eks_build_date=2021-01-05
-
-
-# Windows 1809 Full
-#-----------------------------------------------------
-build-windows1809full-1.16:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809full.json eks_version=1.16
-
-build-windows1809full-1.17:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809full.json eks_version=1.17
-
-build-windows1809full-1.18:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809full.json eks_version=1.18
-
-build-windows1809full-1.19:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809full.json eks_version=1.19
-
-# Windows 1809 Core
-#-----------------------------------------------------
-build-windows1809core-1.16:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809core.json eks_version=1.16
-
-build-windows1809core-1.17:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809core.json eks_version=1.17
-
-build-windows1809core-1.18:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809core.json eks_version=1.18
-
-build-windows1809core-1.19:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-windows1809core.json eks_version=1.19
-
-# Windows 2004 Core
-#-----------------------------------------------------
-build-windows2004core-1.16:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-windows2004core.json eks_version=1.16
-
-build-windows2004core-1.17:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-windows2004core.json eks_version=1.17
-
-build-windows2004core-1.18:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-windows2004core.json eks_version=1.18
-
-build-windows2004core-1.19:
-	$(MAKE) build PACKER_FILE=amazon-eks-node-windows2004core.json eks_version=1.19
