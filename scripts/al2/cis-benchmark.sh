@@ -53,19 +53,13 @@ set_conf_value() {
 echo "1.1.1.1 - ensure mounting of cramfs filesystems is disabled"
 unload_module cramfs
 
-echo "1.1.1.2 - ensure mounting of hfs filesystems is disabled"
-unload_module hfs
-
-echo "1.1.1.3 - ensure mounting of hfsplus filesystems is disabled"
-unload_module hfsplus
-
-echo "1.1.1.4 - ensure mounting of squashfs filesystems is disabled"
+echo "1.1.1.2 - ensure mounting of squashfs filesystems is disabled"
 unload_module squashfs
 
-echo "1.1.1.5 - ensure mounting of udf filesystems is disabled"
+echo "1.1.1.3 - ensure mounting of udf filesystems is disabled"
 unload_module udf
 
-echo "1.1.2 - 1.1.5 - ensure /tmp is configured nodev,nosuid,noexec options set on  /tmp partition"
+echo "1.1.2 - 1.1.5 - ensure /tmp is configured noexec,nodev,nosuid options set on  /tmp partition"
 systemctl unmask tmp.mount && systemctl enable tmp.mount
 
 cat > /etc/systemd/system/local-fs.target.wants/tmp.mount <<EOF
@@ -91,29 +85,36 @@ EOF
 
 systemctl daemon-reload && systemctl restart tmp.mount
 
-echo "1.1.6 - ensure separate partition exists for /var"
-
-echo "1.1.7 - 1.1.10 - ensure separate partition exists for /var/tmp nodev, nosuid, noexec option set"
-tmpfs_and_mount /var/tmp
-
-echo "1.1.11 - ensure separate partition exists for /var/log"
-
-echo "1.1.12 - ensure separate partition exists for /var/log/audit"
-
-echo "1.1.13 - ensure separate partition exists for /home"
-
-echo "1.1.15 - 1.1.17 - ensure nodev,nosuid,noexec option set on /dev/shm"
+echo "1.1.6 - 1.1.9 - ensure noexec,nodev,nosuid option set on /dev/shm"
 echo "tmpfs  /dev/shm  tmpfs  defaults,nodev,nosuid,noexec  0 0" >> /etc/fstab
 mount -a
 
-echo "1.1.19 - disable automounting"
-systemd_disable autofs
+echo "1.1.10 - ensure separate partition exists for /var"
 
-echo "1.2.1 - ensure package manager repositories are configured"
-yum repolist
+echo "1.1.11 - 1.1.14 - ensure separate partition exists for /var/tmp noexec,nodev,nosuid option set"
+tmpfs_and_mount /var/tmp
 
-echo "1.2.2 - ensure GPG keys are configured"
+echo "1.1.15 - ensure separate partition exists for /var/log"
+
+echo "1.1.16 - ensure separate partition exists for /var/log/audit"
+
+echo "1.1.17 - 1.1.18 - ensure separate partition exists for /home nodev option set"
+
+echo "1.1.19 - 1.1.21 - ensure removable media partitions include noexec,nodev,nosuid option"
+
+echo "1.1.22 - ensure sticky bit is set on all world-writable directories"
+
+echo "1.1.23 - disable automounting"
+yum_remove autofs
+
+echo "1.1.24 - disable usb storage"
+echo "install usb-storage /bin/true" > /etc/modprobe.d/usb_storage.conf
+
+echo "1.2.1 - ensure GPG keys are configured"
 rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} --> %{summary}\n'
+
+echo "1.2.2 - ensure package manager repositories are configured"
+yum repolist
 
 echo "1.2.3 - ensure gpgcheck is globally activated"
 grep ^gpgcheck /etc/yum.conf
@@ -186,11 +187,16 @@ echo "1.5.1 - ensure core dumps are restricted"
 echo "* hard core 0" > /etc/security/limits.d/cis.conf
 sysctl_entry "fs.suid_dumpable = 0"
 
-echo "1.5.2 - ensure address space layout randomization (ASLR) is enabled"
+echo "1.5.2 - ensure XD/NX support is enabled"
+
+echo "1.5.3 - ensure address space layout randomization (ASLR) is enabled"
 sysctl_entry "kernel.randomize_va_space = 2"
 
-echo "1.5.3 - ensure prelink is disabled"
+echo "1.5.4 - ensure prelink is disabled"
 yum_remove prelink
+
+echo "1.6.1.4 - ensure the SELinux mode is enforcing or permissive"
+sed -i 's/SELINUX=disabled/SELINUX=enforcing/g' /etc/selinux/config
 
 echo "1.7.1.1 - ensure message of the day is configured properly"
 rm -f /etc/cron.d/update-motd
@@ -247,69 +253,63 @@ chmod 644 /etc/issue.net
 echo "1.8 - ensure updates, patches, and additional security software are installed"
 yum update -y
 
-echo "2.1.2 - ensure X Window System is not installed"
+echo "2.1.2 - ensure X11 Window System is not installed"
 yum_remove xorg-x11*
 
-echo "2.1.3 - ensure Avahi Server is not enabled"
-systemd_disable avahi-daemon
+echo "2.1.3 - ensure Avahi Server is not installed"
+yum_remove avahi-daemon
 
-echo "2.1.4 - ensure CUPS is not enabled"
-systemd_disable cups
+echo "2.1.4 - ensure CUPS is not installed"
+yum_remove cups
 
-echo "2.1.5 - ensure DHCP Server is not enabled"
-systemd_disable dhcpd
+echo "2.1.5 - ensure DHCP Server is not installed"
+yum_remove dhcpd
 
-echo "2.1.6 - ensure LDAP Server is not enabled"
-systemd_disable slapd
+echo "2.1.6 - ensure LDAP Server is not installed"
+yum_remove slapd
 
-echo "2.1.7 - ensure NFS and RPC are not enabled"
-systemd_disable nfs
-systemd_disable nfs-server
-systemd_disable rpcbind
+echo "2.1.7 - ensure DNS Server is not installed"
+yum_remove bind
 
-echo "2.1.8 - ensure DNS Server is not enabled"
-systemd_disable named
+echo "2.1.8 - ensure FTP Server is not installed"
+yum_remove vsftpd
 
-echo "2.1.9 - ensure FTP Server is not enabled"
-systemd_disable vsftpd
+echo "2.1.9 - ensure HTTP Server is not installed"
+yum_remove httpd
 
-echo "2.1.10 - ensure HTTP Server is not enabled"
-systemd_disable httpd
+echo "2.1.10 - ensure IMAP and POP3 Server is not installed"
+yum_remove dovecot
 
-echo "2.1.11 - ensure IMAP and POP3 Server is not enabled"
-systemd_disable dovecot
+echo "2.1.11 - ensure Samba is not installed"
+yum_remove samba
 
-echo "2.1.12 - ensure Samba is not enabled"
-systemd_disable smb
+echo "2.1.12 - ensure HTTP Proxy Server is not installed"
+yum_remove squid
 
-echo "2.1.13 - ensure HTTP Proxy Server is not enabled"
-systemd_disable squid
+echo "2.1.13 - ensure net SNMP Server is not installed"
+yum_remove net-snmp
 
-echo "2.1.14 - ensure SNMP Server is not enabled"
-systemd_disable snmpd
+echo "2.1.14 - ensure NIS Server is not installed"
+yum_remove ypserv
 
-echo "2.1.15 - ensure mail transfer agent is configured for local-only mode"
+echo "2.1.15 - ensure telnet Server is not installed"
+yum_remove telnet-server
+
+echo "2.1.16 - ensure mail transfer agent is configured for local-only mode"
 netstat -an | grep LIST | grep ":25[[:space:]]"
 
-echo "2.1.16 - ensure NIS Server is not enabled"
-systemd_disable ypserv
+echo "2.1.17 - 2.1.18 - ensure NFS and RPC are not enabled"
+systemd_disable nfs-utils
+systemd_disable nfs-server
+systemd_disable rpcbind
 
 echo "2.1.17 - ensure rsh Server is not enabled"
 systemd_disable rsh.socket
 systemd_disable rlogin.socket
 systemd_disable rexec.socket
 
-echo "2.1.18 - ensure telnet Server is not enabled"
-systemd_disable telnet.socket
-
-echo "2.1.19 - ensure tftp Server is not enabled"
-systemd_disable tftp.socket
-
-echo "2.1.20 - ensure rsync service is not enabled"
+echo "2.1.19 - ensure rsync is not installed or the rsyncd service is masked"
 systemd_disable rsyncd
-
-echo "2.1.21 - ensure talk service is not enabled"
-systemd_disable ntalk
 
 echo "2.2.1 - ensure NIS Client is not installed"
 yum_remove ypbind
