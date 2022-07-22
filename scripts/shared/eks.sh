@@ -6,46 +6,7 @@ set -o errexit
 
 source /etc/packer/files/functions.sh
 
-################################################################################
-### Machine Architecture #######################################################
-################################################################################
 ARCH=$(get_arch)
-
-# install dependencies
-
-if (is_rhel && is_rhel_8) || (is_centos && is_centos_8); then
-
-    dnf install -y \
-        conntrack \
-        curl \
-        nfs-utils \
-        socat \
-        unzip
-
-elif (is_rhel && is_rhel_7) || (is_centos && is_centos_7); then
-
-    yum install -y \
-        conntrack \
-        curl \
-        nfs-utils \
-        socat \
-        unzip
-
-elif is_ubuntu; then
-
-    apt-get install -y \
-        conntrack \
-        curl \
-        socat \
-        unzip \
-        nfs-common
-
-else
-
-    echo "Could not install EKS dependencies, OS not supported!"
-    exit 1
-
-fi
 
 ################################################################################
 ### iptables ###################################################################
