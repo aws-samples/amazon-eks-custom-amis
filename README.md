@@ -1,26 +1,19 @@
-# Amazon EKS Sample Custom AMIs
+# Amazon EKS Custom AMIs
 
-This repository contains [Packer](https://packer.io/) scripts and definitions to create custom AMIs for use with [Amazon EKS via self-managed Auto Scaling Groups](https://docs.aws.amazon.com/eks/latest/userguide/worker.html) and [Managed Node Groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html).  Many organizations require running custom AMIs for security, compliance, or internal policy requirements. **The Amazon EKS Optimized AMI remains the preferred way to deploy containers on Amazon EKS, these AMIs aim to provide a starting place for customers looking to implement custom AMIs with operating systems other than Amazon Linux.** The AMIs built in this repository are based on the [Amazon EKS optimized AMI published by AWS](https://github.com/awslabs/amazon-eks-ami).
+This repository contains [Packer](https://packer.io/) configurations to create custom AMIs based on the [Amazon EKS optimized AMI](https://github.com/awslabs/amazon-eks-ami). The Amazon EKS Optimized AMI remains the preferred way to deploy containers on Amazon EKS and the configurations provided here are intended to provide a starting point for customers looking to implement custom EKS Optimized AMIs to meet additional security and compliance requirements.
 
-This repository also applies the Docker CIS Benchmark and Amazon EKS CIS Benchmark to all AMIs. We also support a number of optional hardening benchmarks such as DISA STIG, PCI-DSS, and HIPAA. These are based on [OpenSCAP](https://www.open-scap.org/) and other open source hardening guidelines.
+This project applies the Docker CIS Benchmark and Amazon EKS CIS Benchmark to all AMIs. It also provides a number of additional hardening benchmarks such as DISA STIG, PCI-DSS, and HIPAA. These are based on [OpenSCAP](https://www.open-scap.org/) and other open source hardening guidelines.
 
-*Scripts and artifacts created by this repository do not guarantee compliance and these AMIs are not officially supported by AWS. Ensure your security and compliance teams thoroughly review these scripts before moving AMIs into production.*
+_Scripts and artifacts created by this repository do not guarantee compliance nor are these AMIs are not officially supported by AWS. It is up to users to review and validate for their individual use cases._
 
-Lack of support in this repository does not indicate that you can't meet compliance with Amazon EKS, it simply means it is not supported by this repository. We welcome pull requests!
+| Distribution | Version | Architecture |     Available      | Supported Hardening |
+| :----------- | :-----: | :----------: | :----------------: | ------------------- |
+| Amazon Linux |    2    |    x86_64    | :white_check_mark: | CIS Benchmark       |
+| Amazon Linux |    2    |    arm64     | :white_check_mark: | CIS Benchmark       |
 
-| Distribution | Version | Available | Supported Hardening |
-|:---|:---:|:---:|:---:|
-| Amazon Linux | 2 | :white_check_mark: | CIS Benchmark |
+## Prerequisites
 
-## Installing Dependencies
-
-This repository uses [Packer](https://packer.io/) to build AMIs. You can install these tools from their respective websites or via [Homebrew](https://brew.sh/).
-
-```bash
-brew install packer
-```
-
-You will also need to provision a VPC with a single public Subnet. You can leverage an existing VPC and Subnet or create one via the console. You will need the VPC ID and Subnet ID for the builds.
+- [Packer](https://packer.io/) v1.7+ - [installation instructions](https://learn.hashicorp.com/tutorials/packer/get-started-install-cli)
 
 ## Usage
 
@@ -30,24 +23,24 @@ The Packer commands are encapsulated in Make commands. Packer handles provisioni
 make build-<operating system>-<eks major version>
 ```
 
-| Parameter | Default | Description |
-|-----------|:-------:|-------------|
-| `AWS_REGION` | | The AWS Region to use for the packer instance |
-| `VPC_ID` | | The AWS VPC to use for the packer instance |
-| `SUBNET_ID`| | The AWS Subnet to use for the packer instance |
-| `eks_version`| `1.18.9` | The version of Kubernetes to install. See blow for information on how to get this value. |
-| `eks_build_date`| `2020-11-02` | The build date of the Kubernetes build |
-| `cni_plugin_version`| `v0.8.6` | The version of the Kubernetes Container Networking Interface (CNI) plugin to install |
-| `http_proxy` |  | Specify an HTTP Proxy to use when running commands on the server. This will set the `http_proxy` and `HTTP_PROXY` environment variables on the server while commands are running. |
-| `https_proxy` |  | Specify an HTTPS Proxy to use when running commands on the server. This will set the `https_proxy` and `HTTPS_PROXY` environment variables on the server while commands are running. |
-| `no_proxy` |  | Specify the no proxy configuration to use when running commands on the server. This will set the `no_proxy` and `NO_PROXY` environment variables on the server while commands are running. |
-| `hardening_flag` | `false` | This flag specifies the hardening to apply to the instance. The default is only the Docker and EKS benchmark. |
-| `root_volume_size` | `10` | The size of the root volume on the host. |
-| `data_volume_size` | `50` | The size of the data volume that is attached to those. This volume houses docker, var, and logs. |
+| Parameter            |   Default    | Description                                                                                                                                                                                |
+| -------------------- | :----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `AWS_REGION`         |              | The AWS Region to use for the packer instance                                                                                                                                              |
+| `VPC_ID`             |              | The AWS VPC to use for the packer instance                                                                                                                                                 |
+| `SUBNET_ID`          |              | The AWS Subnet to use for the packer instance                                                                                                                                              |
+| `eks_version`        |   `1.18.9`   | The version of Kubernetes to install. See blow for information on how to get this value.                                                                                                   |
+| `eks_build_date`     | `2020-11-02` | The build date of the Kubernetes build                                                                                                                                                     |
+| `cni_plugin_version` |   `v0.8.6`   | The version of the Kubernetes Container Networking Interface (CNI) plugin to install                                                                                                       |
+| `http_proxy`         |              | Specify an HTTP Proxy to use when running commands on the server. This will set the `http_proxy` and `HTTP_PROXY` environment variables on the server while commands are running.          |
+| `https_proxy`        |              | Specify an HTTPS Proxy to use when running commands on the server. This will set the `https_proxy` and `HTTPS_PROXY` environment variables on the server while commands are running.       |
+| `no_proxy`           |              | Specify the no proxy configuration to use when running commands on the server. This will set the `no_proxy` and `NO_PROXY` environment variables on the server while commands are running. |
+| `hardening_flag`     |   `false`    | This flag specifies the hardening to apply to the instance. The default is only the Docker and EKS benchmark.                                                                              |
+| `root_volume_size`   |     `10`     | The size of the root volume on the host.                                                                                                                                                   |
+| `data_volume_size`   |     `50`     | The size of the data volume that is attached to those. This volume houses docker, var, and logs.                                                                                           |
 
 ### Using the AMI
 
-The AMI can be used with [self-managed node groups](https://docs.aws.amazon.com/eks/latest/userguide/worker.html) and [managed node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) within EKS. The AMIs built in this repository use the same [bootstrap script](https://github.com/awslabs/amazon-eks-ami/blob/master/files/bootstrap.sh) used in the EKS Optimized AMI. To join the cluster, run the following command on boot:
+The AMI can be used with [self-managed node groups](https://docs.aws.amazon.com/eks/latest/userguide/worker.html) and [EKS managed node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) within EKS. The AMIs built in this repository use the same [bootstrap script](https://github.com/awslabs/amazon-eks-ami/blob/master/files/bootstrap.sh) used in the EKS Optimized AMI. To join the cluster, run the following command on boot:
 
 ```bash
 /etc/eks/bootstrap.sh <cluster name> --kubelet-extra-args '--node-labels=eks.amazonaws.com/nodegroup=<node group name>,eks.amazonaws.com/nodegroup-image=<ami id>'
@@ -86,9 +79,9 @@ The following operating systems are supported by this repository. This repositor
 
 #### Amazon Linux
 
-| Distribution | Version | Build Command | CIS Benchmark |
-|:---|:---:|:---:|:---:|
-| Amazon Linux | 2 | `build-al2-<eks major version>` | `hardening_flag=cis` |
+| Distribution | Version |          Build Command          |    CIS Benchmark     |
+| :----------- | :-----: | :-----------------------------: | :------------------: |
+| Amazon Linux |    2    | `build-al2-<eks major version>` | `hardening_flag=cis` |
 
 The Amazon Linux 2 EKS Optmized AMI is used as the base for this image. This image extends the EKS Optimized AMI to apply the Amazon Linux 2 CIS Benchmark, Docker CIS Benchmark, and Amazon EKS CIS Benchmark. These benchmarks are typically used to meet NIST 800-53 controls. Hardening is provided as a "best effort" and does not guarantee compliance with the above frameworks.
 
@@ -111,11 +104,11 @@ make build-al2-1.18
 Amazon EKS builds and tests specific versions of Kubernetes together for compatability. It is important that you use versions that have been tested together.
 
 | Kubernetes Version | Build Date |
-|---|:---:|
-| 1.18.9 | 2020-11-02 |
-| 1.17.12 | 2020-11-02 |
-| 1.16.15 | 2020-11-02 |
-| 1.15.12 | 2020-11-02 |
+| ------------------ | :--------: |
+| 1.18.9             | 2020-11-02 |
+| 1.17.12            | 2020-11-02 |
+| 1.16.15            | 2020-11-02 |
+| 1.15.12            | 2020-11-02 |
 
 To get the list of support Kubernetes versions run the following command:
 
