@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Amazon EKS AMI Build Specification
+    url: https://github.com/awslabs/amazon-eks-ami
+    about: Packer configuration for building an EKS AMI
+  - name: Amazon EKS optimized Amazon Linux AMIs
+    url: https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html
+    about: Amazon EKS optimized Amazon Linux AMIs documentation
+  - name: AWS Containers Roadmap
+    url: https://github.com/aws/containers-roadmap
+    about: The public roadmap for AWS container services (ECS, ECR, Fargate, and EKS)
