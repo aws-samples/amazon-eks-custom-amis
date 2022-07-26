@@ -52,9 +52,3 @@ module "vpc" {
 
   tags = local.tags
 }
-
-resource "aws_ssm_parameter" "subnet_id" {
-  name  = "/amazon-eks-custom-amis/tests/subnet-id"
-  type  = "String"
-  value = element(module.vpc.public_subnets, 0)
-}

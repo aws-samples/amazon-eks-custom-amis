@@ -23,12 +23,6 @@ data "amazon-ami" "this" {
   region = var.aws_region
 }
 
-data "amazon-parameterstore" "subnet_id" {
-  name            = "/amazon-eks-custom-amis/tests/subnet-id"
-  with_decryption = false
-  region          = var.aws_region
-}
-
 source "amazon-ebs" "this" {
   ami_block_device_mappings {
     delete_on_termination = true
@@ -65,7 +59,7 @@ source "amazon-ebs" "this" {
   source_ami   = data.amazon-ami.this.id
   ssh_pty      = true
   ssh_username = var.source_ami_ssh_user
-  subnet_id    = coalesce(var.subnet_id, local.e2_test_subnet_id)
+  subnet_id    = var.subnet_id
 
   tags = {
     os_version        = "Amazon Linux 2"
