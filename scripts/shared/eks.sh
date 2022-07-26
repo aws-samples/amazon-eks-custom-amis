@@ -4,7 +4,7 @@ set -o pipefail
 set -o nounset
 set -o errexit
 
-source /etc/packer/files/functions.sh
+source /tmp/functions.sh
 
 ARCH=$(get_arch)
 

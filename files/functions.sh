@@ -1,20 +1,5 @@
 #!/usr/bin/env bash
 
-################################################################
-# Wait for the cloud-init process to finish before moving
-# to the next step.
-#
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 finishes when the cloud-init process is complete
-################################################################
-wait_for_cloudinit() {
-    cloud-init status --wait
-}
-
 get_arch() {
     local machine_arch=$(uname -m)
 
@@ -26,91 +11,6 @@ get_arch() {
         echo "Unknown machine architecture '$MACHINE'" >&2
         exit 1
     fi
-}
-
-################################################################
-# Install the AWS CLI based on the CPU architecture.
-#
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 after a successful installation
-################################################################
-install_awscliv2() {
-    local awscli_package_name="awscliv2.zip"
-
-    # download the awscli package from aws
-    curl -sL -o $awscli_package_name "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip"
-
-    # unzip the package
-    unzip $awscli_package_name
-
-    # install the aws cli package
-    ./aws/install -i /usr/local/aws-cli -b /usr/bin
-
-    # cleanup the installer
-    rm -f $awscli_package_name
-}
-
-################################################################
-# Test if it is Amazon Linux 2
-#
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 - true
-#   1 - false
-################################################################
-is_amazonlinux2() {
-    [[ $(lsb_release -sd) == "\"Amazon Linux release 2"* ]]
-}
-
-################################################################
-# Install the AWS SSM agent based on the operating system
-#
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 after a successful installation
-################################################################
-install_ssmagent() {
-    yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-    systemctl enable amazon-ssm-agent && systemctl start amazon-ssm-agent
-}
-
-################################################################
-# Install the OpenSCAP based on the operating system
-#
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   0 after a successful installation
-################################################################
-install_openscap() {
-    yum install -y openscap openscap-scanner scap-security-guide
-}
-
-################################################################
-# Install jq based on the operating system
-#
-# Globals:
-#   None
-# Arguments:
-#   None
-# Outputs:
-#   None
-################################################################
-install_jq() {
-    curl -sL -o /usr/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
-    chmod +x /usr/bin/jq
 }
 
 ################################################################
@@ -149,7 +49,7 @@ oscap_generate_fix() {
     local oscap_tailoring_file=${3:-}
 
     # install openscap dependencies
-    install_openscap
+    yum install -y openscap openscap-scanner scap-security-guide
 
     # check if the tailoring file is provided
     if [ ! -z "${oscap_tailoring_file}" ]; then
