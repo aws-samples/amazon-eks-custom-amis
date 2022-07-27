@@ -21,7 +21,6 @@ migrate_and_mount_disk() {
     local folder_path=$2
     local mount_options=$3
     local temp_path="/mnt${folder_path}"
-    local old_path="${folder_path}-old"
 
     # install an ext4 filesystem to the disk
     mkfs -t ext4 ${disk_name}
@@ -31,7 +30,7 @@ migrate_and_mount_disk() {
         mkdir -p ${temp_path}
         mount ${disk_name} ${temp_path}
         cp -Rax ${folder_path}/* ${temp_path}
-        mv ${folder_path} ${old_path}
+        rm -rf ${folder_path}
         umount ${disk_name}
     fi
 
