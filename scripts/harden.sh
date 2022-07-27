@@ -4,8 +4,6 @@ set -o pipefail
 set -o nounset
 set -o errexit
 
-source /tmp/functions.sh
-
 # enable dod stig
 if [ "${HARDENING_FLAG}" = "nist" ]; then
 
@@ -18,5 +16,4 @@ if [ "${HARDENING_FLAG}" = "nist" ]; then
 
     # rebuild grub
     grub2-mkconfig -o /etc/grub2.cfg
-
 fi

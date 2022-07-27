@@ -10,12 +10,7 @@ rm -rf /var/cache/yum
 
 # Clean up files to reduce confusion during debug
 rm -rf \
-    /var-old \
-    /var/log-old \
-    /var/log/audit-old \
-    /home-old \
     /etc/packer \
-    /var/lib/docker-old \
     /etc/hostname \
     /etc/machine-id \
     /etc/resolv.conf \
