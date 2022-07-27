@@ -21,17 +21,21 @@ migrate_and_mount_disk() {
     local folder_path=$2
     local mount_options=$3
     local temp_path="/mnt${folder_path}"
+    local old_path="${folder_path}-old"
 
     # install an ext4 filesystem to the disk
     mkfs -t ext4 ${disk_name}
 
     # check if the folder already exists
     if [ -d "${folder_path}" ]; then
+        FILE=$(ls -A ${folder_path})
+        >&2 echo $FILE
         mkdir -p ${temp_path}
         mount ${disk_name} ${temp_path}
-        cp -Rax ${folder_path}/* ${temp_path}
-        rm -rf ${folder_path}
-        umount ${disk_name}
+        # Empty folder give error on /*
+        if [ ! -z "$FILE" ]; then
+            cp -Rax ${folder_path}/* ${temp_path}
+        fi
     fi
 
     # create the folder
@@ -67,6 +71,7 @@ migrate_and_mount_disk "${disk_name}p2" /var/log        defaults,nofail,nodev,no
 migrate_and_mount_disk "${disk_name}p3" /var/log/audit  defaults,nofail,nodev,nosuid
 migrate_and_mount_disk "${disk_name}p4" /home           defaults,nofail,nodev,nosuid
 
-systemctl start docker
+# Create folder instead of starting/stopping docker daemon
+mkdir -p /var/lib/docker
+chown -R root:docker /var/lib/docker
 migrate_and_mount_disk "${disk_name}p5" /var/lib/docker defaults,nofail
-systemctl stop docker
