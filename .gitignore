@@ -9,3 +9,6 @@ crash.log
 
 # For built boxes
 *.box
+
+# Macos
+.DS_Store

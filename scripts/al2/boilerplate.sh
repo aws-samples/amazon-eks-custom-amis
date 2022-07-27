@@ -4,10 +4,7 @@ set -o pipefail
 set -o nounset
 set -o errexit
 
-source /etc/packer/files/functions.sh
-
-# wait for cloud-init to finish
-wait_for_cloudinit
+source /tmp/functions.sh
 
 # upgrade the operating system
 yum update -y && yum autoremove -y
