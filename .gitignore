@@ -10,11 +10,5 @@ crash.log
 # For built boxes
 *.box
 
-# Static checks
-packer
-manifest.json
-shfmt
-shellcheck
-
 # Macos
 .DS_Store
