@@ -6,14 +6,14 @@ variable "aws_region" {
 
 variable "data_volume_size" {
   description = "Size of the AMI data EBS volume"
-  type        = string
-  default     = "50"
+  type        = number
+  default     = 50
 }
 
 variable "root_volume_size" {
   description = "Size of the AMI root EBS volume"
-  type        = string
-  default     = "10"
+  type        = number
+  default     = 10
 }
 
 variable "eks_version" {

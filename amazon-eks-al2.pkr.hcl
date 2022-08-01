@@ -2,8 +2,6 @@ locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
 
   target_ami_name = "${var.ami_name_prefix}-${var.eks_version}-${local.timestamp}"
-
-  e2_test_subnet_id = data.amazon-parameterstore.subnet_id.value
 }
 
 data "amazon-ami" "this" {
@@ -71,9 +69,11 @@ source "amazon-ebs" "this" {
 build {
   sources = ["source.amazon-ebs.this"]
 
-  provisioner "file" {
-    source      = "files/functions.sh"
-    destination = "/tmp/functions.sh"
+  provisioner "shell" {
+    execute_command   = "echo 'packer' | {{ .Vars }} sudo -S -E bash -eux '{{ .Path }}'"
+    expect_disconnect = true
+    pause_after       = "15s"
+    script            = "scripts/update.sh"
   }
 
   provisioner "shell" {
@@ -86,22 +86,21 @@ build {
 
     expect_disconnect = true
     pause_after       = "15s"
-    script            = "./scripts/al2/boilerplate.sh"
+    scripts = [
+      "scripts/partition-disks.sh",
+      "scripts/configure-proxy.sh",
+      "scripts/configure-containers.sh",
+    ]
   }
 
   provisioner "shell" {
     execute_command = "echo 'packer' | {{ .Vars }} sudo -S -E bash -eux '{{ .Path }}'"
-    environment_vars = [
-      "HTTP_PROXY=${var.http_proxy}",
-      "HTTPS_PROXY=${var.https_proxy}",
-      "NO_PROXY=${var.no_proxy}",
-    ]
 
     scripts = [
-      "./scripts/al2/cis-benchmark.sh",
-      "./scripts/shared/cis-docker.sh",
-      "./scripts/shared/cis-eks.sh",
-      "./scripts/al2/cleanup.sh",
+      "scripts/cis-benchmark.sh",
+      "scripts/cis-docker.sh",
+      "scripts/cis-eks.sh",
+      "scripts/cleanup.sh",
     ]
   }
 }
