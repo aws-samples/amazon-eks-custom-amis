@@ -126,7 +126,7 @@ aide --init
 mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
 
 echo "1.3.2 - ensure filesystem integrity is regularly checked"
-echo "0 5 * * * /usr/sbin/aide --check" > /etc/cron.d/aide
+echo "0 5 * * * root /usr/sbin/aide --check" > /etc/cron.d/aide
 
 echo "1.4.1 - ensure permissions on bootloader config are configured"
 chown root:root /boot/grub2/grub.cfg
