@@ -64,7 +64,7 @@ cat > /etc/docker/daemon.json <<EOF
       "Hard": 200,
       "Soft": 100
     },
-    "nofile": {
+    "nproc": {
       "Name": "nproc",
       "Hard": 2048,
       "Soft": 1024
