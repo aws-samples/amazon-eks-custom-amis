@@ -1,7 +1,7 @@
 locals {
   timestamp = regex_replace(timestamp(), "[- TZ:]", "")
 
-  target_ami_name = "${var.ami_name_prefix}-${var.eks_version}-${local.timestamp}"
+  target_ami_name = "${var.target_ami_name_prefix}-${var.eks_version}-${local.timestamp}"
 }
 
 data "amazon-ami" "this" {
@@ -54,10 +54,12 @@ source "amazon-ebs" "this" {
     Name = local.target_ami_name
   }
 
-  source_ami   = data.amazon-ami.this.id
-  ssh_pty      = true
-  ssh_username = var.source_ami_ssh_user
-  subnet_id    = var.subnet_id
+  source_ami                  = data.amazon-ami.this.id
+  ssh_pty                     = true
+  ssh_username                = var.source_ami_ssh_user
+  subnet_id                   = var.subnet_id
+  associate_public_ip_address = var.associate_public_ip_address
+  
 
   tags = {
     os_version        = "Amazon Linux 2"
