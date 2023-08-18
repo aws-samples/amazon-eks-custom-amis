@@ -1,7 +1,5 @@
-ami_name_prefix = "amazon-eks-arm64"
-ami_type        = "amazon-linux-2-arm64"
-ami_description = "Amazon EKS Kubernetes arm64 AMI based on AmazonLinux2 OS"
-instance_type   = "c6g.large"
+instance_type   = "c6i.large"
+ami_description = "Amazon EKS Kubernetes AMI based on AmazonLinux2 OS"
 
 ami_block_device_mappings = [
   {

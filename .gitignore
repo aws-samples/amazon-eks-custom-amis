@@ -1,6 +1,3 @@
-# Ansible retry
-*.retry
-
 # Cache objects
 packer_cache/
 
@@ -10,5 +7,10 @@ crash.log
 # For built boxes
 *.box
 
-# Macos
+# Editors
+*.swp
+.idea
 .DS_Store
+
+# Temp dir
+temp
