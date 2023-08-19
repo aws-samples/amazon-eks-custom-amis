@@ -77,7 +77,19 @@ variable "instance_type" {
 }
 
 variable "ami_name_prefix" {
-  description = "The prefix to use when creating the AMI name. i.e. - `<ami_name_prefix>-<eks_version>-<timestamp>"
+  description = "The prefix identifying the source AMI to use when creating the AMI. i.e. - `<ami_name_prefix>-<eks_version>-<timestamp>"
   type        = string
   default     = "amazon-eks-node"
+}
+
+variable "associate_public_ip_address" {
+  description = "If using a non-default VPC, public IP addresses are not provided by default. If this is true, your new instance will get a Public IP."
+  type        = string
+  default     = null
+}
+
+variable "target_ami_name_prefix" {
+  description = "The prefix to use when creating the AMI name. i.e. - `<target_ami_name_prefix>-<eks_version>-<timestamp>"
+  type        = string
+  default     = "custom-eks-node"
 }
