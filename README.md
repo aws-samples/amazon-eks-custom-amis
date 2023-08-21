@@ -1,22 +1,22 @@
 # Amazon EKS Custom AMIs
 
-This repository contains [Packer](https://packer.io/) configurations to create custom AMIs based on the [Amazon EKS optimized AMI](https://github.com/awslabs/amazon-eks-ami). The Amazon EKS Optimized AMI remains the preferred way to deploy containers on Amazon EKS and the configurations provided here are intended to provide a starting point for customers looking to implement custom EKS Optimized AMIs to meet additional security and compliance requirements.
+This repository contains [Packer](https://packer.io/) configurations to create custom AMIs based on the [Amazon EKS optimized AMI](https://github.com/awslabs/amazon-eks-ami). The Amazon EKS Optimized AMI remains the preferred way to deploy containers on Amazon EKS. The configurations provided in this project are intended to help support scenarios where further control and customization is required on EKS AMIs.
 
-This project applies the Docker CIS Benchmark and Amazon EKS CIS Benchmark to all AMIs. It also provides a number of additional hardening benchmarks such as DISA STIG, PCI-DSS, and HIPAA. These are based on [OpenSCAP](https://www.open-scap.org/) and other open source hardening guidelines.
+## Support & Feedback
 
-_Scripts and artifacts created by this repository do not guarantee compliance nor are these AMIs are not officially supported by AWS. It is up to users to review and validate for their individual use cases._
+This project is maintained by AWS Solution Architects and Consultants. It is not part of an AWS service and best-effort support is provided by the maintainers. To post feedback, submit feature ideas, or report bugs, please use the [Issues section](https://github.com/aws-samples/amazon-eks-custom-amis/issues) of this repo. If you are interested in contributing, please see the [Contribution guide](https://github.com/aws-samples/amazon-eks-custom-amis/blob/main/CONTRIBUTING.md).
 
-## Supported Distributions
+_Scripts and artifacts created by this repository do not guarantee compliance. It is up to users to review and validate for their individual use cases._
 
-The following AMI distributions are supported by this repository. This repository is not officially supported by AWS or Amazon EKS.
+## Supported Distributions & Configurations
 
-| Distribution | Version | Architecture |     Available      | Attributes |
-| :----------- | :-----: | :----------: | :----------------: | ------------------- |
-| Amazon Linux |    2    |    amd64    | :white_check_mark: | CIS Benchmark       |
-| Amazon Linux |    2    |    arm64     | :white_check_mark: | CIS Benchmark       |
-| Amazon Linux |    2    |    amd64     | :white_check_mark: | NVIDIA GPU       |
+The following AMI distributions and configuration are supported by this repository.
 
-The Amazon Linux 2 EKS Optimized AMI is used as the base for this image. This image extends the EKS Optimized AMI to apply the Amazon Linux 2 CIS Benchmark, Docker CIS Benchmark, and Amazon EKS CIS Benchmark. These benchmarks are typically used to meet NIST 800-53 controls. Hardening is provided as a "best effort" and does not guarantee compliance with the above frameworks.
+| Distribution | Configuration | Architecture |         Variable File       |     Available      |
+| :----------- | :------------ | :----------: | :-------------------------- | :----------------- |
+| EKS AL2      | CIS Benchmark |    amd64     | `al2_amd64.pkrvars.hcl`     | :white_check_mark: |
+| EKS AL2      | CIS Benchmark |    arm64     | `al2_arm64.pkrvars.hcl`     | :white_check_mark: |
+| EKS AL2      | NVIDIA GPU    |    amd64     | `al2_amd64_gpu.pkrvars.hcl` | :white_check_mark: |
 
 ## Prerequisites
 
