@@ -51,7 +51,7 @@ migrate_and_mount_disk() {
     fi
 }
 
-disk_name='/dev/nvme2n1'
+disk_name='/dev/nvme1n1'
 
 # partition the disk
 parted -a optimal -s $disk_name \
