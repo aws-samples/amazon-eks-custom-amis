@@ -24,7 +24,7 @@ systemd_disable() {
   local service_name=$1
 
   if systemctl is-enabled $service_name; then
-    systemctl disable $service_name
+   systemctl  --now mask $service_name
   fi
 }
 
@@ -58,32 +58,6 @@ unload_module squashfs
 
 echo "1.1.1.3 - ensure mounting of udf filesystems is disabled"
 unload_module udf
-
-echo "1.1.2 - 1.1.5 - ensure /tmp is configured noexec,nodev,nosuid options set on  /tmp partition"
-systemctl unmask tmp.mount && systemctl enable tmp.mount
-
-cat > /etc/systemd/system/local-fs.target.wants/tmp.mount <<EOF
-[Unit]
-Description=Temporary Directory
-Documentation=man:hier(7)
-Documentation=http://www.freedesktop.org/wiki/Software/systemd/APIFileSystems
-ConditionPathIsSymbolicLink=!/tmp
-DefaultDependencies=no
-Conflicts=umount.target
-Before=local-fs.target umount.target
-
-[Mount]
-What=tmpfs
-Where=/tmp
-Type=tmpfs
-Options=mode=1777,strictatime,noexec,nodev,nosuid
-
-# Make 'systemctl enable tmp.mount' work:
-[Install]
-WantedBy=local-fs.target
-EOF
-
-systemctl daemon-reload && systemctl restart tmp.mount
 
 echo "1.1.6 - 1.1.9 - ensure noexec,nodev,nosuid option set on /dev/shm"
 echo "tmpfs  /dev/shm  tmpfs  defaults,nodev,nosuid,noexec  0 0" >> /etc/fstab
@@ -198,7 +172,13 @@ yum_remove prelink
 echo "1.6.1.4 - ensure the SELinux mode is enforcing or permissive"
 sed -i 's/SELINUX=disabled/SELINUX=enforcing/g' /etc/selinux/config
 
-echo "1.7.1.1 - ensure message of the day is configured properly"
+echo "1.6.1.7	Ensure SETroubleshoot is not installed"
+yum_remove setroubleshoot
+
+echo "1.6.1.8	Ensure the MCS Translation Service (mcstrans) is not installed"
+yum_remove mcstrans
+
+echo "1.7.1 - ensure message of the day is configured properly"
 rm -f /etc/cron.d/update-motd
 cat > /etc/update-motd.d/30-banner <<"OUTEREOF"
 #!/bin/sh
@@ -214,7 +194,7 @@ By using this IS (which includes any device attached to this IS), you consent to
 EOF
 OUTEREOF
 
-echo "1.7.1.2 - ensure local login warning banner is configured properly"
+echo "1.7.2 - ensure local login warning banner is configured properly"
 cat > /etc/issue <<EOF
 You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only.
 
@@ -226,7 +206,7 @@ By using this IS (which includes any device attached to this IS), you consent to
 -Notwithstanding the above, using this IS does not constitute consent to PM, LE or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details.
 EOF
 
-echo "1.7.1.3 - ensure remote login warning banner is configured properly"
+echo "1.7.3 - ensure remote login warning banner is configured properly"
 cat > /etc/issue.net <<EOF
 You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only.
 
@@ -238,15 +218,15 @@ By using this IS (which includes any device attached to this IS), you consent to
 -Notwithstanding the above, using this IS does not constitute consent to PM, LE or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details.
 EOF
 
-echo "1.7.1.4 - ensure permissions on /etc/motd are configured"
+echo "1.7.4 - ensure permissions on /etc/motd are configured"
 chown root:root /etc/motd
 chmod 644 /etc/motd
 
-echo "1.7.1.5 - ensure permissions on /etc/issue are configured"
+echo "1.7.5 - ensure permissions on /etc/issue are configured"
 chown root:root /etc/issue
 chmod 644 /etc/issue
 
-echo "1.7.1.6 - ensure permissions on /etc/issue.net are configured"
+echo "1.7.6 - ensure permissions on /etc/issue.net are configured"
 chown root:root /etc/issue.net
 chmod 644 /etc/issue.net
 
@@ -298,15 +278,12 @@ yum_remove telnet-server
 echo "2.1.16 - ensure mail transfer agent is configured for local-only mode"
 netstat -an | grep LIST | grep ":25[[:space:]]"
 
-echo "2.1.17 - 2.1.18 - ensure NFS and RPC are not enabled"
-systemd_disable nfs-utils
+echo "2.1.17 Ensure nfs-utils is not installed or the nfs-server service is masked"
 systemd_disable nfs-server
-systemd_disable rpcbind
 
-echo "2.1.17 - ensure rsh Server is not enabled"
-systemd_disable rsh.socket
-systemd_disable rlogin.socket
-systemd_disable rexec.socket
+echo "2.1.18	Ensure rpcbind is not installed or the rpcbind services are masked"
+systemd_disable rpcbind
+systemd_disable rpcbind.socket
 
 echo "2.1.19 - ensure rsync is not installed or the rsyncd service is masked"
 systemd_disable rsyncd
@@ -320,34 +297,60 @@ yum_remove rsh
 echo "2.2.3 - ensure talk client is not installed"
 yum_remove talk
 
-echo "2.2.3 - ensure telnet client is not installed"
+echo "2.2.4 - ensure telnet client is not installed"
 yum_remove telnet
 
-echo "2.2.4 - ensure LDAP client is not installed"
+echo "2.2.5 - ensure LDAP client is not installed"
 yum_remove openldap-clients
 
-echo "3.1.1 - ensure IP forwarding is disabled"
+echo "3.2.1 - ensure IP forwarding is disabled"
 sysctl_entry "net.ipv4.ip_forward = 0"
 sysctl_entry "net.ipv6.conf.all.forwarding = 0"
 
-echo "3.1.2 - ensure packet redirect sending is disabled"
+echo "3.2.2 - ensure packet redirect sending is disabled"
 sysctl_entry "net.ipv4.conf.all.send_redirects = 0"
 sysctl_entry "net.ipv4.conf.default.send_redirects = 0"
 
-echo "3.3.1 - ensure TCP Wrappers is installed"
-yum install -y tcp_wrappers
+
+echo "3.3.1	Ensure source routed packets are not accepted"
+sysctl_entry "net.ipv4.conf.all.accept_source_route = 0"
+sysctl_entry "net.ipv4.conf.default.accept_source_route = 0"
+sysctl_entry "net.ipv6.conf.all.accept_source_route = 0"
+sysctl_entry "net.ipv6.conf.default.accept_source_route = 0"
+
+
+echo "3.3.2	Ensure ICMP redirects are not accepted"
+sysctl_entry "net.ipv4.conf.all.accept_redirects = 0"
+sysctl_entry "net.ipv4.conf.default.accept_redirects = 0"
+sysctl_entry "net.ipv6.conf.all.accept_redirects = 0"
+sysctl_entry "net.ipv6.conf.default.accept_redirects = 0"
+
+echo "3.3.3	Ensure secure ICMP redirects are not accepted"
+sysctl_entry "net.ipv4.conf.all.secure_redirects = 0"
+sysctl_entry "net.ipv4.conf.default.secure_redirects = 0"
+
+echo "3.3.4	Ensure suspicious packets are logged"
+sysctl_entry "net.ipv4.conf.all.log_martians = 1"
+sysctl_entry "net.ipv4.conf.default.log_martians = 1"
+
+echo "3.3.5	Ensure broadcast ICMP requests are ignored"
+sysctl_entry "net.ipv4.icmp_echo_ignore_broadcasts"
+
+echo "3.3.6	Ensure bogus ICMP responses are ignored"
+sysctl_entry "net.ipv4.icmp_ignore_bogus_error_responses = 1"
+
+echo "3.3.8	Ensure TCP SYN Cookies is enabled"
+sysctl_entry "net.ipv4.tcp_syncookies = 1"
+
+echo "3.3.9	Ensure IPv6 router advertisements are not accepted"
+sysctl_entry "net.ipv6.conf.all.accept_ra = 0"
+sysctl_entry "net.ipv6.conf.default.accept_ra = 0"
 
 echo "3.4.1 - ensure DCCP is disabled"
 unload_module dccp
 
 echo "3.4.2 - ensure SCTP is disabled"
 unload_module sctp
-
-echo "3.4.3 - ensure RDS is disabled"
-unload_module rds
-
-echo "3.4.4 - ensure TIPC is disabled"
-unload_module tipc
 
 echo "4.1.1.1 - ensure audit log storage size is configured"
 yum install -y audit
@@ -564,19 +567,29 @@ chmod og-rwx /etc/at.allow
 chown root:root /etc/cron.allow
 chown root:root /etc/at.allow
 
-echo "5.2.1 - ensure permissions on /etc/ssh/sshd_config are configured"
+echo "5.1.9	Ensure at is restricted to authorized users"
+yum_remove at
+
+
+echo "5.2.2	Ensure sudo commands use pty"
+echo -e "#Use pty\nDefaults use_pty" >> /etc/sudoers
+
+echo "5.2.3 - Ensure sudo log file exists"
+echo -e "#Log File\nDefaults logfile="/var/log/sudo.log"" >> /etc/sudoers
+
+echo "5.3.1 - ensure permissions on /etc/ssh/sshd_config are configured"
 chown root:root /etc/ssh/sshd_config
 chmod og-rwx /etc/ssh/sshd_config
 
-echo "5.2.2 - ensure permissions on SSH private host key files are configured"
-find /etc/ssh -xdev -type f -name 'ssh_host_*_key' -exec chown root:ssh_keys {} \;
-find /etc/ssh -xdev -type f -name 'ssh_host_*_key' -exec chmod 0640 {} \;
+echo "5.3.2 - ensure permissions on SSH private host key files are configured"
+find /etc/ssh -xdev -type f -name 'ssh_host_*_key' -exec chown root:root {} \;
+find /etc/ssh -xdev -type f -name 'ssh_host_*_key' -exec chmod u-x,go-rwx {} \;
 
-echo "5.2.3 - ensure permissions on SSH public host key files are configured"
+echo "5.3.3 - ensure permissions on SSH public host key files are configured"
 find /etc/ssh -xdev -type f -name 'ssh_host_*_key.pub' -exec chmod 0644 {} \;
 find /etc/ssh -xdev -type f -name 'ssh_host_*_key.pub' -exec chown root:root {} \;
 
-echo "5.2.3 - 5.2.17, 5.2.19 - SSH Server Configuration"
+echo "5.3.3 - 5.3.17, 5.3.19 - SSH Server Configuration"
 cat > /etc/ssh/sshd_config <<EOF
 # Default Configuration
 HostKey /etc/ssh/ssh_host_rsa_key
@@ -614,12 +627,13 @@ ClientAliveInterval 300
 ClientAliveCountMax 0
 LoginGraceTime 60
 Banner /etc/issue.net
+maxstartups 10:30:60
 EOF
 
-echo "5.2.18 - ensure SSH access is limited"
+echo "5.3.18 - ensure SSH access is limited"
 echo "[not scored] - customer responsible for this configuration"
 
-echo "5.3.1 - ensure password creation requirements are configured"
+echo "5.4.1 - ensure password creation requirements are configured"
 cat > /etc/security/pwquality.conf <<EOF
 minlen = 14
 dcredit = -1
@@ -628,13 +642,19 @@ ocredit = -1
 lcredit = -1
 EOF
 
-echo "5.3.2 - 5.3.4 - Configure PAM"
+echo "5.4.2 - 5.4.4 - Configure PAM"
 cat > /etc/pam.d/password-auth <<EOF
 auth        required      pam_env.so
-auth        sufficient    pam_unix.so try_first_pass nullok
+auth        required      pam_faillock.so preauth silent audit deny=3 unlock_time=600
+auth        sufficient    pam_unix.so nullok try_first_pass
+auth        [default=die] pam_faillock.so authfail audit deny=3 unlock_time=600
+auth        requisite     pam_succeed_if.so uid >= 1000 quiet_success
 auth        required      pam_deny.so
 
-account     required      pam_unix.so
+account required pam_faillock.so
+account required pam_unix.so
+account sufficient pam_localuser.so
+account sufficient pam_pam_succeed_if.so uid < 1000 quiet account required pam_permit.so
 
 password    requisite     pam_pwquality.so try_first_pass local_users_only retry=3 authtok_type=
 password    sufficient    pam_unix.so try_first_pass use_authtok nullok sha512 shadow remember=5
@@ -645,18 +665,21 @@ session     required      pam_limits.so
 -session     optional      pam_systemd.so
 session     [success=1 default=ignore] pam_succeed_if.so service in crond quiet use_uid
 session     required      pam_unix.so
-auth     required pam_faillock.so preauth audit silent deny=5 unlock_time=900
-auth     [success=1 default=bad] pam_unix.so
-auth     [default=die] pam_faillock.so authfail audit deny=5 unlock_time=900
-auth     sufficient pam_faillock.so authsucc audit deny=5 unlock_time=900
 EOF
 
 cat > /etc/pam.d/system-auth <<EOF
+
 auth        required      pam_env.so
-auth        sufficient    pam_unix.so try_first_pass nullok
+auth        required      pam_faillock.so preauth silent audit deny=3 unlock_time=600
+auth        sufficient    pam_unix.so nullok try_first_pass
+auth        [default=die] pam_faillock.so authfail audit deny=3 unlock_time=600
+auth        requisite     pam_succeed_if.so uid >= 1000 quiet_success
 auth        required      pam_deny.so
 
-account     required      pam_unix.so
+account required pam_faillock.so
+account required pam_unix.so
+account sufficient pam_localuser.so
+account sufficient pam_pam_succeed_if.so uid < 1000 quiet account required pam_permit.so
 
 password    requisite     pam_pwquality.so try_first_pass local_users_only retry=3 authtok_type=
 password    sufficient    pam_unix.so try_first_pass use_authtok nullok sha512 shadow remember=5
@@ -667,34 +690,30 @@ session     required      pam_limits.so
 -session     optional      pam_systemd.so
 session     [success=1 default=ignore] pam_succeed_if.so service in crond quiet use_uid
 session     required      pam_unix.so
-auth     required pam_faillock.so preauth audit silent deny=5 unlock_time=900
-auth     [success=1 default=bad] pam_unix.so
-auth     [default=die] pam_faillock.so authfail audit deny=5 unlock_time=900
-auth     sufficient pam_faillock.so authsucc audit deny=5 unlock_time=900
 EOF
 
-echo "5.4.1.1 - ensure password expiration is 365 days or less"
+echo "5.5.1.1 - ensure password expiration is 365 days or less"
 sed -i 's/^\(PASS_MAX_DAYS\s\).*/\190/' /etc/login.defs
 
-echo "5.4.1.2 - ensure minimum days between password changes is 7 or more"
+echo "5.5.1.2 - ensure minimum days between password changes is 7 or more"
 sed -i 's/^\(PASS_MIN_DAYS\s\).*/\17/' /etc/login.defs
 
-echo "5.4.1.3 - ensure password expiration warning days is 7 or more"
+echo "5.5.1.3 - ensure password expiration warning days is 7 or more"
 sed -i 's/^\(PASS_WARN_AGE\s\).*/\17/' /etc/login.defs
 
-echo "5.4.1.4 - ensure inactive password lock is 30 days or less"
+echo "5.5.1.4 - ensure inactive password lock is 30 days or less"
 useradd -D -f 30
 
-echo "5.4.1.5 - ensure all users last password change date is in the past"
+echo "5.5.1.5 - ensure all users last password change date is in the past"
 cat /etc/shadow | cut -d: -f1
 
-echo "5.4.2 - ensure system accounts are non-login"
+echo "5.5.2 - ensure system accounts are non-login"
 egrep -v "^\+" /etc/passwd | awk -F: '($1!="root" && $1!="sync" && $1!="shutdown" && $1!="halt" && $3<1000 && $7!="/usr/sbin/nologin" && $7!="/bin/false") {print}'
 
-echo "5.4.3 - ensure default group for the root account is GID 0"
+echo "5.5.3 - ensure default group for the root account is GID 0"
 grep "^root:" /etc/passwd | cut -f4 -d:
 
-echo "5.4.4 - ensure default user umask is 027 or more restrictive"
+echo "5.5.4 - ensure default user umask is 027 or more restrictive"
 echo "umask 027" >> /etc/bashrc
 echo "umask 027" >> /etc/profile
 # Just adding the umask isn't enough, all existing entries need to be fixed as
@@ -702,15 +721,16 @@ echo "umask 027" >> /etc/profile
 sed -i -e 's/\bumask\s\+\(002\|022\)/umask 027/' \
   /etc/bashrc /etc/profile /etc/profile.d/*.sh
 
-echo "5.4.5 - ensure default user shell timeout is 900 seconds or less"
+echo "5.5.5 - ensure default user shell timeout is 900 seconds or less"
 echo "TMOUT=600" >> /etc/bashrc
 echo "TMOUT=600" >> /etc/profile
 
-echo "5.5 - ensure root login is restricted to system console"
+echo "5.6 - ensure root login is restricted to system console"
 cat /etc/securetty
 
-echo "5.6 - ensure access to the su command is restricted"
-echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su
+echo "5.7 - ensure access to the su command is restricted"
+groupadd sugroup
+echo "auth required pam_wheel.so use_uid group=sugroup" >> /etc/pam.d/su
 
 echo "6.1.2 - ensure permissions on /etc/passwd are configured"
 chown root:root /etc/passwd
@@ -758,6 +778,45 @@ find / -xdev -type f -perm -4000
 
 echo "6.1.14 - audit SGID executables"
 find / -xdev -type f -perm -2000
+
+echo "6.2.1	Ensure accounts in /etc/passwd use shadowed passwords	pass"
+sed -e 's/^\([a-zA-Z0-9_]*\):[^:]*:/\1:x:/' -i /etc/passwd
+
+echo "6.2.2 - ensure password fields are not empty"
+cat /etc/shadow | awk -F: '($2 == "" ) { print $1 " does not have a password "}'
+
+echo "6.2.3 ensure all groups in /etc/passwd exist in /etc/group"
+#!/bin/bash
+for i in $(cut -s -d: -f4 /etc/passwd | sort -u ); do grep -q -P "^.*?:[^:]*:$i:" /etc/group
+if [ $? -ne 0 ]; then
+echo "Group $i is referenced by /etc/passwd but does not exist in /etc/group"
+fi done
+
+echo "6.2.4 ensure shadow group is empty"
+awk -F: '($1=="shadow") {print $NF}' /etc/group
+awk -F: -v GID="$(awk -F: '($1=="shadow") {print $3}' /etc/group)" '($4==GID) {print $1}' /etc/passwd
+
+echo "6.2.5 ensure no duplicate user names exist"
+#!/bin/bash
+cut -d: -f1 /etc/passwd | sort | uniq -d | while read x; do echo "Duplicate login name ${x} in /etc/passwd"
+done
+
+echo "6.2.6 ensure no duplicate group names exist"
+#!/bin/bash
+cut -d: -f1 /etc/group | sort | uniq -d | while read -r x; do echo "Duplicate group name ${x} in /etc/group"
+done
+
+echo "6.2.8 ensure no duplicate GIDs exist "
+#!/bin/bash
+cut -d: -f3 /etc/group | sort | uniq -d | while read -r x; do echo "Duplicate GID ($x) in /etc/group"
+done
+
+
+echo "6.2.9 ensure root is the only UID 0 account"
+awk -F: '($3 == 0) { print $1 }' /etc/passwd
+
+echo "6.2.1 - ensure password fields are not empty"
+cat /etc/shadow | awk -F: '($2 == "" ) { print $1 " does not have a password "}'
 
 echo "6.2.1 - ensure password fields are not empty"
 cat /etc/shadow | awk -F: '($2 == "" ) { print $1 " does not have a password "}'
