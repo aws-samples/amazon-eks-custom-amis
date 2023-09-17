@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 set -o pipefail
-set -o nounset
 set -o errexit
 
 # Configure the host with HTTP_PROXY, HTTPS_PROXY, and NO_PROXY
