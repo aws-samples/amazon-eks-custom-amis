@@ -47,8 +47,8 @@ shell_provisioner3 = {
   expect_disconnect = true
   scripts = [
     "scripts/cis-benchmark.sh",
-    "scripts/cis-docker.sh",
     "scripts/cis-eks.sh",
     "scripts/cleanup.sh",
+    "scripts/cis-benchmark-tmpmount.sh",
   ]
 }

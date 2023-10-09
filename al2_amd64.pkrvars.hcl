@@ -29,11 +29,11 @@ shell_provisioner1 = {
 shell_provisioner2 = {
   expect_disconnect = true
   // Pass in values below if enabling proxy support
-  // environment_vars = [
-  //     "HTTP_PROXY=xxx",
-  //     "HTTPS_PROXY=xxx",
-  //     "NO_PROXY=xxx",
-  //   ]
+ environment_vars = [
+   //     "HTTP_PROXY=xxx",
+  //     "HTTPS_PROXY=xxx",    
+ //      "NO_PROXY=xxx",
+   ]
   scripts = [
     "scripts/partition-disks.sh",
     "scripts/configure-proxy.sh",
@@ -45,8 +45,8 @@ shell_provisioner3 = {
   expect_disconnect = true
   scripts = [
     "scripts/cis-benchmark.sh",
-    "scripts/cis-docker.sh",
     "scripts/cis-eks.sh",
     "scripts/cleanup.sh",
+    "scripts/cis-benchmark-tmpmount.sh",
   ]
 }
