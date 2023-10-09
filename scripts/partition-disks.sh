@@ -71,6 +71,6 @@ migrate_and_mount_disk "${disk_name}p2" /var/log        defaults,nofail,nodev,no
 migrate_and_mount_disk "${disk_name}p3" /var/log/audit  defaults,nofail,nodev,nosuid
 migrate_and_mount_disk "${disk_name}p4" /home           defaults,nofail,nodev,nosuid
 
-# Create folder instead of starting/stopping docker daemon
+# Create folder instead of starting/stopping containerd
 mkdir -p /var/lib/containerd
 migrate_and_mount_disk "${disk_name}p5" /var/lib/containerd defaults,nofail
